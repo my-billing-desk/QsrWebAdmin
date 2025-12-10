@@ -1,0 +1,483 @@
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Save, X, Plus, Trash2, Check, ChevronDown, GripVertical } from 'lucide-react';
+import { menuService, groupService } from '../services/api';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableVariantRow({ id, index, variant, handleVariantChange, removeVariant }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 10 : 1,
+        position: 'relative'
+    };
+
+    return (
+        <tr ref={setNodeRef} style={style} className="group hover:bg-blue-50/30 transition-colors">
+            <td className="p-3 text-center text-xs text-gray-400 font-mono w-10">
+                <div {...attributes} {...listeners} className="cursor-grab hover:text-gray-600">
+                    <GripVertical className="w-4 h-4 mx-auto" />
+                </div>
+            </td>
+            <td className="p-3">
+                <input
+                    value={variant.name}
+                    onChange={e => handleVariantChange(index, 'name', e.target.value)}
+                    className="w-full bg-transparent border-b border-transparent focus:border-blue-500 outline-none text-sm font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400"
+                    placeholder="e.g. Small"
+                />
+            </td>
+            <td className="p-3">
+                <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">₹</span>
+                    <input
+                        type="number"
+                        value={variant.price}
+                        onChange={e => handleVariantChange(index, 'price', e.target.value)}
+                        className="w-full pl-7 pr-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-md text-sm font-bold text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                        placeholder="0.00"
+                    />
+                </div>
+            </td>
+            <td className="p-3 text-center">
+                <button
+                    onClick={() => removeVariant(index)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                    title="Remove Variant"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </td>
+        </tr>
+    );
+}
+
+export function AddItem({ onBack, itemToEdit }) {
+    const [formData, setFormData] = useState({
+        name: '',
+        shortCode: '',
+        onlineName: '',
+        price: '',
+        categoryId: '',
+        description: '',
+        isVeg: true,
+        goodsServices: 'Goods', // GST Type
+        orderDelivery: true,
+        orderTakeAway: true,
+        orderDineIn: true,
+        isAvailable: true, // Online Expose
+        variants: [], // { _key, name, price }
+        addonGroupIds: [] // Currently single select in UI but backend supports array
+    });
+
+    const [categories, setCategories] = useState([]);
+    const [addonGroups, setAddonGroups] = useState([]);
+    const [variationGroups, setVariationGroups] = useState([]);
+    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    // Dnd Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    useEffect(() => {
+        loadData();
+        if (itemToEdit) {
+            setFormData({
+                name: itemToEdit.name,
+                shortCode: itemToEdit.shortCode || '',
+                onlineName: itemToEdit.onlineName || '',
+                price: itemToEdit.price,
+                categoryId: itemToEdit.categoryId,
+                description: itemToEdit.description || '',
+                isVeg: itemToEdit.isVeg,
+                goodsServices: itemToEdit.goodsServices || 'Goods',
+                orderDelivery: itemToEdit.orderDelivery,
+                orderTakeAway: itemToEdit.orderTakeAway,
+                orderDineIn: itemToEdit.orderDineIn,
+                isAvailable: itemToEdit.isAvailable,
+                variants: itemToEdit.Variants ? itemToEdit.Variants.map(v => ({
+                    _key: Math.random().toString(36).substr(2, 9),
+                    name: v.name,
+                    price: v.price
+                })) : [],
+                addonGroupIds: itemToEdit.addonGroups ? itemToEdit.addonGroups.map(g => g.id) : []
+            });
+        }
+    }, [itemToEdit]); // Re-run if itemToEdit changes
+
+    const loadData = async () => {
+        try {
+            const [catRes, groupRes, varRes] = await Promise.all([
+                menuService.getCategories(),
+                groupService.getAddonGroups(),
+                groupService.getVariationGroups()
+            ]);
+            setCategories(catRes.data);
+            setAddonGroups(groupRes.data);
+            setVariationGroups(varRes.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const handleVariantChange = (index, field, value) => {
+        const newVariants = [...formData.variants];
+        newVariants[index][field] = value;
+        setFormData(prev => ({ ...prev, variants: newVariants }));
+    };
+
+    const addVariant = () => {
+        setFormData(prev => ({
+            ...prev,
+            variants: [...prev.variants, { _key: Math.random().toString(36).substr(2, 9), name: '', price: '' }]
+        }));
+    };
+
+    const removeVariant = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            variants: prev.variants.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+        if (active.id !== over.id) {
+            setFormData(prev => {
+                const oldIndex = prev.variants.findIndex(v => v._key === active.id);
+                const newIndex = prev.variants.findIndex(v => v._key === over.id);
+                return {
+                    ...prev,
+                    variants: arrayMove(prev.variants, oldIndex, newIndex)
+                };
+            });
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!formData.name || !formData.categoryId || !formData.price) {
+            alert('Please fill Name, Category and Price');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const payload = {
+                ...formData,
+                variants: formData.variants.map((v, i) => ({
+                    name: v.name,
+                    price: v.price,
+                    sortOrder: i
+                })),
+                addonGroupIds: formData.addonGroupIds.filter(id => id) // Clean array
+            };
+
+            if (itemToEdit) {
+                await menuService.updateItem(itemToEdit.id, payload);
+            } else {
+                await menuService.createItem(payload);
+            }
+
+            setLoading(false);
+            onBack();
+        } catch (error) {
+            setLoading(false);
+            alert('Failed to save item: ' + error.message);
+        }
+    };
+
+    const handleCreateCategory = async () => {
+        if (!newCategoryName.trim()) return;
+        try {
+            const res = await menuService.createCategory({ name: newCategoryName });
+            const catRes = await menuService.getCategories();
+            setCategories(catRes.data);
+            setFormData(prev => ({ ...prev, categoryId: res.data.id }));
+            setShowNewCategoryInput(false);
+        } catch (err) {
+            alert("Failed to create category");
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+            {/* Header */}
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-4">
+                    <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <div>
+                        <div className="text-xs text-gray-500">Menu Management - Add Item</div>
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{formData.name || 'New Item'}</h1>
+                    </div>
+                </div>
+                <div className="flex gap-3">
+                    <button onClick={handleSubmit} disabled={loading} className="px-6 py-2 bg-red-600 text-white font-medium rounded hover:bg-red-700 shadow-sm disabled:opacity-50">
+                        {loading ? 'Saving...' : 'Save & Exit'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
+                <div className="max-w-7xl mx-auto space-y-6">
+
+                    {/* Basic Info Card */}
+                    <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div className="grid grid-cols-12 gap-6">
+                            {/* Row 1 */}
+                            <div className="col-span-3">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Name *</label>
+                                <input name="name" value={formData.name} onChange={handleInputChange} className="w-full p-2 border rounded bg-blue-50/30 border-blue-200 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Item Name" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Short Code *</label>
+                                <input name="shortCode" value={formData.shortCode} onChange={handleInputChange} className="w-full p-2 border rounded focus:ring-1 focus:ring-gray-300 outline-none" placeholder="Code" />
+                            </div>
+                            <div className="col-span-3">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Online Display Name</label>
+                                <input name="onlineName" value={formData.onlineName} onChange={handleInputChange} className="w-full p-2 border rounded focus:ring-1 focus:ring-gray-300 outline-none" placeholder="Display Name" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Category *</label>
+                                <select
+                                    name="categoryId"
+                                    value={formData.categoryId}
+                                    onChange={(e) => {
+                                        if (e.target.value === 'new') { setShowNewCategoryInput(true); setNewCategoryName(''); }
+                                        else handleInputChange(e);
+                                    }}
+                                    className="w-full p-2 border rounded bg-white outline-none"
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    <option value="new" className="text-blue-600 font-bold">+ New Category</option>
+                                </select>
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Price *</label>
+                                <input type="number" name="price" value={formData.price} onChange={handleInputChange} className="w-full p-2 border rounded focus:ring-1 focus:ring-gray-300 outline-none" placeholder="0" />
+                            </div>
+
+                            {/* Row 2 */}
+                            <div className="col-span-3">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Description</label>
+                                <input name="description" value={formData.description} onChange={handleInputChange} className="w-full p-2 border rounded focus:ring-1 focus:ring-gray-300 outline-none" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Dietary</label>
+                                <select
+                                    name="isVeg"
+                                    value={formData.isVeg}
+                                    onChange={e => setFormData({ ...formData, isVeg: e.target.value === 'true' })}
+                                    className="w-full p-2 border rounded bg-white outline-none"
+                                >
+                                    <option value="true">Veg</option>
+                                    <option value="false">Non-Veg</option>
+                                </select>
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-1">GST Type</label>
+                                <select name="goodsServices" value={formData.goodsServices} onChange={handleInputChange} className="w-full p-2 border rounded bg-white outline-none">
+                                    <option value="Goods">Goods</option>
+                                    <option value="Services">Services</option>
+                                </select>
+                            </div>
+
+                            {/* Order Types */}
+                            <div className="col-span-5">
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Order Type</label>
+                                <div className="space-y-1">
+                                    {[
+                                        { key: 'orderDelivery', label: 'Delivery' },
+                                        { key: 'orderTakeAway', label: 'Take Away' },
+                                        { key: 'orderDineIn', label: 'Dine In' },
+                                        { key: 'isAvailable', label: 'Online Expose' },
+                                    ].map(type => (
+                                        <label key={type.key} className="flex items-center gap-2 cursor-pointer group">
+                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${formData[type.key] ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
+                                                {formData[type.key] && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <input type="checkbox" name={type.key} checked={formData[type.key]} onChange={handleInputChange} className="hidden" />
+                                            <span className="text-sm text-gray-700 group-hover:text-gray-900">{type.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Variations Section */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide">Item Variations</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Define variants and their specific prices for this item</p>
+                            </div>
+
+                            <div className="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 focus-within:ring-2 ring-blue-500/20">
+                                <span className="text-xs font-semibold text-gray-500 whitespace-nowrap px-1">Select Variation:</span>
+                                <select
+                                    className="p-1.5 text-sm bg-transparent border-0 outline-none text-gray-700 dark:text-gray-200 w-48 font-medium cursor-pointer"
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            const selectedVar = variationGroups.find(g => g.id === parseInt(e.target.value));
+                                            if (selectedVar) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    variants: [...prev.variants, { _key: Math.random().toString(36).substr(2, 9), name: selectedVar.name, price: '' }]
+                                                }));
+                                            }
+                                        }
+                                        e.target.value = ''; // Reset select
+                                    }}
+                                >
+                                    <option value="">Choose...</option>
+                                    {variationGroups.map(g => (
+                                        <option key={g.id} value={g.id}>{g.name} ({g.departmentName})</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            {formData.variants.length > 0 ? (
+                                <div className="border rounded-lg overflow-hidden">
+                                    <DndContext
+                                        sensors={sensors}
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={handleDragEnd}
+                                    >
+                                        <table className="w-full text-left">
+                                            <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                                <tr>
+                                                    <th className="p-3 pl-4 w-12 text-center">#</th>
+                                                    <th className="p-3">Variation Name</th>
+                                                    <th className="p-3 w-48">Price (₹)</th>
+                                                    <th className="p-3 w-20 text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                                <SortableContext
+                                                    items={formData.variants.map(v => v._key)}
+                                                    strategy={verticalListSortingStrategy}
+                                                >
+                                                    {formData.variants.map((variant, index) => (
+                                                        <SortableVariantRow
+                                                            key={variant._key}
+                                                            id={variant._key}
+                                                            index={index}
+                                                            variant={variant}
+                                                            handleVariantChange={handleVariantChange}
+                                                            removeVariant={removeVariant}
+                                                        />
+                                                    ))}
+                                                </SortableContext>
+                                            </tbody>
+                                        </table>
+                                    </DndContext>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                                    <p className="text-sm text-gray-500">No variations added yet.</p>
+                                    <p className="text-xs text-gray-400 mt-1">Load a group from above or add manually below.</p>
+                                </div>
+                            )}
+
+                            <div className="mt-4 flex justify-end">
+                                <button
+                                    onClick={addVariant}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                                >
+                                    <Plus className="w-4 h-4 text-blue-500" />
+                                    <span>Add Custom Variant Row</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Addon Group */}
+                    <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <select
+                            className="w-full p-2 border rounded bg-white text-gray-700 outline-none"
+                            value={formData.addonGroupIds[0] || ''} // Handle single select for now as per UI
+                            onChange={(e) => setFormData(p => ({ ...p, addonGroupIds: [e.target.value] }))}
+                        >
+                            <option value="">Select AddonGroup</option>
+                            {addonGroups.map(g => (
+                                <option key={g.id} value={g.id}>{g.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Footer Checkbox */}
+                    <div className="flex items-start gap-2 p-2">
+                        <input type="checkbox" className="mt-1 w-4 h-4 text-red-600 rounded" />
+                        <div>
+                            <div className="text-sm font-medium text-gray-800">Create Self Item Recipe</div>
+                            <div className="text-xs text-blue-500">Applicable only when menu item is Purchased but does not have any recipe. After setting this option you can not revert it back.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* Hidden: AI Agent Button (from reference) */}
+            <div className="fixed bottom-6 right-6 z-50">
+                <button className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                    <span className="font-bold text-xs">AI Agent</span>
+                </button>
+            </div>
+
+            {/* New Category Modal */}
+            {showNewCategoryInput && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-96 p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold">Create New Category</h3>
+                            <button onClick={() => setShowNewCategoryInput(false)}><X className="w-4 h-4" /></button>
+                        </div>
+                        <input
+                            autoFocus
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleCreateCategory()}
+                            className="w-full p-2 border rounded mb-4"
+                            placeholder="Category Name"
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setShowNewCategoryInput(false)} className="px-3 py-1 text-gray-600">Cancel</button>
+                            <button onClick={handleCreateCategory} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
