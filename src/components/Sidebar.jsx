@@ -23,7 +23,8 @@ export function Sidebar({ activeTab, onTabChange }) {
         {
             title: 'Modules',
             items: [
-                { id: 'inventory', path: '/inventory', label: 'Inventory Management', icon: Archive },
+                { id: 'raw_materials', path: '/inventory/raw-materials', label: 'Raw Materials', icon: Archive },
+                { id: 'recipes', path: '/inventory/recipes', label: 'Recipes', icon: Archive },
             ]
         },
         {

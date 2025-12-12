@@ -184,9 +184,9 @@ export function MenuChannelDashboard() {
         "Parent_Category", "Category", "Category_online_display", "Price", "Attributes", "Goods_Services",
         "Unit", "is_Self_Item_Recipe", "minimum_stock_level", "at_par_stock_level", "Rank",
         "Packing_Charges", "Allow_Decimal_Qty", "Available_Offline", "Available_Swiggy", "Available_Zomato",
-        "Addon_Group_Name", "Addon_Group_Selection",
-        "Addon_Group_Min", "Addon_Group_Max", "Variation_group_name", "Variation",
-        "Variation_Price", "Variation_Sap_Code", "Variation_Packing_Charges"
+        "Variation_group_name", "Variation_Group_Department", "Variation", "Variation_Price", "Variation_Sap_Code", "Variation_Packing_Charges",
+        "Addon_Group_Name", "Addon_Group_Selection", "Addon_Group_Min", "Addon_Group_Max",
+        "Addon_Name", "Addon_Price", "Addon_Sap_Code", "Addon_Packing_Charges", "Addon_Item_Rank"
     ];
 
     const downloadFullMenu = async () => {
@@ -224,8 +224,8 @@ export function MenuChannelDashboard() {
     const downloadFullTemplate = () => {
         // Sample data with handling for commas in fields (wrapped in quotes)
         const sample = [
-            `"Chicken Burger","Burger King","Juicy chicken patty","CB01",,"SAP123","HSN001","Fast Food","Burgers","Burgers Online",150,"Spicy","Goods","Pcs","TRUE",10,20,1,10,"FALSE","TRUE","TRUE","FALSE","Toppings","Multiple",0,3,"Size","Large",180,"SAP_LG",15`,
-            `"Chicken Burger","Burger King","Juicy chicken patty","CB01",,"SAP123","HSN001","Fast Food","Burgers","Burgers Online",150,"Spicy","Goods","Pcs","TRUE",10,20,1,10,"FALSE","TRUE","FALSE","TRUE","Toppings","Multiple",0,3,"Size","Regular",150,"SAP_RG",10`
+            `"Chicken Burger","Burger King","Juicy chicken patty","CB01",,"SAP123","HSN001","Fast Food","Burgers","Burgers Online",150,"Spicy","Goods","Pcs","TRUE",10,20,1,10,"FALSE","TRUE","TRUE","FALSE","Size","Food","Large",180,"SAP_LG",15,"Toppings","Multiple",0,3,"Cheese",20,"ADD_01",0,1`,
+            `"Chicken Burger","Burger King","Juicy chicken patty","CB01",,"SAP123","HSN001","Fast Food","Burgers","Burgers Online",150,"Spicy","Goods","Pcs","TRUE",10,20,1,10,"FALSE","TRUE","FALSE","TRUE","Size","Food","Regular",150,"SAP_RG",10,"Toppings","Multiple",0,3,"Mushrooms",10,"ADD_02",0,2`
         ].join("\n");
 
         const csvContent = `\uFEFF${CSV_HEADERS.join(",")}\n${sample}`; // Add BOM for Excel

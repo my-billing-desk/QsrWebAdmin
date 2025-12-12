@@ -136,6 +136,70 @@ export function Settings() {
                 </div>
             </div>
 
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">
+                        <AlertCircle className="w-6 h-6" /> {/* Using AlertCircle as placeholder icon */}
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold">Store Operations</h2>
+                        <p className="text-gray-500 text-sm">Enable or disable specific order types for the store.</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${settings.store_dinein_enabled !== 'false' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600'}`}>
+                        <div className="flex items-center gap-3 mb-2">
+                            <input
+                                type="checkbox"
+                                checked={settings.store_dinein_enabled !== 'false'}
+                                onChange={(e) => handleChange('store_dinein_enabled', e.target.checked.toString())}
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                            />
+                            <span className="font-bold text-gray-900 dark:text-gray-100">Dine-In</span>
+                        </div>
+                        <div className="text-xs text-gray-500">Enable in-store dining orders.</div>
+                    </label>
+
+                    <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${settings.store_takeaway_enabled !== 'false' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600'}`}>
+                        <div className="flex items-center gap-3 mb-2">
+                            <input
+                                type="checkbox"
+                                checked={settings.store_takeaway_enabled !== 'false'}
+                                onChange={(e) => handleChange('store_takeaway_enabled', e.target.checked.toString())}
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                            />
+                            <span className="font-bold text-gray-900 dark:text-gray-100">Takeaway</span>
+                        </div>
+                        <div className="text-xs text-gray-500">Enable takeaway/pickup orders.</div>
+                    </label>
+
+                    <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${settings.store_delivery_enabled !== 'false' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600'}`}>
+                        <div className="flex items-center gap-3 mb-2">
+                            <input
+                                type="checkbox"
+                                checked={settings.store_delivery_enabled !== 'false'}
+                                onChange={(e) => handleChange('store_delivery_enabled', e.target.checked.toString())}
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                            />
+                            <span className="font-bold text-gray-900 dark:text-gray-100">Delivery</span>
+                        </div>
+                        <div className="text-xs text-gray-500">Enable home delivery orders.</div>
+                    </label>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className={`px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 dark:shadow-none flex items-center gap-2 ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                        <Save className="w-5 h-5" />
+                        {saving ? 'Saving...' : 'Save Configuration'}
+                    </button>
+                </div>
+            </div>
+
             <div className="flex items-start gap-3 p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-100 text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <p>Note: Changing these settings will affect how new orders are calculated. Past orders will remain unchanged.</p>

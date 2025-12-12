@@ -71,6 +71,7 @@ export const groupService = {
     // Variation Groups
     getVariationGroups: () => api.get('/groups/variation-groups'),
     createVariationGroup: (data) => api.post('/groups/variation-groups', data),
+    updateVariationGroup: (id, data) => api.put(`/groups/variation-groups/${id}`, data),
     deleteVariationGroup: (id) => api.delete(`/groups/variation-groups/${id}`),
     assignGroups: (data) => api.post('/groups/assign-groups', data),
 };

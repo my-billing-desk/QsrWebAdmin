@@ -9,10 +9,12 @@ import { AllOrders } from './components/orders/AllOrders';
 import { Settings } from './components/Settings';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { InventoryLayout } from './components/inventory/InventoryLayout';
-import { InventoryDashboard } from './components/inventory/InventoryDashboard';
-import { RawMaterials } from './components/inventory/RawMaterials';
-import { Recipes } from './components/inventory/Recipes';
+import RawMaterialsList from './components/inventory/RawMaterialsList';
+import AddRawMaterial from './components/inventory/AddRawMaterial';
+import RecipeList from './components/inventory/RecipeList';
+import AddRecipe from './components/inventory/AddRecipe';
+// import { RawMaterials } from './components/inventory/RawMaterials'; // Removed
+// import { Recipes } from './components/inventory/Recipes'; // Removed
 import { Preferences } from './components/inventory/Preferences';
 import { PurchaseEntry } from './components/inventory/PurchaseEntry';
 import { PurchaseOrder } from './components/inventory/PurchaseOrder';
@@ -85,8 +87,17 @@ function AppRoutes() {
       <Route path="/inventory" element={<InventoryLayout />}>
         <Route index element={<Navigate to="/inventory/dashboard" replace />} />
         <Route path="dashboard" element={<InventoryDashboard />} />
-        <Route path="materials" element={<RawMaterials />} />
-        <Route path="recipes" element={<Recipes />} />
+
+        {/* Raw Materials Routes */}
+        <Route path="raw-materials" element={<RawMaterialsList />} />
+        <Route path="raw-materials/add" element={<AddRawMaterial />} />
+        <Route path="raw-materials/edit/:id" element={<AddRawMaterial />} />
+
+        {/* Recipe Routes */}
+        <Route path="recipes" element={<RecipeList />} />
+        <Route path="recipes/add" element={<AddRecipe />} />
+        <Route path="recipes/edit/:id" element={<AddRecipe />} />
+
         <Route path="preferences" element={<Preferences />} />
         <Route path="purchase" element={<PurchaseEntry />} />
         <Route path="purchase-order" element={<PurchaseOrder />} />

@@ -77,8 +77,7 @@ export function VariationsView() {
         try {
             setLoading(true);
             if (editingGroupId) {
-                await groupService.deleteVariationGroup(editingGroupId);
-                await groupService.createVariationGroup(payload);
+                await groupService.updateVariationGroup(editingGroupId, payload);
             } else {
                 await groupService.createVariationGroup(payload);
             }
@@ -152,7 +151,7 @@ export function VariationsView() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 pl-72 animate-in fade-in duration-200">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
                         {/* Modal Header */}
                         <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
@@ -207,13 +206,78 @@ export function VariationsView() {
                                         <input
                                             type="checkbox"
                                             className="hidden"
-                                            checked={formData.isActive}
                                             onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
                                         />
                                         <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Status</span>
                                     </label>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Variants List Section */}
+                        <div className="border-t border-gray-100 dark:border-gray-700 p-6 pt-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Variation Options</h4>
+                                <button
+                                    onClick={() => setFormData({ ...formData, variants: [...formData.variants, { name: '', price: '', sapCode: '' }] })}
+                                    className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition-colors"
+                                >
+                                    + Add Option
+                                </button>
+                            </div>
+
+                            {formData.variants.length > 0 ? (
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-12 gap-4 px-2 text-xs font-bold text-gray-500 uppercase">
+                                        <div className="col-span-6">Name</div>
+                                        <div className="col-span-5">SAP Code</div>
+                                        <div className="col-span-1"></div>
+                                    </div>
+                                    {formData.variants.map((variant, idx) => (
+                                        <div key={idx} className="grid grid-cols-12 gap-4 items-center animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="col-span-6">
+                                                <input
+                                                    value={variant.name}
+                                                    onChange={e => {
+                                                        const newVars = [...formData.variants];
+                                                        newVars[idx].name = e.target.value;
+                                                        setFormData({ ...formData, variants: newVars });
+                                                    }}
+                                                    className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700/50 border-gray-300 dark:border-gray-600 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
+                                                    placeholder="e.g. Small"
+                                                />
+                                            </div>
+                                            <div className="col-span-5">
+                                                <input
+                                                    value={variant.sapCode || ''}
+                                                    onChange={e => {
+                                                        const newVars = [...formData.variants];
+                                                        newVars[idx].sapCode = e.target.value;
+                                                        setFormData({ ...formData, variants: newVars });
+                                                    }}
+                                                    className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700/50 border-gray-300 dark:border-gray-600 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
+                                                    placeholder="SAP Code"
+                                                />
+                                            </div>
+                                            <div className="col-span-1 flex justify-center">
+                                                <button
+                                                    onClick={() => {
+                                                        const newVars = formData.variants.filter((_, i) => i !== idx);
+                                                        setFormData({ ...formData, variants: newVars });
+                                                    }}
+                                                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                                    <p className="text-sm text-gray-500">No options added yet.</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Divider */}
@@ -228,7 +292,8 @@ export function VariationsView() {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

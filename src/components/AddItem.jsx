@@ -78,7 +78,8 @@ export function AddItem({ onBack, itemToEdit }) {
         orderDineIn: true,
         isAvailable: true, // Online Expose
         variants: [], // { _key, name, price }
-        addonGroupIds: [] // Currently single select in UI but backend supports array
+        addonGroupIds: [], // Currently single select in UI but backend supports array
+        itemVariationGroups: [] // New field for Variation Groups selection
     });
 
     const [categories, setCategories] = useState([]);
@@ -117,7 +118,8 @@ export function AddItem({ onBack, itemToEdit }) {
                     name: v.name,
                     price: v.price
                 })) : [],
-                addonGroupIds: itemToEdit.addonGroups ? itemToEdit.addonGroups.map(g => g.id) : []
+                addonGroupIds: itemToEdit.addonGroups ? itemToEdit.addonGroups.map(g => g.id) : [],
+                itemVariationGroups: itemToEdit.variationGroups ? itemToEdit.variationGroups.map(vg => vg.id) : []
             });
         }
     }, [itemToEdit]); // Re-run if itemToEdit changes
@@ -154,7 +156,11 @@ export function AddItem({ onBack, itemToEdit }) {
     const addVariant = () => {
         setFormData(prev => ({
             ...prev,
-            variants: [...prev.variants, { _key: Math.random().toString(36).substr(2, 9), name: '', price: '' }]
+            variants: [...prev.variants, {
+                _key: Math.random().toString(36).substr(2, 9),
+                name: '',
+                price: ''
+            }]
         }));
     };
 
@@ -194,7 +200,8 @@ export function AddItem({ onBack, itemToEdit }) {
                     price: v.price,
                     sortOrder: i
                 })),
-                addonGroupIds: formData.addonGroupIds.filter(id => id) // Clean array
+                addonGroupIds: formData.addonGroupIds.filter(id => id), // Clean array
+                variationGroupIds: formData.itemVariationGroups // Send selected var groups
             };
 
             if (itemToEdit) {
@@ -334,91 +341,130 @@ export function AddItem({ onBack, itemToEdit }) {
                     </div>
 
                     {/* Variations Section */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide">Item Variations</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">Define variants and their specific prices for this item</p>
-                            </div>
-
-                            <div className="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 focus-within:ring-2 ring-blue-500/20">
-                                <span className="text-xs font-semibold text-gray-500 whitespace-nowrap px-1">Select Variation:</span>
-                                <select
-                                    className="p-1.5 text-sm bg-transparent border-0 outline-none text-gray-700 dark:text-gray-200 w-48 font-medium cursor-pointer"
-                                    onChange={(e) => {
-                                        if (e.target.value) {
-                                            const selectedVar = variationGroups.find(g => g.id === parseInt(e.target.value));
-                                            if (selectedVar) {
-                                                setFormData(prev => ({
+                    <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Variation Groups</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {variationGroups.map(group => (
+                                <label key={group.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${formData.itemVariationGroups?.includes(group.id)
+                                    ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
+                                    : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-blue-300'
+                                    }`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.itemVariationGroups?.includes(group.id) || false}
+                                        onChange={(e) => {
+                                            const isChecked = e.target.checked;
+                                            setFormData(prev => {
+                                                const current = prev.itemVariationGroups || [];
+                                                return {
                                                     ...prev,
-                                                    variants: [...prev.variants, { _key: Math.random().toString(36).substr(2, 9), name: selectedVar.name, price: '' }]
-                                                }));
-                                            }
-                                        }
-                                        e.target.value = ''; // Reset select
-                                    }}
-                                >
-                                    <option value="">Choose...</option>
-                                    {variationGroups.map(g => (
-                                        <option key={g.id} value={g.id}>{g.name} ({g.departmentName})</option>
-                                    ))}
-                                </select>
+                                                    itemVariationGroups: isChecked
+                                                        ? [...current, group.id]
+                                                        : current.filter(id => id !== group.id)
+                                                };
+                                            });
+                                        }}
+                                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                    />
+                                    <div>
+                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{group.name}</div>
+                                        <div className="text-xs text-gray-500">{group.departmentName}</div>
+                                    </div>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Item Specific Variations & Custom Overrides */}
+                    <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase">Custom Variations & Price Overrides</h3>
+                                <p className="text-xs text-gray-500">Add custom variants or import from groups to override prices for this item.</p>
                             </div>
                         </div>
 
-                        <div className="p-6">
-                            {formData.variants.length > 0 ? (
-                                <div className="border rounded-lg overflow-hidden">
-                                    <DndContext
-                                        sensors={sensors}
-                                        collisionDetection={closestCenter}
-                                        onDragEnd={handleDragEnd}
-                                    >
-                                        <table className="w-full text-left">
-                                            <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                                <tr>
-                                                    <th className="p-3 pl-4 w-12 text-center">#</th>
-                                                    <th className="p-3">Variation Name</th>
-                                                    <th className="p-3 w-48">Price (₹)</th>
-                                                    <th className="p-3 w-20 text-center">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                                <SortableContext
-                                                    items={formData.variants.map(v => v._key)}
-                                                    strategy={verticalListSortingStrategy}
-                                                >
-                                                    {formData.variants.map((variant, index) => (
-                                                        <SortableVariantRow
-                                                            key={variant._key}
-                                                            id={variant._key}
-                                                            index={index}
-                                                            variant={variant}
-                                                            handleVariantChange={handleVariantChange}
-                                                            removeVariant={removeVariant}
-                                                        />
-                                                    ))}
-                                                </SortableContext>
-                                            </tbody>
-                                        </table>
-                                    </DndContext>
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                                    <p className="text-sm text-gray-500">No variations added yet.</p>
-                                    <p className="text-xs text-gray-400 mt-1">Load a group from above or add manually below.</p>
+                        {/* Helper: Import from Selected Groups */}
+                        {formData.itemVariationGroups.length > 0 && (
+                            <div className="mb-4 flex flex-wrap gap-2">
+                                {formData.itemVariationGroups.map(groupId => {
+                                    const group = variationGroups.find(g => g.id === groupId);
+                                    if (!group) return null;
+                                    return (
+                                        <button
+                                            key={group.id}
+                                            onClick={() => {
+                                                // Add variants from this group to the list
+                                                const newVariants = [...formData.variants];
+                                                if (group.Variants && group.Variants.length > 0) {
+                                                    group.Variants.forEach(gv => {
+                                                        // Avoid duplicates by name? Or allow duplicates? 
+                                                        // Best to check if name exists, if so, maybe don't add or warn?
+                                                        // Let's just add them, user can delete.
+                                                        newVariants.push({
+                                                            _key: Math.random().toString(36).substr(2, 9),
+                                                            name: gv.name,
+                                                            price: gv.price || ''
+                                                        });
+                                                    });
+                                                    setFormData(prev => ({ ...prev, variants: newVariants }));
+                                                } else {
+                                                    alert("No master variants found in this group.");
+                                                }
+                                            }}
+                                            className="text-xs flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors"
+                                        >
+                                            <Plus className="w-3 h-3" /> Import {group.name} Options
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Table */}
+                        <div className="border rounded-lg overflow-hidden">
+                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                <table className="w-full text-left">
+                                    <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        <tr>
+                                            <th className="p-3 pl-4 w-12 text-center">#</th>
+                                            <th className="p-3">Variation Name</th>
+                                            <th className="p-3 w-48">Price (₹)</th>
+                                            <th className="p-3 w-20 text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                        <SortableContext items={formData.variants.map(v => v._key)} strategy={verticalListSortingStrategy}>
+                                            {formData.variants.map((variant, index) => (
+                                                <SortableVariantRow
+                                                    key={variant._key}
+                                                    id={variant._key}
+                                                    index={index}
+                                                    variant={variant}
+                                                    handleVariantChange={handleVariantChange}
+                                                    removeVariant={removeVariant}
+                                                />
+                                            ))}
+                                        </SortableContext>
+                                    </tbody>
+                                </table>
+                            </DndContext>
+
+                            {formData.variants.length === 0 && (
+                                <div className="text-center py-6 text-gray-400 text-sm">
+                                    No custom variations added.
                                 </div>
                             )}
+                        </div>
 
-                            <div className="mt-4 flex justify-end">
-                                <button
-                                    onClick={addVariant}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 transition-all shadow-sm"
-                                >
-                                    <Plus className="w-4 h-4 text-blue-500" />
-                                    <span>Add Custom Variant Row</span>
-                                </button>
-                            </div>
+                        <div className="mt-4 flex justify-end">
+                            <button
+                                onClick={addVariant}
+                                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm"
+                            >
+                                <Plus className="w-4 h-4 text-blue-500" />
+                                <span>Add Empty Row</span>
+                            </button>
                         </div>
                     </div>
 
