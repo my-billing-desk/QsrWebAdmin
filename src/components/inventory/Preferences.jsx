@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Store, Map, ChefHat, X, Save } from 'lucide-react';
-import { settingService } from '../../services/api';
+import { settingsService } from '../../services/api';
 
 export function Preferences() {
     const [settings, setSettings] = useState({});
@@ -31,7 +31,7 @@ export function Preferences() {
 
     const loadSettings = async () => {
         try {
-            const res = await settingService.getAll();
+            const res = await settingsService.getAll();
             // Convert array of {key, value} to object
             const loaded = res.data.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value === 'true' }), {});
             setSettings(loaded);
@@ -44,7 +44,7 @@ export function Preferences() {
         const newValue = !currentValue;
         setSettings(prev => ({ ...prev, [key]: newValue }));
         try {
-            await settingService.update({ [key]: newValue });
+            await settingsService.update({ [key]: newValue });
         } catch (error) {
             console.error(error);
             setSettings(prev => ({ ...prev, [key]: currentValue })); // Revert on error

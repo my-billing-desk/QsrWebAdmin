@@ -111,7 +111,8 @@ export const inventoryService = {
     getClosingStockReport: () => api.get('/inventory/reports/closing-stock'),
 };
 
-export const settingService = {
+export const settingsService = {
+    getSettings: () => api.get('/settings'), // Alias for consistency
     getAll: () => api.get('/settings'),
     update: (data) => api.post('/settings', data),
 };
