@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     RotateCcw, MoreVertical, AlertTriangle, TrendingUp, HelpCircle
 } from 'lucide-react';
-import { dashboardService } from '../services/api';
+import { dashboardService, settingsService } from '../services/api';
 
 export function Dashboard() {
     const [stats, setStats] = useState({
@@ -16,8 +16,11 @@ export function Dashboard() {
     });
     const [recentOrders, setRecentOrders] = useState([]);
     const [chartsData, setChartsData] = useState({ revenue: { labels: [], data: [] }, topItems: [] });
-    // Using placeholder/hardcoded values for things we don't have endpoints for yet
-    // like "Dine In" split in the stats object, though logic exists in controller to expand.
+    const [settings, setSettings] = useState({
+        store_dinein_enabled: 'true',
+        store_takeaway_enabled: 'true',
+        store_delivery_enabled: 'true'
+    });
 
     useEffect(() => {
         fetchDashboardData();
@@ -25,14 +28,19 @@ export function Dashboard() {
 
     const fetchDashboardData = async () => {
         try {
-            const statsRes = await dashboardService.getStats();
+            const [statsRes, chartsRes, recentRes, settingsRes] = await Promise.all([
+                dashboardService.getStats(),
+                dashboardService.getCharts(),
+                dashboardService.getRecentOrders(),
+                settingsService.getSettings() // This already persists and fetches from DB
+            ]);
+
             setStats(statsRes.data);
-
-            const chartsRes = await dashboardService.getCharts();
             setChartsData(chartsRes.data);
-
-            const recentRes = await dashboardService.getRecentOrders();
             setRecentOrders(recentRes.data);
+            if (settingsRes.data) {
+                setSettings(prev => ({ ...prev, ...settingsRes.data }));
+            }
         } catch (error) {
             console.error("Failed to load dashboard data", error);
         }
@@ -68,50 +76,56 @@ export function Dashboard() {
                     <div className="text-xs text-gray-500 font-medium">{stats.totalOrders} Orders</div>
                 </div>
 
-                {/* Dine In */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-gray-500 text-sm font-medium">Dine In</span>
-                        <div className="w-8 h-8 bg-cyan-50 text-cyan-500 rounded-full flex items-center justify-center">
-                            🍴
+                {/* Dine In - Conditionally Rendered */}
+                {settings.store_dinein_enabled !== 'false' && (
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-gray-500 text-sm font-medium">Dine In</span>
+                            <div className="w-8 h-8 bg-cyan-50 text-cyan-500 rounded-full flex items-center justify-center">
+                                🍴
+                            </div>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.dineInTotal || 0}</div>
+                        <div className="flex justify-between items-center">
+                            <div className="text-xs text-gray-500 font-medium">Actual</div>
+                            <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.dineInTotal || 0}</div>
-                    <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500 font-medium">Actual</div>
-                        <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-                </div>
+                )}
 
-                {/* Take Away */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-gray-500 text-sm font-medium">Take Away</span>
-                        <div className="w-8 h-8 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center">
-                            🛍️
+                {/* Take Away - Conditionally Rendered */}
+                {settings.store_takeaway_enabled !== 'false' && (
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-gray-500 text-sm font-medium">Take Away</span>
+                            <div className="w-8 h-8 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center">
+                                🛍️
+                            </div>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.takeAwayTotal || 0}</div>
+                        <div className="flex justify-between items-center">
+                            <div className="text-xs text-gray-500 font-medium">Actual</div>
+                            <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.takeAwayTotal || 0}</div>
-                    <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500 font-medium">Actual</div>
-                        <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-                </div>
+                )}
 
-                {/* Delivery */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-gray-500 text-sm font-medium">Delivery</span>
-                        <div className="w-8 h-8 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
-                            🛵
+                {/* Delivery - Conditionally Rendered */}
+                {settings.store_delivery_enabled !== 'false' && (
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-gray-500 text-sm font-medium">Delivery</span>
+                            <div className="w-8 h-8 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
+                                🛵
+                            </div>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.deliveryTotal || 0}</div>
+                        <div className="flex justify-between items-center">
+                            <div className="text-xs text-gray-500 font-medium">Actual</div>
+                            <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.deliveryTotal || 0}</div>
-                    <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500 font-medium">Actual</div>
-                        <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-                </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

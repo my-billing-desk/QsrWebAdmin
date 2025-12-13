@@ -269,77 +269,157 @@ export function AllOrders() {
                     </div>
                 )}
 
-                {/* Selected Order Detail Form - Shows when an order is selected */}
+                {/* Order Details Modal */}
                 {selectedOrder && (
-                    <div className="absolute inset-0 overflow-auto bg-gray-50 p-4">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-w-4xl mx-auto">
-                            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-                                <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                                    Edit Order <span className="text-red-600">#{selectedOrder.orderNumber}</span>
-                                </h3>
-                                <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-800">
-                                    <X className="w-5 h-5" />
+                    <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-hidden">
+                        <div className="bg-white dark:bg-gray-900 w-full max-w-5xl max-h-full flex flex-col rounded-lg shadow-2xl relative">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+                                <h3 className="font-bold text-xl text-gray-800 dark:text-white">Order Details</h3>
+                                <button
+                                    onClick={() => setSelectedOrder(null)}
+                                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500"
+                                >
+                                    <X className="w-6 h-6" />
                                 </button>
                             </div>
 
-                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
-                                        <span className="font-bold text-gray-700">Payment Type:</span>
-                                        <span className="bg-gray-100 px-2 py-1 rounded text-sm">{selectedOrder.paymentMode || 'Cash'}</span>
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                {/* Info Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-sm">
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Order No.:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">{selectedOrder.orderNumber}</span>
                                     </div>
-                                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
-                                        <span className="font-bold text-gray-700">Order Status:</span>
-                                        <span className="capitalize">{selectedOrder.status}</span>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Billing User:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">-</span>
                                     </div>
-                                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
-                                        <span className="font-bold text-gray-700">Order Type:</span>
-                                        <span className="capitalize">{selectedOrder.orderType}</span>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Customer Name:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">{selectedOrder.customerName || '-'}</span>
+                                    </div>
+
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Customer Phone:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">{selectedOrder.customerPhone || '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Customer Address:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">-</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Customer Locality:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">-</span>
+                                    </div>
+
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">No. of Persons:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">-</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Order Type:</span>
+                                        <span className="text-gray-600 dark:text-gray-400 capitalize">{selectedOrder.type}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Assign to:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">-</span>
+                                    </div>
+
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Total Tax:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">₹ {selectedOrder.taxAmount?.toFixed(2) || '0.00'}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Total Discount:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">₹ {(selectedOrder.discount || 0).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Grand Total:</span>
+                                        <span className="font-bold text-gray-800 dark:text-white">₹ {selectedOrder.totalAmount?.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Settlement Amount:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">₹ 0.00</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Order Status:</span>
+                                        <span className="capitalize px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-600 font-medium">{selectedOrder.status}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Paid:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">{selectedOrder.paid ? 'Yes' : '-'}</span>
+                                    </div>
+
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">Payment Type:</span>
+                                        <span className="text-gray-600 dark:text-gray-400">{selectedOrder.paymentMode || '-'}</span>
                                     </div>
                                 </div>
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
-                                        <span className="font-bold text-gray-700">Customer:</span>
-                                        <span>{selectedOrder.customerName || 'N/A'}</span>
-                                    </div>
-                                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
-                                        <span className="font-bold text-gray-700">Phone:</span>
-                                        <span>{selectedOrder.customerPhone || 'N/A'}</span>
+
+                                {/* Order Items Table */}
+                                <div>
+                                    <h4 className="font-bold text-gray-800 dark:text-white mb-3">Order Items</h4>
+                                    <div className="overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-blue-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold">
+                                                <tr>
+                                                    <th className="p-3 text-left">Item Name</th>
+                                                    <th className="p-3 text-left">Special Note</th>
+                                                    <th className="p-3 text-center">Quantity</th>
+                                                    <th className="p-3 text-right">Unit Price (₹)</th>
+                                                    <th className="p-3 text-right">Total Price (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                                                {selectedOrder.items && selectedOrder.items.map((item, idx) => (
+                                                    <React.Fragment key={idx}>
+                                                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                                            <td className="p-3">
+                                                                <div className="font-medium text-gray-800 dark:text-white">{item.itemName}</div>
+                                                                {item.variantName && (
+                                                                    <div className="text-xs text-red-500">[{item.variantName}]</div>
+                                                                )}
+                                                                {item.addons && (
+                                                                    <div className="text-xs text-gray-500 mt-1">
+                                                                        Addon: {Array.isArray(item.addons) ? item.addons.map(a => a.name).join(', ') : ' - '}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td className="p-3 text-gray-500">--</td>
+                                                            <td className="p-3 text-center">{item.quantity}</td>
+                                                            <td className="p-3 text-right">{(item.price).toFixed(2)}</td>
+                                                            <td className="p-3 text-right font-medium">{(item.price * item.quantity).toFixed(2)}</td>
+                                                        </tr>
+                                                    </React.Fragment>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                                                <tr>
+                                                    <td colSpan="5" className="p-4">
+                                                        <div className="flex flex-col items-end gap-1 text-sm">
+                                                            <div className="flex justify-between w-64">
+                                                                <span className="text-gray-500">Total Tax:</span>
+                                                                <span className="font-medium">₹ {selectedOrder.taxAmount?.toFixed(2)}</span>
+                                                            </div>
+                                                            {selectedOrder.roundOff && Math.abs(selectedOrder.roundOff) > 0.001 && (
+                                                                <div className="flex justify-between w-64">
+                                                                    <span className="text-gray-500">Round Off:</span>
+                                                                    <span className="font-medium">{selectedOrder.roundOff > 0 ? '+' : ''}{selectedOrder.roundOff.toFixed(2)}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between w-64 pt-2 border-t border-gray-200 dark:border-gray-700 mt-1">
+                                                                <span className="font-bold text-gray-800 dark:text-white">Grand Total:</span>
+                                                                <span className="font-bold text-red-600">₹ {selectedOrder.totalAmount?.toFixed(2)}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="px-6 mb-6">
-                                <h4 className="font-bold text-gray-800 mb-3 border-b pb-2">Order Items</h4>
-                                <table className="w-full text-sm border bg-white">
-                                    <thead className="bg-gray-50 text-gray-700 font-bold">
-                                        <tr>
-                                            <th className="p-3 text-left w-10"></th>
-                                            <th className="p-3 text-left">Item Name</th>
-                                            <th className="p-3 text-center w-24">Qty</th>
-                                            <th className="p-3 text-right">Unit Price</th>
-                                            <th className="p-3 text-right">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {selectedOrder.items && selectedOrder.items.map((item, idx) => (
-                                            <tr key={idx} className="group hover:bg-gray-50">
-                                                <td className="p-3 text-center"><button className="text-gray-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></button></td>
-                                                <td className="p-3 font-medium text-gray-800">{item.itemName}</td>
-                                                <td className="p-3 text-center">
-                                                    <input type="number" defaultValue={item.quantity} className="w-16 border border-gray-300 rounded px-2 py-1 text-center" />
-                                                </td>
-                                                <td className="p-3 text-right">₹{item.price}</td>
-                                                <td className="p-3 text-right font-medium">₹{(item.price * item.quantity).toFixed(2)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
-                                <button onClick={() => setSelectedOrder(null)} className="px-4 py-2 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-50">Cancel</button>
-                                <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 shadow-sm">Save Changes</button>
                             </div>
                         </div>
                     </div>
