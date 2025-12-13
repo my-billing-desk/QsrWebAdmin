@@ -123,6 +123,45 @@ export function Settings() {
                         </div>
                     </div>
 
+                    {/* Round Off Setting */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Accept Decimal in Total?
+                            </label>
+                            <p className="text-xs text-gray-500 mb-3">
+                                If 'No', the final total amount will be rounded to the nearest integer.
+                            </p>
+                        </div>
+                        <div className="flex gap-4">
+                            <label className={`flex-1 p-4 rounded-xl border-2 cursor-pointer transition-all ${settings.accept_decimal === 'true' ? 'border-violet-600 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'}`}>
+                                <input
+                                    type="radio"
+                                    name="accept_decimal"
+                                    value="true"
+                                    checked={settings.accept_decimal === 'true'}
+                                    onChange={(e) => handleChange('accept_decimal', e.target.value)}
+                                    className="hidden"
+                                />
+                                <div className="font-bold text-gray-900 dark:text-gray-100">Yes</div>
+                                <div className="text-xs text-gray-500 mt-1">Exact Total (e.g. ₹105.50)</div>
+                            </label>
+
+                            <label className={`flex-1 p-4 rounded-xl border-2 cursor-pointer transition-all ${settings.accept_decimal !== 'true' ? 'border-violet-600 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'}`}>
+                                <input
+                                    type="radio"
+                                    name="accept_decimal"
+                                    value="false"
+                                    checked={settings.accept_decimal !== 'true'}
+                                    onChange={(e) => handleChange('accept_decimal', e.target.value)}
+                                    className="hidden"
+                                />
+                                <div className="font-bold text-gray-900 dark:text-gray-100">No</div>
+                                <div className="text-xs text-gray-500 mt-1">Round Off (e.g. ₹106)</div>
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="flex justify-end pt-4">
                         <button
                             onClick={handleSave}
