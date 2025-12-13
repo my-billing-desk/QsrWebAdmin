@@ -12,8 +12,10 @@ export function InventoryLayout() {
     // State for expanded menu groups
     const [expandedGroups, setExpandedGroups] = useState({
         'Purchase': true,
-        'Manage Stock': true,
+        'Manage Stock': false,
         'Consumption': false,
+        'Production': false,
+        'Reports': false,
         'Masters': true
     });
 
@@ -40,13 +42,13 @@ export function InventoryLayout() {
                 { label: 'Purchase Return', path: '/inventory/purchase-return' },
             ]
         },
-        // {
-        //     group: 'Manage Stock',
-        //     icon: Archive,
-        //     items: [
-        //         { label: 'Closing Stock', path: '/inventory/stock/closing' },
-        //     ]
-        // },
+        {
+            group: 'Manage Stock',
+            icon: Archive,
+            items: [
+                { label: 'Closing Stock', path: '/inventory/stock/closing' },
+            ]
+        },
         {
             group: 'Consumption',
             icon: BarChart3,
@@ -57,12 +59,27 @@ export function InventoryLayout() {
             ]
         },
         {
+            group: 'Production',
+            icon: Factory,
+            items: [
+                { label: 'Production Entry', path: '/inventory/production' },
+            ]
+        },
+        {
+            group: 'Reports',
+            icon: FileText,
+            items: [
+                { label: 'Inventory Reports', path: '/inventory/reports' },
+            ]
+        },
+        {
             group: 'Masters',
             icon: Settings,
             items: [
-                { label: 'Raw Materials', path: '/inventory/materials' },
+                { label: 'Raw Materials', path: '/inventory/raw-materials' },
                 { label: 'Recipes', path: '/inventory/recipes' },
                 { label: 'Preferences', path: '/inventory/preferences' },
+                { label: 'Settings', path: '/inventory/settings' },
             ]
         }
     ];

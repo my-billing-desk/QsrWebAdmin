@@ -55,12 +55,16 @@ export const userService = {
 
 export const dashboardService = {
     getStats: () => api.get('/dashboard/stats'),
+    getCharts: () => api.get('/dashboard/charts'),
+    getRecentOrders: () => api.get('/dashboard/recent-orders'),
+    getTopItems: () => api.get('/dashboard/top-items'),
     clearData: () => api.post('/dashboard/clear-data'),
 };
 
 export const orderService = {
     getAll: (params) => api.get('/orders', { params }),
     create: (data) => api.post('/orders', data),
+    update: (id, data) => api.put(`/orders/${id}`, data),
 };
 
 export const groupService = {
@@ -104,11 +108,12 @@ export const inventoryService = {
     createWastage: (data) => api.post('/inventory/wastage', data),
 
     getStats: () => api.get('/inventory/stats'),
+    getClosingStockReport: () => api.get('/inventory/reports/closing-stock'),
 };
 
 export const settingService = {
     getAll: () => api.get('/settings'),
-    update: (data) => api.put('/settings', data),
+    update: (data) => api.post('/settings', data),
 };
 
 export default api;

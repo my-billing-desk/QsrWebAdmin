@@ -33,6 +33,9 @@ export function Sidebar({ activeTab, onTabChange }) {
                 { id: 'running_orders', path: '/orders/running', label: 'Running Orders', icon: Clock },
                 { id: 'all_orders', path: '/orders', label: 'All Orders', icon: FileText },
                 { id: 'online_orders', path: '/orders/online', label: 'Online Orders', icon: ShoppingCart },
+                { id: 'kot', path: '/orders/kot', label: 'KOT', icon: FileText },
+                { id: 'due_payment', path: '/orders/due-payment', label: 'Due Payment Settlement', icon: Receipt },
+                { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss', icon: BarChart3 },
             ]
         },
         {

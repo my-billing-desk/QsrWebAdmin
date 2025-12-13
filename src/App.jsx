@@ -6,6 +6,7 @@ import { Dashboard } from './components/Dashboard';
 import { MenuManagement } from './components/MenuManagement';
 import { UserManagement } from './components/UserManagement';
 import { AllOrders } from './components/orders/AllOrders';
+import { KOT } from './components/orders/KOT';
 import { Settings } from './components/Settings';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -21,8 +22,15 @@ import { PurchaseOrder } from './components/inventory/PurchaseOrder';
 import { PurchaseReturn } from './components/inventory/PurchaseReturn';
 import { StockTransfer } from './components/inventory/StockTransfer';
 import { Wastage } from './components/inventory/Wastage';
-import { StockStatus } from './components/inventory/Placeholders'; // Keeping as placeholder if not implemented yet
+import { StockStatus, ProductionEntry } from './components/inventory/Placeholders'; // Keeping as placeholder if not implemented yet
 import { OnlineOrders } from './components/orders/OnlineOrders';
+import { RunningOrders } from './components/orders/RunningOrders';
+
+
+import { InventoryLayout } from './components/inventory/InventoryLayout';
+import { InventoryDashboard } from './components/inventory/InventoryDashboard';
+import { InventorySettings } from './components/inventory/InventorySettings';
+import { InventoryReports } from './components/inventory/InventoryReports';
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard'); // Kept for sidebar compatibility mostly, or we remove it
@@ -76,7 +84,9 @@ function AppRoutes() {
         <Route path="/menu" element={<MenuManagement />} />
         <Route path="/orders" element={<AllOrders />} />
         <Route path="/orders/online" element={<OnlineOrders />} />
-        <Route path="/orders/running" element={<div className="flex items-center justify-center h-full text-xl font-bold text-gray-400">Running Orders Module</div>} />
+        <Route path="/orders/kot" element={<KOT />} />
+        <Route path="/orders/due-payment" element={<div className="p-8 text-center text-gray-500">Due Payment Settlement Module</div>} />
+        <Route path="/orders/running" element={<RunningOrders />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/settings" element={<Settings />} />
         {/* Fallback for "Under Development" pages caught by sidebar links */}
@@ -104,7 +114,10 @@ function AppRoutes() {
         <Route path="purchase-return" element={<PurchaseReturn />} />
         <Route path="transfer" element={<StockTransfer />} />
         <Route path="wastage" element={<Wastage />} />
+        <Route path="production" element={<ProductionEntry />} />
         <Route path="stock/closing" element={<StockStatus />} />
+        <Route path="reports" element={<InventoryReports />} />
+        <Route path="settings" element={<InventorySettings />} />
       </Route>
     </Routes>
   );

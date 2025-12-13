@@ -2,26 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, FileText, MoreHorizontal, ChefHat } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { menuService } from '../../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export default function RecipeList() {
     const navigate = useNavigate();
     const [recipes, setRecipes] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All Recipes');
 
     useEffect(() => {
-        fetchRecipes();
+        fetchData();
     }, []);
 
-    const fetchRecipes = async () => {
+    const fetchData = async () => {
+        setLoading(true);
         try {
-            const res = await axios.get(`${API_URL}/inventory/recipes`);
-            setRecipes(res.data);
+            const [recipesRes, categoriesRes] = await Promise.all([
+                axios.get(`${API_URL}/inventory/recipes`),
+                menuService.getCategories()
+            ]);
+            setRecipes(recipesRes.data);
+            setCategories(categoriesRes.data);
         } catch (error) {
-            console.error("Failed to fetch recipes", error);
+            console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
@@ -29,23 +36,29 @@ export default function RecipeList() {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this recipe?")) return;
-        // Assuming delete endpoint exists or will be added. 
-        // If not, we might need to add it to backend. 
-        // For now, let's assume it's standard.
-        // Wait, I didn't check if delete recipe exists in backend. 
-        // Let's assume standard REST for now.
         try {
-            // await axios.delete(`${API_URL}/inventory/recipes/${id}`);
-            // fetchRecipes();
-            alert("Delete functionality to be connected.");
+            await axios.delete(`${API_URL}/inventory/recipes/${id}`);
+            const recipesRes = await axios.get(`${API_URL}/inventory/recipes`); // Re-fetch recipes
+            setRecipes(recipesRes.data);
+            alert("Recipe deleted successfully");
         } catch (error) {
             console.error("Failed to delete recipe", error);
+            alert("Failed to delete recipe");
         }
     };
 
-    const filteredRecipes = recipes.filter(r =>
-        (r.Item?.name || r.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredRecipes = recipes.filter(r => {
+        const matchesSearch = (r.Item?.name || r.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = filterCategory === 'All Recipes'
+            ? true
+            : (r.Item?.Category?.name === filterCategory);
+        return matchesSearch && matchesCategory;
+    });
+
+    // Calculate recipe counts per category for the stats cards
+    const getCategoryCount = (catName) => {
+        return recipes.filter(r => r.Item?.Category?.name === catName).length;
+    };
 
     if (loading) return <div className="p-8">Loading...</div>;
 
@@ -100,36 +113,51 @@ export default function RecipeList() {
                     />
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
-                <select className="px-4 py-2 border border-gray-200 rounded-lg outline-none bg-white">
-                    <option>All Recipes</option>
-                    <option>Veg Burgers</option>
+                <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="px-4 py-2 border border-gray-200 rounded-lg outline-none bg-white"
+                >
+                    <option value="All Recipes">All Recipes</option>
+                    {categories.map(cat => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
                 </select>
                 <button className="px-6 py-2 bg-white border border-red-500 text-red-600 rounded-lg hover:bg-red-50 font-medium">
                     Search
                 </button>
-                <button className="px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium">
+                <button
+                    onClick={() => { setSearchTerm(''); setFilterCategory('All Recipes'); }}
+                    className="px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium"
+                >
                     Clear
                 </button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-4 gap-4">
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center cursor-pointer hover:bg-blue-100 transition-colors">
-                    <h4 className="font-bold text-gray-800">Veg Sides</h4>
-                    <span className="text-sm text-gray-500">9 Items</span>
-                </div>
-                <div className="bg-white p-4 rounded-xl border-2 border-blue-500 text-center cursor-pointer shadow-sm relative">
-                    <h4 className="font-bold text-gray-800">Veg Burgers</h4>
-                    <span className="text-sm text-gray-500">6 Items</span>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center cursor-pointer hover:bg-blue-100 transition-colors">
-                    <h4 className="font-bold text-gray-800">Veg Combos</h4>
-                    <span className="text-sm text-gray-500">6 Items</span>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center cursor-pointer hover:bg-blue-100 transition-colors">
-                    <h4 className="font-bold text-gray-800">Waffles</h4>
-                    <span className="text-sm text-gray-500">5 Items</span>
-                </div>
+            {/* Stats Cards - Dynamic */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {categories.length > 0 ? (
+                    categories.slice(0, 4).map((cat, index) => {
+                        const count = getCategoryCount(cat.name);
+                        // Vary styles slightly to match the original look if needed, or keep uniform
+                        const isEven = index % 2 === 0;
+                        return (
+                            <div
+                                key={cat.id}
+                                onClick={() => setFilterCategory(cat.name)}
+                                className={`p-4 rounded-xl border text-center cursor-pointer transition-colors shadow-sm relative
+                                    ${filterCategory === cat.name
+                                        ? 'bg-white border-blue-500 ring-2 ring-blue-500/20'
+                                        : 'bg-blue-50 border-blue-100 hover:bg-blue-100'}`}
+                            >
+                                <h4 className="font-bold text-gray-800">{cat.name}</h4>
+                                <span className="text-sm text-gray-500">{count} Items</span>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <div className="col-span-4 text-center text-gray-400 py-4">No categories found</div>
+                )}
             </div>
 
             {/* Table */}
@@ -146,37 +174,51 @@ export default function RecipeList() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {filteredRecipes.map((recipe) => (
-                            <tr key={recipe.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td className="p-4 text-center">
-                                    <input type="checkbox" className="rounded border-gray-300 text-red-600 focus:ring-red-500" />
-                                </td>
-                                <td className="p-4 font-medium text-gray-900 dark:text-gray-100">
-                                    {recipe.Item?.name || recipe.name || 'Unnamed Recipe'}
-                                </td>
-                                <td className="p-4 text-gray-500">
-                                    {recipe.Item?.Category?.name || 'Uncategorized'}
-                                </td>
-                                <td className="p-4">
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            onClick={() => navigate(`/inventory/recipes/edit/${recipe.Item?.id || recipe.itemId}`)} // Use itemId to edit
-                                            className="p-1 px-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors flex items-center gap-1"
-                                        >
-                                            <Plus className="w-3 h-3" /> Edit
-                                        </button>
-                                        <button className="p-1 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors flex items-center gap-1">
-                                            Creation with AI
-                                        </button>
-                                    </div>
+                        {filteredRecipes.length > 0 ? (
+                            filteredRecipes.map((recipe) => (
+                                <tr key={recipe.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <td className="p-4 text-center">
+                                        <input type="checkbox" className="rounded border-gray-300 text-red-600 focus:ring-red-500" />
+                                    </td>
+                                    <td className="p-4 font-medium text-gray-900 dark:text-gray-100">
+                                        {recipe.Item?.name || recipe.name || 'Unnamed Recipe'}
+                                    </td>
+                                    <td className="p-4 text-gray-500">
+                                        {recipe.Item?.Category?.name || 'Uncategorized'}
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex justify-end gap-2">
+                                            <button
+                                                onClick={() => navigate(`/inventory/recipes/edit/${recipe.Item?.id || recipe.itemId}`)} // Use itemId to edit
+                                                className="p-1 px-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors flex items-center gap-1"
+                                            >
+                                                <Plus className="w-3 h-3" /> Edit
+                                            </button>
+                                            <button className="p-1 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors flex items-center gap-1">
+                                                Creation with AI
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(recipe.id)}
+                                                className="p-1 px-3 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded transition-colors flex items-center gap-1"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="p-8 text-center text-gray-500">
+                                    No recipes found matching your filters.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
             <div className="text-xs text-gray-500">
-                Showing 1 to {filteredRecipes.length} of {filteredRecipes.length} records
+                Showing {filteredRecipes.length} records
             </div>
         </div>
     );

@@ -1,160 +1,146 @@
-import React, { useState } from 'react';
-import { Search, Filter, Download, ChevronDown, LayoutGrid, Activity } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, RotateCcw } from 'lucide-react';
+import { orderService } from '../../services/api';
+
+const ZomatoLogo = () => <span className="font-bold text-red-600 text-xl italic bg-black px-2 rounded-sm border border-white">zomato</span>;
+const SwiggyLogo = () => <span className="font-bold text-orange-500 text-xl font-sans tracking-tight">Swiggy</span>;
+const MagicpinLogo = () => <span className="font-bold text-purple-600 text-xl font-serif">magicpin</span>;
 
 export function OnlineOrders() {
     const [activeTab, setActiveTab] = useState('All');
-    const [timeRange, setTimeRange] = useState('Last 5 Days Orders');
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const aggregators = [
-        { name: 'All', icon: LayoutGrid, color: 'text-gray-600' },
-        { name: 'Zomato', color: 'text-red-600', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg' }, // Using text/placeholder if no image
-        { name: 'Swiggy', color: 'text-orange-500', logo: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' },
-        { name: 'Magicpin', color: 'text-pink-600' },
-        { name: 'Eksecond', color: 'text-red-500' },
-        { name: 'Gintaa Food', color: 'text-red-700' }
+    const tabs = [
+        { id: 'All', label: 'All', icon: null },
+        { id: 'Zomato', label: 'Zomato', icon: ZomatoLogo },
+        { id: 'Swiggy', label: 'Swiggy', icon: SwiggyLogo },
+        { id: 'Magicpin', label: 'Magicpin', icon: MagicpinLogo },
+        { id: 'Eksecond', label: 'Eksecond', icon: null },
+        { id: 'Gintaa Food', label: 'Gintaa Food', icon: null },
     ];
 
+    useEffect(() => {
+        const fetchOnlineOrders = async () => {
+            setLoading(true);
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const params = {
+                    startDate: today + ' 00:00:00',
+                    endDate: today + ' 23:59:59',
+                    type: 'delivery', // Usually online orders are delivery
+                    source: activeTab !== 'All' ? activeTab : undefined
+                };
+
+                const response = await orderService.getAll(params);
+                setOrders(response.data);
+            } catch (error) {
+                console.error("Error fetching online orders:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOnlineOrders();
+    }, [activeTab]);
+
     return (
-        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 p-6">
-            <h1 className="text-xl font-bold text-gray-800 mb-6">Online Orders Activity</h1>
-
-            {/* Aggregator Tabs */}
-            <div className="flex gap-4 overflow-x-auto pb-2 mb-6">
-                {aggregators.map(agg => (
-                    <button
-                        key={agg.name}
-                        onClick={() => setActiveTab(agg.name)}
-                        className={`
-                            flex items-center gap-3 px-6 py-3 rounded-lg border min-w-[140px]
-                            transition-all duration-200
-                            ${activeTab === agg.name
-                                ? 'bg-white border-red-500 shadow-sm ring-1 ring-red-100'
-                                : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'}
-                        `}
-                    >
-                        {agg.icon ? (
-                            <agg.icon className={`w-6 h-6 ${agg.color}`} />
-                        ) : (
-                            <div className={`w-6 h-6 rounded-full bg-current ${agg.color} opacity-20 flex items-center justify-center`}>
-                                <span className={`text-xs font-bold ${agg.color} opacity-100`}>{agg.name[0]}</span>
-                            </div>
-                        )}
-                        <span className={`font-bold ${activeTab === agg.name ? 'text-gray-800' : 'text-gray-500'}`}>
-                            {agg.name}
-                        </span>
-                    </button>
-                ))}
-            </div>
-
-            {/* Chart Section */}
-            <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
-                        <Activity className="w-5 h-5" />
-                    </div>
-                    <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors">
-                        <span className="font-bold text-lg text-gray-800">{timeRange}</span>
-                        <span className="text-gray-500 text-sm font-medium">(View Chart)</span>
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
-                    </div>
-                </div>
-                {/* Placeholder Chart */}
-                <div className="h-40 bg-gradient-to-b from-blue-50/50 to-transparent rounded flex items-end justify-between px-10 pb-4">
-                    {[40, 65, 45, 80, 55].map((h, i) => (
-                        <div key={i} className="flex flex-col items-center gap-2 group cursor-pointer">
-                            <div className="w-16 bg-blue-500/10 group-hover:bg-blue-500/20 rounded-t-lg transition-all" style={{ height: `${h}%` }}></div>
-                            <span className="text-xs font-bold text-gray-400">Day {i + 1}</span>
-                        </div>
+        <div className="flex flex-col h-full bg-white dark:bg-gray-900 font-sans">
+            <div className="p-4 border-b border-gray-200">
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === tab.id
+                                    ? 'bg-red-600 text-white border-red-600'
+                                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                }`}
+                        >
+                            {tab.icon && <tab.icon />}
+                            {!tab.icon && tab.label}
+                        </button>
                     ))}
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 flex flex-wrap gap-4 items-end shadow-sm">
-                <div className="flex flex-col gap-1 min-w-[200px]">
-                    <label className="text-xs font-bold text-gray-600">Record Type</label>
-                    <div className="relative">
-                        <select className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 appearance-none font-medium text-gray-700 outline-none focus:border-red-500">
-                            <option>Last 2 days records</option>
-                            <option>This Week</option>
-                            <option>This Month</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
-                </div>
-                <div className="flex flex-col gap-1 min-w-[150px]">
-                    <label className="text-xs font-bold text-gray-600">Status</label>
-                    <div className="relative">
-                        <select className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 appearance-none font-medium text-gray-700 outline-none focus:border-red-500">
-                            <option>All</option>
-                            <option>Pending</option>
-                            <option>Accepted</option>
-                            <option>Delivered</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
-                </div>
-                <div className="flex flex-col gap-1 flex-1">
-                    <label className="text-xs font-bold text-gray-600">Order No.</label>
-                    <input
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white outline-none focus:border-red-500 transition-colors"
-                        placeholder="Search by Order ID"
-                    />
-                </div>
-
-                <div className="flex gap-2">
-                    <button className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-bold text-sm shadow hover:bg-red-700 transition-colors">Apply</button>
-                    <button className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors">Show All</button>
-                    <button className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors flex items-center gap-2">
-                        <Download className="w-4 h-4" /> Export Custom Report
-                    </button>
+            {/* Chart/Stats Banner - Placeholder */}
+            <div className="bg-blue-50/50 p-6 border-b border-gray-200">
+                <div className=" h-40 flex items-center justify-center text-gray-400">
+                    Chart Placeholder (No data to display)
                 </div>
             </div>
 
-            {/* Table / Empty State */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-blue-50/50 border-b border-gray-200 text-xs font-bold uppercase text-gray-700">
-                            <tr>
-                                <th className="p-4 min-w-[120px]">Order No.</th>
-                                <th className="p-4 min-w-[150px]">
-                                    <div className="flex flex-col">
-                                        <span>Outlet Name</span>
-                                        <span className="text-blue-500 font-normal normal-case pt-0.5">Order From</span>
-                                    </div>
-                                </th>
-                                <th className="p-4 min-w-[150px]">
-                                    <div className="flex flex-col">
-                                        <span>Order Type</span>
-                                        <span className="text-blue-500 font-normal normal-case pt-0.5">Rider Details</span>
-                                    </div>
-                                </th>
-                                <th className="p-4">Customer Details</th>
-                                <th className="p-4">OTP</th>
-                                <th className="p-4">Date Time</th>
-                                <th className="p-4 bg-green-50/50 w-24 text-right">Total</th>
-                                <th className="p-4 w-24">Status</th>
-                                <th className="p-4 w-16">At</th>
-                                <th className="p-4 w-24">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {/* Empty State */}
-                            <tr>
-                                <td colSpan="10" className="p-20 text-center">
-                                    <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
-                                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                                            <Search className="w-8 h-8 text-red-400" />
-                                        </div>
-                                        <h3 className="text-lg font-bold text-gray-800 mb-1">No Record Found</h3>
-                                        <p className="text-sm text-gray-500">We could not find what you searched for. Try searching again.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            {/* Filters */}
+            <div className="p-4 border-b border-gray-200 bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-gray-500">Record Type</label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-red-500">
+                            <option>Latest current days records</option>
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-gray-500">Other Order Status</label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-red-500">
+                            <option>All</option>
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-gray-500">Order No(s)</label>
+                        <input type="text" placeholder="Order id(s) must be comma(,) separated." className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-red-500" />
+                    </div>
+                    <div className="flex items-end gap-2">
+                        <button className="px-6 py-2 bg-red-700 text-white rounded font-medium shadow-sm hover:bg-red-800 transition-colors text-sm h-[38px]">Search</button>
+                        <button className="px-6 py-2 border border-gray-300 rounded font-medium text-gray-600 bg-white hover:bg-gray-50 transition-colors text-sm h-[38px]">Reset</button>
+                    </div>
                 </div>
+            </div>
+
+            {/* Results */}
+            <div className="flex-1 p-8 flex flex-col items-center justify-center text-gray-500 bg-white">
+                {loading ? <p>Loading...</p> :
+                    orders.length > 0 ? (
+                        <div className="w-full overflow-auto self-start">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="p-3">Order No</th>
+                                        <th className="p-3">Source</th>
+                                        <th className="p-3">Amount</th>
+                                        <th className="p-3">Status</th>
+                                        <th className="p-3">Items</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {orders.map(o => (
+                                        <tr key={o.id} className="border-b hover:bg-gray-50">
+                                            <td className="p-3 font-medium">{o.orderNumber}</td>
+                                            <td className="p-3">{o.source || activeTab}</td>
+                                            <td className="p-3">{o.totalAmount}</td>
+                                            <td className="p-3"><span className="px-2 py-1 rounded bg-gray-100 text-xs">{o.status}</span></td>
+                                            <td className="p-3 text-xs">{o.items.map(i => i.itemName).join(', ')}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-400">
+                                <Search className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900">No Record Found</h3>
+                            <p className="text-gray-400">Great! All your orders have invoices</p>
+                        </div>
+                    )
+                }
+            </div>
+
+            {/* FAB */}
+            <div className="fixed bottom-6 right-6">
+                <button className="w-12 h-12 bg-red-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-900 transition-colors">
+                    <span className="text-xl">💬</span>
+                </button>
             </div>
         </div>
     );
