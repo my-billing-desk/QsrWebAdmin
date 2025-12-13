@@ -9,7 +9,10 @@ export function Dashboard() {
         totalIncome: 0,
         totalOrders: 0,
         totalCustomers: 0,
-        avgPerCustomer: 0
+        avgPerCustomer: 0,
+        dineInTotal: 0,
+        takeAwayTotal: 0,
+        deliveryTotal: 0
     });
     const [recentOrders, setRecentOrders] = useState([]);
     const [chartsData, setChartsData] = useState({ revenue: { labels: [], data: [] }, topItems: [] });
@@ -65,7 +68,7 @@ export function Dashboard() {
                     <div className="text-xs text-gray-500 font-medium">{stats.totalOrders} Orders</div>
                 </div>
 
-                {/* Dine In - Placeholder Split Logic (Improve later) */}
+                {/* Dine In */}
                 <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group">
                     <div className="flex justify-between items-start mb-2">
                         <span className="text-gray-500 text-sm font-medium">Dine In</span>
@@ -73,9 +76,9 @@ export function Dashboard() {
                             🍴
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.totalIncome > 0 ? (stats.totalIncome * 0.7).toFixed(0) : 0}</div>
+                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.dineInTotal || 0}</div>
                     <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500 font-medium">Approx</div>
+                        <div className="text-xs text-gray-500 font-medium">Actual</div>
                         <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                     </div>
                 </div>
@@ -88,9 +91,9 @@ export function Dashboard() {
                             🛍️
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.totalIncome > 0 ? (stats.totalIncome * 0.2).toFixed(0) : 0}</div>
+                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.takeAwayTotal || 0}</div>
                     <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500 font-medium">Approx</div>
+                        <div className="text-xs text-gray-500 font-medium">Actual</div>
                         <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                     </div>
                 </div>
@@ -103,9 +106,9 @@ export function Dashboard() {
                             🛵
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.totalIncome > 0 ? (stats.totalIncome * 0.1).toFixed(0) : 0}</div>
+                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.deliveryTotal || 0}</div>
                     <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500 font-medium">Approx</div>
+                        <div className="text-xs text-gray-500 font-medium">Actual</div>
                         <button className="text-gray-400 hover:text-gray-600"><MoreVertical className="w-4 h-4" /></button>
                     </div>
                 </div>
