@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, Download, Eye, RotateCcw, Filter } from 'lucide-react';
+import { Search, Calendar, Download, Eye, RotateCcw, Filter, Printer } from 'lucide-react';
 
 export function KOT() {
     const [kots, setKots] = useState([]);
@@ -45,6 +45,13 @@ export function KOT() {
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSearch = () => {
+        console.log("Searching with filters:", filters);
+        setLoading(true);
+        // Simulate fetch
+        setTimeout(() => setLoading(false), 500);
     };
 
     return (
