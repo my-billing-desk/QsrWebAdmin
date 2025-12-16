@@ -21,13 +21,6 @@ export function Sidebar({ activeTab, onTabChange }) {
             ]
         },
         {
-            title: 'Modules',
-            items: [
-                { id: 'raw_materials', path: '/inventory/raw-materials', label: 'Raw Materials', icon: Archive },
-                { id: 'recipes', path: '/inventory/recipes', label: 'Recipes', icon: Archive },
-            ]
-        },
-        {
             title: 'Daily Operations',
             items: [
                 { id: 'running_orders', path: '/orders/running', label: 'Running Orders', icon: Clock },
@@ -42,8 +35,12 @@ export function Sidebar({ activeTab, onTabChange }) {
             title: 'Master',
             items: [
                 { id: 'menu', path: '/menu', label: 'Menu Management', icon: UtensilsCrossed },
-                { id: 'manage_customer', path: '/manage-customer', label: 'Manage Customer', icon: Users },
-                { id: 'employee', path: '/employees', label: 'Employee', icon: UserCircle },
+            ]
+        },
+        {
+            title: 'Inventory Management',
+            items: [
+                { id: 'raw_materials', path: '/inventory', label: 'Inventory', icon: Archive },
             ]
         },
         {

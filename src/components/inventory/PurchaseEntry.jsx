@@ -28,7 +28,6 @@ export function PurchaseEntry() {
         tcs: 0,
         tcsType: 'amount',
         tds: 0,
-        tds: 0,
         tdsType: 'amount'
     });
 

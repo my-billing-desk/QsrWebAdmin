@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Save, Info, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Check } from 'lucide-react';
-import { settingService, inventoryService } from '../../services/api';
+import { settingsService, inventoryService } from '../../services/api';
 
 export function InventorySettings() {
     const [activeTab, setActiveTab] = useState('Consumption and production');
@@ -32,7 +32,7 @@ export function InventorySettings() {
         setLoading(true);
         try {
             const [settingsRes, supRes] = await Promise.all([
-                settingService.getAll(),
+                settingsService.getAll(),
                 inventoryService.getSuppliers() // Reusing existing service method
                 // inventoryService.getLocations() // If exists
             ]);
@@ -55,7 +55,7 @@ export function InventorySettings() {
 
     const saveSettings = async () => {
         try {
-            await settingService.update(settings);
+            await settingsService.update(settings);
             alert("Settings saved successfully!");
         } catch (error) {
             console.error("Failed to save settings:", error);
