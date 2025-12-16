@@ -77,6 +77,9 @@ export function AddItem({ onBack, itemToEdit }) {
         orderTakeAway: true,
         orderDineIn: true,
         isAvailable: true, // Online Expose
+        image: null,
+        imagePreview: null,
+        showImage: true,
         variants: [], // { _key, name, price }
         addonGroupIds: [], // Currently single select in UI but backend supports array
         itemVariationGroups: [] // New field for Variation Groups selection
@@ -113,6 +116,9 @@ export function AddItem({ onBack, itemToEdit }) {
                 orderTakeAway: itemToEdit.orderTakeAway,
                 orderDineIn: itemToEdit.orderDineIn,
                 isAvailable: itemToEdit.isAvailable,
+                image: null, // New file upload is null
+                imagePreview: itemToEdit.image ? `http://localhost:5001${itemToEdit.image}` : null, // Prepend backend URL if relative
+                showImage: itemToEdit.showImage !== undefined ? itemToEdit.showImage : true,
                 variants: itemToEdit.Variants ? itemToEdit.Variants.map(v => ({
                     _key: Math.random().toString(36).substr(2, 9),
                     name: v.name,
@@ -193,21 +199,40 @@ export function AddItem({ onBack, itemToEdit }) {
 
         try {
             setLoading(true);
-            const payload = {
-                ...formData,
-                variants: formData.variants.map((v, i) => ({
-                    name: v.name,
-                    price: v.price,
-                    sortOrder: i
-                })),
-                addonGroupIds: formData.addonGroupIds.filter(id => id), // Clean array
-                variationGroupIds: formData.itemVariationGroups // Send selected var groups
-            };
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('shortCode', formData.shortCode);
+            data.append('onlineName', formData.onlineName);
+            data.append('price', formData.price);
+            data.append('categoryId', formData.categoryId);
+            data.append('description', formData.description);
+            data.append('isVeg', formData.isVeg);
+            data.append('goodsServices', formData.goodsServices);
+            data.append('orderDelivery', formData.orderDelivery);
+            data.append('orderTakeAway', formData.orderTakeAway);
+            data.append('orderDineIn', formData.orderDineIn);
+            data.append('isAvailable', formData.isAvailable);
+            data.append('showImage', formData.showImage);
 
+            if (formData.image instanceof File) {
+                data.append('image', formData.image);
+            }
+
+            // Complex objects as strings
+            data.append('variants', JSON.stringify(formData.variants.map((v, i) => ({
+                name: v.name,
+                price: v.price,
+                sortOrder: i
+            }))));
+
+            data.append('addonGroupIds', JSON.stringify(formData.addonGroupIds.filter(id => id)));
+            data.append('variationGroupIds', JSON.stringify(formData.itemVariationGroups));
+
+            // menuService update needs to handle FormData correctly (content-type usually automatic with fetch/axios if body is FormData)
             if (itemToEdit) {
-                await menuService.updateItem(itemToEdit.id, payload);
+                await menuService.updateItem(itemToEdit.id, data);
             } else {
-                await menuService.createItem(payload);
+                await menuService.createItem(data);
             }
 
             setLoading(false);
@@ -337,6 +362,65 @@ export function AddItem({ onBack, itemToEdit }) {
                                     ))}
                                 </div>
                             </div>
+                            {/* Image Upload Row */}
+                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                {formData.imagePreview ? (
+                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                                                        <p className="text-xs text-gray-500">Upload Image</p>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setFormData(p => ({
+                                                                ...p,
+                                                                image: file,
+                                                                imagePreview: URL.createObjectURL(file)
+                                                            }));
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
+                                                {formData.imagePreview && (
+                                                    <button
+                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
+                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
+                                                    >
+                                                        Remove Image
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.showImage}
+                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -372,6 +456,65 @@ export function AddItem({ onBack, itemToEdit }) {
                                     </div>
                                 </label>
                             ))}
+                            {/* Image Upload Row */}
+                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                {formData.imagePreview ? (
+                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                                                        <p className="text-xs text-gray-500">Upload Image</p>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setFormData(p => ({
+                                                                ...p,
+                                                                image: file,
+                                                                imagePreview: URL.createObjectURL(file)
+                                                            }));
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
+                                                {formData.imagePreview && (
+                                                    <button
+                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
+                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
+                                                    >
+                                                        Remove Image
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.showImage}
+                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -465,6 +608,65 @@ export function AddItem({ onBack, itemToEdit }) {
                                 <Plus className="w-4 h-4 text-blue-500" />
                                 <span>Add Empty Row</span>
                             </button>
+                            {/* Image Upload Row */}
+                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                {formData.imagePreview ? (
+                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                                                        <p className="text-xs text-gray-500">Upload Image</p>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setFormData(p => ({
+                                                                ...p,
+                                                                image: file,
+                                                                imagePreview: URL.createObjectURL(file)
+                                                            }));
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
+                                                {formData.imagePreview && (
+                                                    <button
+                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
+                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
+                                                    >
+                                                        Remove Image
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.showImage}
+                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -488,6 +690,65 @@ export function AddItem({ onBack, itemToEdit }) {
                         <div>
                             <div className="text-sm font-medium text-gray-800">Create Self Item Recipe</div>
                             <div className="text-xs text-blue-500">Applicable only when menu item is Purchased but does not have any recipe. After setting this option you can not revert it back.</div>
+                            {/* Image Upload Row */}
+                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                {formData.imagePreview ? (
+                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                                                        <p className="text-xs text-gray-500">Upload Image</p>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setFormData(p => ({
+                                                                ...p,
+                                                                image: file,
+                                                                imagePreview: URL.createObjectURL(file)
+                                                            }));
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
+                                                {formData.imagePreview && (
+                                                    <button
+                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
+                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
+                                                    >
+                                                        Remove Image
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.showImage}
+                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -520,6 +781,65 @@ export function AddItem({ onBack, itemToEdit }) {
                         <div className="flex justify-end gap-2">
                             <button onClick={() => setShowNewCategoryInput(false)} className="px-3 py-1 text-gray-600">Cancel</button>
                             <button onClick={handleCreateCategory} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
+                            {/* Image Upload Row */}
+                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                {formData.imagePreview ? (
+                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                                                        <p className="text-xs text-gray-500">Upload Image</p>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setFormData(p => ({
+                                                                ...p,
+                                                                image: file,
+                                                                imagePreview: URL.createObjectURL(file)
+                                                            }));
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
+                                                {formData.imagePreview && (
+                                                    <button
+                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
+                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
+                                                    >
+                                                        Remove Image
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.showImage}
+                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

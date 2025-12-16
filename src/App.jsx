@@ -37,6 +37,7 @@ import { InventoryReports } from './components/inventory/InventoryReports';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PlaceholderPage } from './components/PlaceholderPage';
+import ConsumerMenu from './components/ConsumerMenu';
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -208,7 +209,10 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <QuickLinksProvider>
-          <AppRoutes />
+          <Routes>
+            <Route path="/scan-order" element={<ConsumerMenu />} />
+            <Route path="/*" element={<AppRoutes />} />
+          </Routes>
         </QuickLinksProvider>
       </AuthProvider>
     </BrowserRouter>

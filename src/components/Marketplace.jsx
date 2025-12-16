@@ -6,9 +6,16 @@ import {
 } from 'lucide-react';
 import { aggregatorService } from '../services/api';
 
+import { QRCodeSVG } from 'qrcode.react';
+
 export default function Marketplace() {
     const [activeTab, setActiveTab] = useState('integration'); // Default to integration as it matches the detailed screenshot
     const [integrations, setIntegrations] = useState([]);
+
+    // QR Code Modal State
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [qrType, setQrType] = useState('dine-in'); // 'dine-in' | 'take-away'
+    const [tableNo, setTableNo] = useState('1');
 
     // Mock Data for Services Tab
     const servicesCategories = [
@@ -30,7 +37,7 @@ export default function Marketplace() {
 
     // Mock Data for Active Subscription Tab
     const subscriptions = [
-        { id: 1, title: ' Scan & Order', expiry: '05 Oct 2025', price: '4,500', tax: '+ Taxes', status: 'Active' },
+        { id: 1, title: ' Scan & Order', expiry: '05 Oct 2025', price: '4,500', tax: '+ Taxes', status: 'Active', isScanOrder: true },
         { id: 2, title: 'WhatsApp Alerts', expiry: '14 Dec 2025', price: '1000', tax: '+ Taxes', status: 'Active' },
         { id: 3, title: 'POS Subscription', expiry: '20 Feb 2026', price: '7000', tax: '+ Taxes', status: 'Active' },
     ];
@@ -72,9 +79,16 @@ export default function Marketplace() {
         return acc;
     }, {});
 
+    const getQRValue = () => {
+        const baseUrl = window.location.origin + '/scan-order';
+        if (qrType === 'take-away') {
+            return `${baseUrl}?type=take-away`;
+        }
+        return `${baseUrl}?type=dine-in&table=${tableNo}`;
+    };
 
     return (
-        <div className="bg-gray-50 min-h-screen font-sans pb-10">
+        <div className="bg-gray-50 min-h-screen font-sans pb-10 relative">
             {/* Find Next-Gen Tools Banner */}
             <div className="bg-gradient-to-r from-red-50 to-pink-100 p-8 mb-6 border-b border-pink-100 relative overflow-hidden">
                 <div className="relative z-10 max-w-3xl">
@@ -212,14 +226,84 @@ export default function Marketplace() {
 
                                 <div className="text-xs text-gray-400 mb-4">Activate this service for 1 Year</div>
 
-                                <button className="w-full py-2.5 border border-red-500 text-red-600 font-bold rounded hover:bg-red-50 transition-colors">
-                                    Renew Existing Plan
-                                </button>
+                                {sub.isScanOrder ? (
+                                    <button
+                                        onClick={() => setShowQRModal(true)}
+                                        className="w-full py-2.5 border border-red-500 bg-red-50 text-red-600 font-bold rounded hover:bg-red-100 transition-colors">
+                                        Generate QR Code
+                                    </button>
+                                ) : (
+                                    <button className="w-full py-2.5 border border-red-500 text-red-600 font-bold rounded hover:bg-red-50 transition-colors">
+                                        Renew Existing Plan
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* QR Code Modal */}
+            {showQRModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden relative">
+                        {/* Close Button */}
+                        <button onClick={() => setShowQRModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                            <span className="text-2xl">&times;</span>
+                        </button>
+
+                        <div className="p-6">
+                            <h2 className="text-xl font-bold text-gray-800 mb-2 text-center">Scan & Order QR Code</h2>
+                            <p className="text-sm text-gray-500 text-center mb-6">Generate QR code for customers to scan and order.</p>
+
+                            {/* Tabs */}
+                            <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+                                <button
+                                    onClick={() => setQrType('dine-in')}
+                                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${qrType === 'dine-in' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Dine-In
+                                </button>
+                                <button
+                                    onClick={() => setQrType('take-away')}
+                                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${qrType === 'take-away' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Take-Away
+                                </button>
+                            </div>
+
+                            {/* Content */}
+                            <div className="space-y-4">
+                                {qrType === 'dine-in' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Table Number</label>
+                                        <input
+                                            type="text"
+                                            value={tableNo}
+                                            onChange={(e) => setTableNo(e.target.value)}
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col items-center justify-center bg-gray-50 p-6 rounded-xl border border-gray-100">
+                                    <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 mb-4">
+                                        <QRCodeSVG value={getQRValue()} size={180} />
+                                    </div>
+                                    <p className="text-xs font-mono text-gray-500 text-center break-all">{getQRValue()}</p>
+                                </div>
+
+                                <button
+                                    className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-500/30"
+                                    onClick={() => window.print()}
+                                >
+                                    Print QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

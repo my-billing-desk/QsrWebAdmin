@@ -113,6 +113,16 @@ export default function Login() {
                 <div className="mt-6 text-center text-xs text-gray-400">
                     <p>Default Admin: admin / password123</p>
                 </div>
+
+                <div className="mt-4 text-center">
+                    <button
+                        type="button"
+                        onClick={() => login('admin', 'password123')} // Auto-login as admin for 'Skip'
+                        className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500 underline"
+                    >
+                        Skip for now
+                    </button>
+                </div>
             </div>
         </div>
     );
