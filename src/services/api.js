@@ -53,9 +53,14 @@ export const userService = {
     register: (data) => api.post('/auth/register', data),
 };
 
+export const aggregatorService = {
+    getAll: () => api.get('/aggregators'),
+    toggle: (id) => api.post(`/aggregators/${id}/toggle`)
+};
+
 export const dashboardService = {
-    getStats: () => api.get('/dashboard/stats'),
-    getCharts: () => api.get('/dashboard/charts'),
+    getStats: (params) => api.get('/dashboard/stats', { params }),
+    getCharts: (params) => api.get('/dashboard/charts', { params }),
     getRecentOrders: () => api.get('/dashboard/recent-orders'),
     getTopItems: () => api.get('/dashboard/top-items'),
     clearData: () => api.post('/dashboard/clear-data'),
@@ -109,6 +114,9 @@ export const inventoryService = {
 
     getStats: () => api.get('/inventory/stats'),
     getClosingStockReport: () => api.get('/inventory/reports/closing-stock'),
+    getStockSummaryReport: (params) => api.get('/inventory/reports/stock-summary', { params }), // New
+    getOrderWiseConsumptionReport: (params) => api.get('/inventory/reports/order-consumption', { params }), // New
+    getConsumptionSummaryReport: (params) => api.get('/inventory/reports/consumption-summary', { params }), // New
 };
 
 export const settingsService = {
@@ -116,5 +124,6 @@ export const settingsService = {
     getAll: () => api.get('/settings'),
     update: (data) => api.post('/settings', data),
 };
+export const settingService = settingsService;
 
 export default api;

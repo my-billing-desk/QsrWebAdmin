@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Search, RotateCcw } from 'lucide-react';
-import { orderService } from '../../services/api';
-
-const ZomatoLogo = () => <span className="font-bold text-red-600 text-xl italic bg-black px-2 rounded-sm border border-white">zomato</span>;
-const SwiggyLogo = () => <span className="font-bold text-orange-500 text-xl font-sans tracking-tight">Swiggy</span>;
-const MagicpinLogo = () => <span className="font-bold text-purple-600 text-xl font-serif">magicpin</span>;
+import { orderService, aggregatorService } from '../../services/api';
 
 export function OnlineOrders() {
     const [activeTab, setActiveTab] = useState('All');
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [tabs, setTabs] = useState([{ id: 'All', label: 'All' }]);
 
-    const tabs = [
-        { id: 'All', label: 'All', icon: null },
-        { id: 'Zomato', label: 'Zomato', icon: ZomatoLogo },
-        { id: 'Swiggy', label: 'Swiggy', icon: SwiggyLogo },
-        { id: 'Magicpin', label: 'Magicpin', icon: MagicpinLogo },
-        { id: 'Eksecond', label: 'Eksecond', icon: null },
-        { id: 'Gintaa Food', label: 'Gintaa Food', icon: null },
-    ];
+    useEffect(() => {
+        async function loadAggregators() {
+            try {
+                const res = await aggregatorService.getAll();
+                const connected = res.data.filter(a => a.isConnected);
+                const dynamicTabs = connected.map(a => ({
+                    id: a.name,
+                    label: a.name,
+                    icon: a.icon
+                }));
+                setTabs([{ id: 'All', label: 'All' }, ...dynamicTabs]);
+            } catch (e) { console.error(e); }
+        }
+        loadAggregators();
+    }, []);
 
     useEffect(() => {
         const fetchOnlineOrders = async () => {
@@ -28,7 +32,7 @@ export function OnlineOrders() {
                 const params = {
                     startDate: today + ' 00:00:00',
                     endDate: today + ' 23:59:59',
-                    type: 'delivery', // Usually online orders are delivery
+                    type: 'delivery',
                     source: activeTab !== 'All' ? activeTab : undefined
                 };
 
@@ -52,12 +56,15 @@ export function OnlineOrders() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'bg-red-600 text-white border-red-600'
-                                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                ? 'bg-red-600 text-white border-red-600'
+                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                                 }`}
                         >
-                            {tab.icon && <tab.icon />}
-                            {!tab.icon && tab.label}
+                            {tab.icon ? (
+                                <img src={tab.icon} alt={tab.label} className="h-5 w-auto object-contain bg-white rounded-sm px-1" />
+                            ) : (
+                                <span>{tab.label}</span>
+                            )}
                         </button>
                     ))}
                 </div>

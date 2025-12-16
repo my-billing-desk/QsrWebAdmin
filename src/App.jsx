@@ -8,55 +8,65 @@ import { UserManagement } from './components/UserManagement';
 import { AllOrders } from './components/orders/AllOrders';
 import { KOT } from './components/orders/KOT';
 import { Settings } from './components/Settings';
-import Login from './pages/Login';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import RawMaterialsList from './components/inventory/RawMaterialsList';
+import { QuickLinksProvider } from './context/QuickLinksContext';
+import { QuickLinksPage } from './components/QuickLinksPage';
+import AggregatorCenter from './components/AggregatorCenter';
+import Marketplace from './components/Marketplace';
+import AggregatorConfig from './components/AggregatorConfig';
+
+// Inventory Imports (moved from misplaced section)
 import AddRawMaterial from './components/inventory/AddRawMaterial';
+import RawMaterialsList from './components/inventory/RawMaterialsList';
 import RecipeList from './components/inventory/RecipeList';
 import AddRecipe from './components/inventory/AddRecipe';
-// import { RawMaterials } from './components/inventory/RawMaterials'; // Removed
-// import { Recipes } from './components/inventory/Recipes'; // Removed
 import { Preferences } from './components/inventory/Preferences';
 import { PurchaseEntry } from './components/inventory/PurchaseEntry';
 import { PurchaseOrder } from './components/inventory/PurchaseOrder';
 import { PurchaseReturn } from './components/inventory/PurchaseReturn';
 import { StockTransfer } from './components/inventory/StockTransfer';
 import { Wastage } from './components/inventory/Wastage';
-import { StockStatus, ProductionEntry } from './components/inventory/Placeholders'; // Keeping as placeholder if not implemented yet
+import { StockStatus, ProductionEntry } from './components/inventory/Placeholders';
 import { OnlineOrders } from './components/orders/OnlineOrders';
 import { RunningOrders } from './components/orders/RunningOrders';
-
-
 import { InventoryLayout } from './components/inventory/InventoryLayout';
 import { InventoryDashboard } from './components/inventory/InventoryDashboard';
 import { InventorySettings } from './components/inventory/InventorySettings';
 import { InventoryReports } from './components/inventory/InventoryReports';
 
+// Auth and Placeholder Imports (identified as missing from top)
+import Login from './pages/Login';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { PlaceholderPage } from './components/PlaceholderPage';
+
 function MainLayout() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // Kept for sidebar compatibility mostly, or we remove it
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Default open
   const location = useLocation();
 
   const getTitle = (pathname) => {
     if (pathname === '/') return 'Overview';
     if (pathname === '/menu') return 'Menu Management';
     if (pathname === '/orders') return 'Orders';
+    // Handle specific inventory routes for titles if needed, otherwise default
+    if (pathname.startsWith('/inventory/')) {
+      const subPath = pathname.split('/').pop();
+      return subPath.charAt(0).toUpperCase() + subPath.slice(1).replace(/-/g, ' ');
+    }
     return pathname.replace('/', '').charAt(0).toUpperCase() + pathname.slice(2);
   };
 
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 font-sans overflow-hidden">
-      {/* Background Gradients/Mesh */}
-      {/* Background Gradients/Mesh - Removed for cleaner white look as requested */}
-      {/* <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-100/40 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:opacity-20 animate-blob"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-100/40 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-[-20%] left-[20%] w-[40%] h-[40%] bg-secondary-100/40 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:opacity-20 animate-blob animation-delay-4000"></div>
-      </div> */}
-
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        <Header title={getTitle(location.pathname)} />
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        isOpen={sidebarOpen}
+        onToggleSidebar={toggleSidebar}
+      />
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10 transition-all duration-300">
+        <Header title={getTitle(location.pathname)} onToggleSidebar={toggleSidebar} />
         <main className="flex-1 overflow-auto px-8 pb-8">
           <Outlet />
         </main>
@@ -67,13 +77,12 @@ function MainLayout() {
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
-  if (!user) return <Login />; // Or navigate to login
+  if (!user) return <Login />;
   return children;
 }
 
 function AppRoutes() {
   const { user } = useAuth();
-
   if (!user) return <Login />;
 
   return (
@@ -85,10 +94,81 @@ function AppRoutes() {
         <Route path="/orders" element={<AllOrders />} />
         <Route path="/orders/online" element={<OnlineOrders />} />
         <Route path="/orders/kot" element={<KOT />} />
-        <Route path="/orders/due-payment" element={<div className="p-8 text-center text-gray-500">Due Payment Settlement Module</div>} />
+        <Route path="/orders/due-payment" element={<PlaceholderPage title="Due Payment Settlement" />} />
         <Route path="/orders/running" element={<RunningOrders />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/settings" element={<Settings />} />
+
+        {/* New Modules */}
+        <Route path="/reports/profit-loss" element={<PlaceholderPage title="Profit & Loss" />} />
+        <Route path="/aggregator-center" element={<AggregatorCenter />} />
+
+        {/* Menu */}
+        <Route path="/menu/on-off" element={<PlaceholderPage title="Menu On/Off" />} />
+
+        {/* Reports */}
+        <Route path="/reports/day-end" element={<PlaceholderPage title="Day End Summary" />} />
+        <Route path="/reports/other" element={<PlaceholderPage title="Other Reports" />} />
+        <Route path="/reports/notifications" element={<PlaceholderPage title="Report Notification" />} />
+        <Route path="/reports/delivery" element={<PlaceholderPage title="Delivery Management" />} />
+
+        {/* Config */}
+        <Route path="/config/outlet" element={<PlaceholderPage title="Outlet Configuration" />} />
+        <Route path="/config/sub-order" element={<PlaceholderPage title="Sub Order Type" />} />
+        <Route path="/config/delivery" element={<PlaceholderPage title="Delivery Distance" />} />
+        <Route path="/config/area-delivery" element={<PlaceholderPage title="Area/Locality Wise Delivery" />} />
+        <Route path="/config/marketplace" element={<PlaceholderPage title="Marketplace Setting" />} />
+        <Route path="/config/floor-plan" element={<PlaceholderPage title="Floor Plan" />} />
+        <Route path="/config/email-template" element={<PlaceholderPage title="Email Template Settings" />} />
+
+        {/* Accounting */}
+        <Route path="/accounting/payments" element={<PlaceholderPage title="Payment Information" />} />
+        <Route path="/accounting/virtual-wallet" element={<PlaceholderPage title="Virtual Wallet" />} />
+        <Route path="/accounting/reconciliation" element={<PlaceholderPage title="Online Order Reconciliation" />} />
+        <Route path="/accounting/gst" element={<PlaceholderPage title="GST Information" />} />
+        <Route path="/accounting/bank" element={<PlaceholderPage title="Bank Details" />} />
+        <Route path="/accounting/kyc" element={<PlaceholderPage title="KYC Details" />} />
+        <Route path="/accounting/utility" element={<PlaceholderPage title="Utility Bills" />} />
+        <Route path="/accounting/expense" element={<PlaceholderPage title="Expense & Withdrawal" />} />
+        <Route path="/accounting/service-history" element={<PlaceholderPage title="Service Payment History" />} />
+        <Route path="/accounting/agreement" element={<PlaceholderPage title="Agreement Info" />} />
+        <Route path="/accounting/loan" element={<PlaceholderPage title="Loan Information" />} />
+        <Route path="/accounting/denomination" element={<PlaceholderPage title="Denomination" />} />
+
+        {/* User Management */}
+        <Route path="/users/biller" element={<PlaceholderPage title="Biller App" />} />
+        <Route path="/users/biller-group" element={<PlaceholderPage title="Biller Group Management" />} />
+        <Route path="/users/admin-group" element={<PlaceholderPage title="Admin Group Management" />} />
+        <Route path="/users/admin" element={<PlaceholderPage title="Admin Management" />} />
+
+        {/* User Logs */}
+        <Route path="/logs/store" element={<PlaceholderPage title="Online Store Logs" />} />
+        <Route path="/logs/item-on-off" element={<PlaceholderPage title="Online Item On/Off Logs" />} />
+        <Route path="/logs/auto-accept" element={<PlaceholderPage title="Auto Accept Change Logs" />} />
+        <Route path="/logs/support" element={<PlaceholderPage title="Support Management" />} />
+        <Route path="/logs/notifications" element={<PlaceholderPage title="Notification" />} />
+        <Route path="/logs/menu-trigger" element={<PlaceholderPage title="Menu Trigger Logs" />} />
+        <Route path="/logs/closing-hour" element={<PlaceholderPage title="Closing Hour Logs" />} />
+
+        {/* Others */}
+        <Route path="/apps/other" element={<PlaceholderPage title="Other APPs" />} />
+        <Route path="/finance" element={<PlaceholderPage title="Finance" />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/marketplace/config/:slug" element={<AggregatorConfig />} />
+
+        {/* CRM */}
+        <Route path="/crm/marketing" element={<PlaceholderPage title="Marketing" />} />
+        <Route path="/crm/campaign" element={<PlaceholderPage title="Campaign" />} />
+        <Route path="/crm/reputation" element={<PlaceholderPage title="Reputation" />} />
+        <Route path="/crm/beta" element={<PlaceholderPage title="Beta" />} />
+        <Route path="/crm/automation" element={<PlaceholderPage title="Marketing Automation" />} />
+        <Route path="/crm/customers" element={<PlaceholderPage title="Customers" />} />
+        <Route path="/crm/feedback" element={<PlaceholderPage title="Feedback" />} />
+        <Route path="/crm/gift-card" element={<PlaceholderPage title="Gift Card" />} />
+        <Route path="/crm/loyalty" element={<PlaceholderPage title="Loyalty" />} />
+        <Route path="/crm/dual-screen" element={<PlaceholderPage title="Dual Screen Marketing" />} />
+        <Route path="/crm/ebill" element={<PlaceholderPage title="Ebill Templates" />} />
+
         {/* Fallback for "Under Development" pages caught by sidebar links */}
         <Route path="*" element={<div className="flex items-center justify-center h-full text-gray-400 flex-col gap-4"><div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-2xl">🚧</div><p>Module Under Development</p></div>} />
       </Route>
@@ -127,7 +207,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <QuickLinksProvider>
+          <AppRoutes />
+        </QuickLinksProvider>
       </AuthProvider>
     </BrowserRouter>
   );
