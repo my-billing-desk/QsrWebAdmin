@@ -3,12 +3,12 @@ import { Search, RotateCcw, Filter, Smartphone, Globe, Power, Upload, Download, 
 import Papa from 'papaparse';
 import { menuService } from '../services/api';
 
-export function MenuChannelDashboard() {
+export function MenuChannelDashboard({ initialTab = 'online', initialChannel = 'all' }) {
     const [items, setItems] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('online'); // 'online' or 'offline'
-    const [activeChannel, setActiveChannel] = useState('all'); // 'all', 'swiggy', 'zomato'
+    const [activeTab, setActiveTab] = useState(initialTab); // 'online' or 'offline'
+    const [activeChannel, setActiveChannel] = useState(initialChannel); // 'all', 'swiggy', 'zomato'
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState({
         category: 'All',

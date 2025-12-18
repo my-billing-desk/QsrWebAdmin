@@ -37,7 +37,16 @@ import { InventoryReports } from './components/inventory/InventoryReports';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PlaceholderPage } from './components/PlaceholderPage';
-import ConsumerMenu from './components/ConsumerMenu';
+import { GiftCard } from './components/crm/GiftCard';
+import { VirtualWallet } from './components/accounting/VirtualWallet';
+import { SubOrderType } from './components/configuration/SubOrderType';
+import { DeliveryDistance } from './components/configuration/DeliveryDistance';
+import { AreaDeliveryCharges } from './components/configuration/AreaDeliveryCharges';
+import { FloorPlan } from './components/configuration/FloorPlan';
+import { EmailTemplateSettings } from './components/configuration/EmailTemplateSettings';
+import { DayEndSummary } from './components/reports/DayEndSummary';
+import { OutletConfiguration } from './components/configuration/OutletConfiguration';
+import { MarketplaceSetting } from './components/configuration/MarketplaceSetting';
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -108,23 +117,23 @@ function AppRoutes() {
         <Route path="/menu/on-off" element={<PlaceholderPage title="Menu On/Off" />} />
 
         {/* Reports */}
-        <Route path="/reports/day-end" element={<PlaceholderPage title="Day End Summary" />} />
+        <Route path="/reports/day-end" element={<DayEndSummary />} />
         <Route path="/reports/other" element={<PlaceholderPage title="Other Reports" />} />
         <Route path="/reports/notifications" element={<PlaceholderPage title="Report Notification" />} />
         <Route path="/reports/delivery" element={<PlaceholderPage title="Delivery Management" />} />
 
         {/* Config */}
-        <Route path="/config/outlet" element={<PlaceholderPage title="Outlet Configuration" />} />
-        <Route path="/config/sub-order" element={<PlaceholderPage title="Sub Order Type" />} />
-        <Route path="/config/delivery" element={<PlaceholderPage title="Delivery Distance" />} />
-        <Route path="/config/area-delivery" element={<PlaceholderPage title="Area/Locality Wise Delivery" />} />
-        <Route path="/config/marketplace" element={<PlaceholderPage title="Marketplace Setting" />} />
-        <Route path="/config/floor-plan" element={<PlaceholderPage title="Floor Plan" />} />
-        <Route path="/config/email-template" element={<PlaceholderPage title="Email Template Settings" />} />
+        <Route path="/config/outlet" element={<OutletConfiguration />} />
+        <Route path="/config/sub-order" element={<SubOrderType />} />
+        <Route path="/config/delivery" element={<DeliveryDistance />} />
+        <Route path="/config/area-delivery" element={<AreaDeliveryCharges />} />
+        <Route path="/config/marketplace" element={<MarketplaceSetting />} />
+        <Route path="/config/floor-plan" element={<FloorPlan />} />
+        <Route path="/config/email-template" element={<EmailTemplateSettings />} />
 
         {/* Accounting */}
         <Route path="/accounting/payments" element={<PlaceholderPage title="Payment Information" />} />
-        <Route path="/accounting/virtual-wallet" element={<PlaceholderPage title="Virtual Wallet" />} />
+        <Route path="/accounting/virtual-wallet" element={<VirtualWallet />} />
         <Route path="/accounting/reconciliation" element={<PlaceholderPage title="Online Order Reconciliation" />} />
         <Route path="/accounting/gst" element={<PlaceholderPage title="GST Information" />} />
         <Route path="/accounting/bank" element={<PlaceholderPage title="Bank Details" />} />
@@ -165,7 +174,7 @@ function AppRoutes() {
         <Route path="/crm/automation" element={<PlaceholderPage title="Marketing Automation" />} />
         <Route path="/crm/customers" element={<PlaceholderPage title="Customers" />} />
         <Route path="/crm/feedback" element={<PlaceholderPage title="Feedback" />} />
-        <Route path="/crm/gift-card" element={<PlaceholderPage title="Gift Card" />} />
+        <Route path="/crm/gift-card" element={<GiftCard />} />
         <Route path="/crm/loyalty" element={<PlaceholderPage title="Loyalty" />} />
         <Route path="/crm/dual-screen" element={<PlaceholderPage title="Dual Screen Marketing" />} />
         <Route path="/crm/ebill" element={<PlaceholderPage title="Ebill Templates" />} />

@@ -186,6 +186,8 @@ export default function ConsumerMenu() {
     // Cart State
     const [cart, setCart] = useState([]);
     const [lastOrder, setLastOrder] = useState(null);
+    const [showFinalBill, setShowFinalBill] = useState(false);
+    const [aggregatedBill, setAggregatedBill] = useState(null);
 
     useEffect(() => {
         async function loadMenu() {
@@ -263,15 +265,22 @@ export default function ConsumerMenu() {
     const handlePlaceOrder = async () => {
         try {
             // Calculate tax estimates for display (simple logic, backend does actual)
+            // Calculate tax estimates
             const gstPercent = parseFloat(settings.gst_percentage || 5);
             let taxAmount = 0;
             let finalTotal = 0;
-            let subTotal = 0;
+            let subTotal = cartTotal;
+            let containerCharge = 0;
 
-            // Assuming Exclusive Tax for now as per common practice
-            subTotal = cartTotal;
+            // Container Charge for Take Away
+            if (type === 'take-away') {
+                const chargePerItem = parseFloat(settings.container_charge || 0);
+                const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+                containerCharge = totalItems * chargePerItem;
+            }
+
             taxAmount = subTotal * (gstPercent / 100);
-            finalTotal = subTotal + taxAmount;
+            finalTotal = subTotal + taxAmount + containerCharge;
             const roundOff = Math.round(finalTotal) - finalTotal;
 
             const orderData = {
@@ -289,8 +298,10 @@ export default function ConsumerMenu() {
                 totalAmount: Math.round(finalTotal),
                 taxAmount: taxAmount,
                 subTotal: subTotal,
+                containerCharge: containerCharge,
                 roundOff: roundOff,
-                source: 'ScanOrder'
+                source: 'ScanOrder',
+                type: type === 'take-away' ? 'takeaway' : 'dine-in' // Normalize type for backend
             };
 
             const res = await orderService.create(orderData);
@@ -311,11 +322,83 @@ export default function ConsumerMenu() {
         if (!lastOrder) return;
         try {
             await orderService.update(lastOrder.id, { printBillRequested: true });
-            alert("Bill sent to POS Printer!");
+
+            // Fetch all orders for this table to show aggregated view
+            if (table) {
+                const startOfDay = new Date();
+                startOfDay.setHours(0, 0, 0, 0);
+                const res = await orderService.getAll({
+                    tableNumber: table,
+                    startDate: startOfDay.toISOString()
+                });
+
+                if (res.data) {
+                    const validOrders = res.data.filter(o => o.status !== 'cancelled');
+
+                    // Aggregate
+                    const combinedItems = [];
+                    let totalAmount = 0, taxAmount = 0, roundOff = 0, containerCharge = 0, subTotal = 0;
+
+                    validOrders.forEach(o => {
+                        totalAmount += Number(o.totalAmount || 0);
+                        taxAmount += Number(o.taxAmount || 0);
+                        roundOff += Number(o.roundOff || 0);
+                        containerCharge += Number(o.containerCharge || 0);
+                        subTotal += Number(o.subTotal || 0);
+
+                        (o.items || []).forEach(item => {
+                            const existing = combinedItems.find(ci =>
+                                ci.itemName === item.itemName &&
+                                ci.variantName === item.variantName
+                            );
+                            if (existing) {
+                                existing.quantity += item.quantity;
+                            } else {
+                                combinedItems.push({ ...item });
+                            }
+                        });
+                    });
+
+                    setAggregatedBill({
+                        items: combinedItems,
+                        totalAmount,
+                        taxAmount,
+                        roundOff,
+                        containerCharge,
+                        subTotal,
+                        orderCount: validOrders.length,
+                        orderNumbers: validOrders.map(o => o.orderNumber.slice(-5)).join(', ')
+                    });
+                    setShowFinalBill(true);
+                }
+            } else {
+                setAggregatedBill({
+                    items: lastOrder.items,
+                    totalAmount: lastOrder.totalAmount,
+                    taxAmount: lastOrder.taxAmount,
+                    roundOff: lastOrder.roundOff,
+                    containerCharge: lastOrder.containerCharge,
+                    subTotal: lastOrder.subTotal,
+                    orderCount: 1,
+                    orderNumbers: lastOrder.orderNumber.slice(-5)
+                });
+                setShowFinalBill(true);
+            }
         } catch (e) {
             console.error("Print request failed", e);
-            alert("Failed to send print request.");
         }
+    };
+
+    const handleReset = () => {
+        setCart([]);
+        setLastOrder(null);
+        setCustomer({ name: '', phone: '' });
+        setOtp('');
+        setOtpError('');
+        setExpandedItem(null);
+        setAuthStep('login');
+        setShowFinalBill(false);
+        setAggregatedBill(null);
     };
 
     // ... Rest of Render Logic is same ...
@@ -473,28 +556,205 @@ export default function ConsumerMenu() {
 
     // 4. Confirmed / Status View
     if (authStep === 'confirmed') {
+        const isTakeAway = type === 'take-away';
+
+        if (isTakeAway) {
+            return (
+                <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
+                    <div className="bg-white w-full max-w-sm shadow-2xl rounded-sm overflow-hidden relative">
+                        {/* Receipt zigzag top */}
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-gray-100" style={{ backgroundImage: 'linear-gradient(45deg, white 25%, transparent 25%), linear-gradient(-45deg, white 25%, transparent 25%)', backgroundSize: '10px 10px' }}></div>
+
+                        <div className="p-6 pt-8">
+                            <div className="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
+                                <h2 className="text-xl font-bold uppercase tracking-wider">{settings.store_name || 'QSR STORE'}</h2>
+                                <p className="text-xs text-gray-500 mt-1">{settings.store_address}</p>
+                                <div className="flex justify-between mt-6 text-xs font-bold text-gray-600 uppercase">
+                                    <span>{new Date().toLocaleDateString()}</span>
+                                    <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                                <div className="flex justify-between mt-1 text-xs font-bold text-gray-600 uppercase">
+                                    <span>Ord: #{lastOrder?.orderNumber?.slice(-5) || '---'}</span>
+                                    <span>{lastOrder?.type}</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3 mb-6">
+                                <div className="flex font-bold text-xs uppercase border-b border-gray-200 pb-2">
+                                    <div className="flex-1">Item</div>
+                                    <div className="w-8 text-center">Qty</div>
+                                    <div className="w-16 text-right">Amt</div>
+                                </div>
+                                {lastOrder?.items?.map((item, idx) => (
+                                    <div key={idx} className="flex text-sm">
+                                        <div className="flex-1 pr-2">
+                                            <div className="font-medium text-gray-800">{item.itemName || item.name}</div>
+                                            {item.variantName && <div className="text-xs text-gray-500">({item.variantName})</div>}
+                                        </div>
+                                        <div className="w-8 text-center text-gray-600">{item.quantity}</div>
+                                        <div className="w-16 text-right font-medium">{(item.price * item.quantity).toFixed(2)}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="border-t-2 border-dashed border-gray-300 pt-4 space-y-1 text-sm">
+                                <div className="flex justify-between text-gray-600">
+                                    <span>Sub Total</span>
+                                    <span>{Number(lastOrder?.subTotal || lastOrder?.totalAmount || 0).toFixed(2)}</span>
+                                </div>
+                                {Number(lastOrder?.taxAmount) > 0 && (
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>Tax</span>
+                                        <span>{Number(lastOrder?.taxAmount).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {Number(lastOrder?.containerCharge) > 0 && (
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>Packing Charges</span>
+                                        <span>{Number(lastOrder?.containerCharge).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {Number(lastOrder?.roundOff) !== 0 && (
+                                    <div className="flex justify-between text-gray-600 text-xs">
+                                        <span>Round Off</span>
+                                        <span>{Number(lastOrder?.roundOff).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between font-bold text-xl mt-3 pt-3 border-t border-gray-200 text-gray-900">
+                                    <span>TOTAL</span>
+                                    <span>₹{Number(lastOrder?.totalAmount || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 text-center">
+                                <div className="inline-block px-4 py-1 bg-green-100 text-green-700 font-bold rounded-full text-sm mb-2">
+                                    ORDER PLACED
+                                </div>
+                                <p className="text-xs text-gray-500">Please wait for your number to be called.</p>
+                            </div>
+                        </div>
+
+                        {/* Receipt zigzag bottom */}
+                        <div className="h-2 bg-gray-100 w-full" style={{ backgroundImage: 'linear-gradient(135deg, white 25%, transparent 25%), linear-gradient(225deg, white 25%, transparent 25%)', backgroundSize: '10px 10px' }}></div>
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-                    <Check size={40} />
-                </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Placed!</h1>
-                <p className="text-gray-500 mb-8">Order #{lastOrder?.id || '---'}. KOT has been sent to the kitchen.</p>
+                {showFinalBill && aggregatedBill ? (
+                    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 animate-in fade-in">
+                        <div className="bg-white w-full max-w-sm rounded-sm overflow-hidden shadow-2xl relative">
+                            {/* Receipt zigzag top */}
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-gray-100" style={{ backgroundImage: 'linear-gradient(45deg, white 25%, transparent 25%), linear-gradient(-45deg, white 25%, transparent 25%)', backgroundSize: '10px 10px' }}></div>
 
-                <div className="space-y-4 w-full max-w-sm">
-                    <button
-                        onClick={handlePrintBill}
-                        className="w-full py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm"
-                    >
-                        <Printer size={18} /> Print Bill
-                    </button>
-                    <button
-                        onClick={() => setAuthStep('menu')}
-                        className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-lg shadow-red-500/30"
-                    >
-                        Order More Items
-                    </button>
-                </div>
+                            <div className="p-6 pt-8 max-h-[85vh] overflow-y-auto">
+                                {/* Close button removed for blocking user flow */}
+
+                                <div className="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
+                                    <h2 className="text-xl font-bold uppercase tracking-wider">{settings.store_name || 'QSR STORE'}</h2>
+                                    <p className="text-xs text-gray-500 mt-1">{settings.store_address}</p>
+                                    <div className="flex justify-between mt-6 text-xs font-bold text-gray-600 uppercase">
+                                        <span>{new Date().toLocaleDateString()}</span>
+                                        <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                    <div className="flex justify-between mt-1 text-xs font-bold text-gray-600 uppercase">
+                                        <span>Table: {table}</span>
+                                        <span>All Bills</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex font-bold text-xs uppercase border-b border-gray-200 pb-2">
+                                        <div className="flex-1">Item</div>
+                                        <div className="w-8 text-center">Qty</div>
+                                        <div className="w-16 text-right">Amt</div>
+                                    </div>
+                                    {aggregatedBill.items.map((item, idx) => (
+                                        <div key={idx} className="flex text-sm">
+                                            <div className="flex-1 pr-2">
+                                                <div className="font-medium text-gray-800">{item.itemName || item.name}</div>
+                                                {item.variantName && <div className="text-xs text-gray-500">({item.variantName})</div>}
+                                            </div>
+                                            <div className="w-8 text-center text-gray-600">{item.quantity}</div>
+                                            <div className="w-16 text-right font-medium">{(item.price * item.quantity).toFixed(2)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="border-t-2 border-dashed border-gray-300 pt-4 space-y-1 text-sm">
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>Sub Total</span>
+                                        <span>{aggregatedBill.subTotal.toFixed(2)}</span>
+                                    </div>
+                                    {aggregatedBill.taxAmount > 0 && (
+                                        <div className="flex justify-between text-gray-600">
+                                            <span>Tax</span>
+                                            <span>{aggregatedBill.taxAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    {aggregatedBill.containerCharge > 0 && (
+                                        <div className="flex justify-between text-gray-600">
+                                            <span>Packing Charges</span>
+                                            <span>{aggregatedBill.containerCharge.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    {Math.abs(aggregatedBill.roundOff) > 0.001 && (
+                                        <div className="flex justify-between text-gray-600 text-xs">
+                                            <span>Round Off</span>
+                                            <span>{aggregatedBill.roundOff.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between font-bold text-xl mt-3 pt-3 border-t border-gray-200 text-gray-900">
+                                        <span>TOTAL</span>
+                                        <span>₹{aggregatedBill.totalAmount.toFixed(2)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 text-center">
+                                    <div className="inline-block px-4 py-1 bg-green-100 text-green-700 font-bold rounded-full text-sm mb-2 animate-pulse">
+                                        ✓ SENT TO CASHIER
+                                    </div>
+                                    <p className="text-xs text-gray-500 mb-6">Includes {aggregatedBill.orderCount} Orders: {aggregatedBill.orderNumbers}</p>
+
+                                    <button
+                                        onClick={handleReset}
+                                        className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-lg shadow-red-500/30"
+                                    >
+                                        Start New Order
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Receipt zigzag bottom */}
+                            <div className="h-2 bg-gray-100 w-full" style={{ backgroundImage: 'linear-gradient(135deg, white 25%, transparent 25%), linear-gradient(225deg, white 25%, transparent 25%)', backgroundSize: '10px 10px' }}></div>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+                            <Check size={40} />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Placed!</h1>
+                        <p className="text-gray-500 mb-8">Order #{lastOrder?.id || '---'}. KOT has been sent to the kitchen.</p>
+
+                        <div className="space-y-4 w-full max-w-sm">
+                            <button
+                                onClick={handlePrintBill}
+                                className="w-full py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm"
+                            >
+                                <Printer size={18} /> Final Bill
+                            </button>
+                            <button
+                                onClick={() => setAuthStep('menu')}
+                                className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-lg shadow-red-500/30"
+                            >
+                                Order More Items
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
         );
     }

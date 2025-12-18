@@ -162,6 +162,28 @@ export function Settings() {
                         </div>
                     </div>
 
+                    {/* Container Charge Setting */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Container Charge (Per Item)
+                            </label>
+                            <p className="text-xs text-gray-500 mb-3">
+                                Amount to charge per item for Takeaway/Delivery orders.
+                            </p>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="px-4 py-3 bg-gray-100 dark:bg-gray-600 border border-r-0 border-gray-200 dark:border-gray-500 rounded-l-xl text-gray-500">₹</span>
+                            <input
+                                type="number"
+                                value={settings.container_charge || 0}
+                                onChange={(e) => handleChange('container_charge', e.target.value)}
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow"
+                                placeholder="0"
+                            />
+                        </div>
+                    </div>
+
                     <div className="flex justify-end pt-4">
                         <button
                             onClick={handleSave}
