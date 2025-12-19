@@ -35,7 +35,7 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                     if (item.forceExpanded) return; // Prevent collapse if forced
                     hasSubItems ? toggleGroup(item.id) : onNavigate(item.path);
                 }}
-                className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl transition-all duration-200 group relative
+                className={`w-full flex items-center justify-between py-1.5 px-3 rounded-lg transition-all duration-200 group relative
                     ${active && !hasSubItems
                         ? 'bg-red-50 text-red-600 shadow-sm shadow-red-100 dark:bg-red-900/20 dark:text-red-400 dark:shadow-none font-semibold'
                         : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-200 font-medium'
@@ -46,16 +46,16 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                 style={{ paddingLeft: isSidebarOpen ? `${totalPadding}rem` : '0.75rem' }}
                 title={!isSidebarOpen ? item.label : ''}
             >
-                <div className={`flex items-center gap-3 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
+                <div className={`flex items-center gap-2.5 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
                     {Icon && (
-                        <Icon className={`w-5 h-5 shrink-0 transition-colors ${active && !hasSubItems ? 'text-red-600 dark:text-red-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}`} />
+                        <Icon className={`w-4 h-4 shrink-0 transition-colors ${active && !hasSubItems ? 'text-red-600 dark:text-red-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}`} />
                     )}
 
                     {isSidebarOpen && (
                         <>
-                            <span className="truncate text-sm flex-1 text-left">{item.label}</span>
+                            <span className="truncate text-xs flex-1 text-left">{item.label}</span>
                             {item.badge && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-600 font-bold ml-2">
+                                <span className="text-[9px] px-1.5 py-0 rounded bg-blue-100 text-blue-600 font-bold ml-2">
                                     {item.badge}
                                 </span>
                             )}
@@ -128,7 +128,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
     // Let's render Quick Links separately after the main groups loop or as a special group.
     // Since we map over groups, mapping over Quick Links separately is cleaner.
     return (
-        <div className={`h-screen flex flex-col z-20 transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shrink-0 ${isOpen ? 'w-80' : 'w-24'}`}>
+        <div className={`h-screen flex flex-col z-20 transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}>
 
             {/* Header */}
             <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-6' : 'justify-center'} border-b border-gray-100 dark:border-gray-800/50`}>

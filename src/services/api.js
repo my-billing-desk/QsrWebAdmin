@@ -58,6 +58,14 @@ export const aggregatorService = {
     toggle: (id) => api.post(`/aggregators/${id}/toggle`)
 };
 
+export const specialNoteService = {
+    getAll: () => api.get('/special-notes'),
+    create: (data) => api.post('/special-notes', data),
+    update: (id, data) => api.put(`/special-notes/${id}`, data),
+    delete: (id) => api.delete(`/special-notes/${id}`),
+    toggleStatus: (id) => api.patch(`/special-notes/${id}/toggle`),
+};
+
 export const dashboardService = {
     getStats: (params) => api.get('/dashboard/stats', { params }),
     getCharts: (params) => api.get('/dashboard/charts', { params }),

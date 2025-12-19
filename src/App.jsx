@@ -12,6 +12,7 @@ import { QuickLinksProvider } from './context/QuickLinksContext';
 import { QuickLinksPage } from './components/QuickLinksPage';
 import AggregatorCenter from './components/AggregatorCenter';
 import Marketplace from './components/Marketplace';
+import ConsumerMenu from './components/ConsumerMenu';
 import AggregatorConfig from './components/AggregatorConfig';
 
 // Inventory Imports (moved from misplaced section)
@@ -46,7 +47,12 @@ import { FloorPlan } from './components/configuration/FloorPlan';
 import { EmailTemplateSettings } from './components/configuration/EmailTemplateSettings';
 import { DayEndSummary } from './components/reports/DayEndSummary';
 import { OutletConfiguration } from './components/configuration/OutletConfiguration';
+import { ProfitLoss } from './components/reports/ProfitLoss';
+import { ConfigureProfitLoss } from './components/reports/ConfigureProfitLoss';
+import { MenuOnOff } from './components/menu/MenuOnOff';
+import { SpecialNote } from './components/menu/SpecialNote';
 import { MarketplaceSetting } from './components/configuration/MarketplaceSetting';
+import { Toaster } from 'react-hot-toast';
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -77,7 +83,7 @@ function MainLayout() {
       />
       <div className="flex-1 flex flex-col overflow-hidden relative z-10 transition-all duration-300">
         <Header title={getTitle(location.pathname)} onToggleSidebar={toggleSidebar} />
-        <main className="flex-1 overflow-auto px-8 pb-8">
+        <main className="flex-1 overflow-auto px-4 pb-4">
           <Outlet />
         </main>
       </div>
@@ -110,11 +116,13 @@ function AppRoutes() {
         <Route path="/settings" element={<Settings />} />
 
         {/* New Modules */}
-        <Route path="/reports/profit-loss" element={<PlaceholderPage title="Profit & Loss" />} />
+        <Route path="/reports/profit-loss" element={<ProfitLoss />} />
+        <Route path="/reports/profit-loss/configure" element={<ConfigureProfitLoss />} />
         <Route path="/aggregator-center" element={<AggregatorCenter />} />
 
         {/* Menu */}
-        <Route path="/menu/on-off" element={<PlaceholderPage title="Menu On/Off" />} />
+        <Route path="/menu/on-off" element={<MenuOnOff />} />
+        <Route path="/menu/special-note" element={<SpecialNote />} />
 
         {/* Reports */}
         <Route path="/reports/day-end" element={<DayEndSummary />} />
@@ -218,6 +226,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <QuickLinksProvider>
+          <Toaster position="top-right" />
           <Routes>
             <Route path="/scan-order" element={<ConsumerMenu />} />
             <Route path="/*" element={<AppRoutes />} />
