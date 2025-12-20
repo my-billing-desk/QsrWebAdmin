@@ -1,7 +1,34 @@
 import React, { useState } from 'react';
 
+import IntegrationDetail from './IntegrationDetail';
+
 export function MarketplaceSetting() {
     const [activeTab, setActiveTab] = useState('POS Subscription');
+    const [selectedIntegration, setSelectedIntegration] = useState(null);
+
+    // Mock Aggregators
+    const aggregators = [
+        {
+            id: 1,
+            name: 'Zomato',
+            icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg',
+            category: 'Food Aggregator',
+            isConnected: true, // Mock logic: Zomato is connected
+            requestStatus: 'received'
+        },
+        {
+            id: 2,
+            name: 'Swiggy',
+            icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg',
+            category: 'Food Aggregator',
+            isConnected: false,
+            requestStatus: 'none'
+        }
+    ];
+
+    if (selectedIntegration) {
+        return <IntegrationDetail integration={selectedIntegration} onBack={() => setSelectedIntegration(null)} />;
+    }
 
     return (
         <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen font-sans flex gap-6">
@@ -15,8 +42,8 @@ export function MarketplaceSetting() {
                     <button
                         onClick={() => setActiveTab('POS Subscription')}
                         className={`w-full text-left px-4 py-3 text-sm font-medium border-l-4 transition-colors ${activeTab === 'POS Subscription'
-                                ? 'border-red-600 bg-red-50 text-red-600 dark:bg-red-900/10'
-                                : 'border-transparent text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
+                            ? 'border-red-600 bg-red-50 text-red-600 dark:bg-red-900/10'
+                            : 'border-transparent text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
                             }`}
                     >
                         POS Subscription
@@ -24,8 +51,8 @@ export function MarketplaceSetting() {
                     <button
                         onClick={() => setActiveTab('Online Orders Integration')}
                         className={`w-full text-left px-4 py-3 text-sm font-medium border-l-4 transition-colors ${activeTab === 'Online Orders Integration'
-                                ? 'border-red-600 bg-red-50 text-red-600 dark:bg-red-900/10'
-                                : 'border-transparent text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
+                            ? 'border-red-600 bg-red-50 text-red-600 dark:bg-red-900/10'
+                            : 'border-transparent text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
                             }`}
                     >
                         Online Orders Integration
@@ -95,6 +122,31 @@ export function MarketplaceSetting() {
                                 Save
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {activeTab === 'Online Orders Integration' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {aggregators.map(agg => (
+                            <div
+                                key={agg.id}
+                                onClick={() => setSelectedIntegration(agg)}
+                                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:shadow-md transition-shadow group"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center p-2 border border-gray-100 dark:border-gray-600">
+                                        <img src={agg.icon} alt={agg.name} className="w-full h-full object-contain" />
+                                    </div>
+                                    {agg.isConnected ? (
+                                        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold">Connected</span>
+                                    ) : (
+                                        <span className="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full font-bold">Connect</span>
+                                    )}
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">{agg.name}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{agg.category}</p>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

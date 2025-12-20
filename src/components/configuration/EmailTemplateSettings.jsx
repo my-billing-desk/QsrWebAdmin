@@ -52,7 +52,7 @@ export function EmailTemplateSettings() {
                     <div className="w-full max-w-lg space-y-8">
                         {/* Header card */}
                         <div className="bg-[#C52031] text-white p-6 rounded-lg h-32 flex items-center justify-between shadow-md relative overflow-hidden">
-                            <div className="text-xl font-bold tracking-wider z-10">PETPOOJA</div>
+                            <div className="text-xl font-bold tracking-wider z-10">mybill</div>
                             {/* Decorative icons mock */}
                             <div className="flex gap-4 opacity-50 z-10">
                                 <span className="text-xs">❄️</span>
@@ -78,9 +78,9 @@ export function EmailTemplateSettings() {
                                 <span>3rd Floor, Tower-A, Gopal Palace, Nehrunagar, Ambawadi, Ahmedabad, Gujarat - 380015.</span>
                             </div>
                             <div className="flex flex-wrap gap-4 pl-6">
-                                <span className="flex items-center gap-1">📞 07969 223344</span>
-                                <span className="flex items-center gap-1">📧 support@petpooja.com</span>
-                                <span className="flex items-center gap-1">🌐 https://petpooja.com/</span>
+                                <span className="flex items-center gap-1">📞 </span>
+                                <span className="flex items-center gap-1">📧 support@mybill.com</span>
+                                <span className="flex items-center gap-1">🌐 https://mybill.com/</span>
                             </div>
                         </div>
                     </div>

@@ -23,7 +23,7 @@ export function OutletConfiguration() {
 
             <Section title="Outlet Information">
                 <ConfigCard icon={FileText} title="Outlet Details" desc="Configure email id, address, Logo of an Outlet." to="/config/outlet-details" />
-                <ConfigCard icon={Smartphone} title="Contact Details" desc="Configure contact details of your's and your staff details to reach by Petpooja team." />
+                <ConfigCard icon={Smartphone} title="Contact Details" desc="Configure contact details of your's and your staff details to reach by mybill team." />
                 <ConfigCard icon={Clock} title="Outlet Timings" desc="Configure Closing hours, lunch & dinner timings, timing information to display on various places." />
                 <ConfigCard icon={CreditCard} title="Payment" desc="Configure Currency and Payment Types available." to="/accounting/payments" />
                 <ConfigCard icon={FileText} title="Invoice Sequence" desc="Configure multiple invoice sequence" />
@@ -48,7 +48,7 @@ export function OutletConfiguration() {
             </Section>
 
             <Section title="Notification Setting">
-                <ConfigCard icon={Monitor} title="SMS Configuration" desc="Configure the option to receive SMS from Petpooja." />
+                <ConfigCard icon={Monitor} title="SMS Configuration" desc="Configure the option to receive SMS from mybill." />
             </Section>
 
             <div className="fixed bottom-6 right-6">
