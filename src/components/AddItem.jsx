@@ -362,63 +362,60 @@ export function AddItem({ onBack, itemToEdit }) {
                                     ))}
                                 </div>
                             </div>
-                            {/* Image Upload Row */}
-                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
-                                <div className="flex items-start gap-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                {formData.imagePreview ? (
-                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                                                        <p className="text-xs text-gray-500">Upload Image</p>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            setFormData(p => ({
-                                                                ...p,
-                                                                image: file,
-                                                                imagePreview: URL.createObjectURL(file)
-                                                            }));
-                                                        }
-                                                    }}
-                                                />
-                                            </label>
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
-                                                {formData.imagePreview && (
-                                                    <button
-                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
-                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
-                                                    >
-                                                        Remove Image
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                        </div>
 
-                                    <div className="flex items-center gap-2 pt-2">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.showImage}
-                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
-                                        </label>
-                                    </div>
+                        {/* Compact Image Upload Row */}
+                        <div className="col-span-12 border-t border-gray-100 pt-3 mt-2">
+                            <div className="flex items-center gap-4">
+                                <label className="flex flex-col items-center justify-center w-20 h-20 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors bg-white">
+                                    {formData.imagePreview ? (
+                                        <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center">
+                                            <Plus className="w-5 h-5 text-gray-400" />
+                                            <p className="text-[9px] text-gray-500 mt-1">Upload</p>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                setFormData(p => ({
+                                                    ...p,
+                                                    image: file,
+                                                    imagePreview: URL.createObjectURL(file)
+                                                }));
+                                            }
+                                        }}
+                                    />
+                                </label>
+
+                                <div className="flex flex-col gap-2">
+                                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                                        <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${formData.showImage ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                                            <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${formData.showImage ? 'translate-x-4' : ''}`} />
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.showImage}
+                                            onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
+                                            className="hidden"
+                                        />
+                                        <span className="text-xs font-semibold text-gray-700">Show Image in POS</span>
+                                    </label>
+
+                                    {formData.imagePreview && (
+                                        <button
+                                            onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
+                                            className="text-[10px] text-red-500 hover:text-red-700 font-medium text-left flex items-center gap-1"
+                                        >
+                                            <Trash2 className="w-3 h-3" /> Remove Image
+                                        </button>
+                                    )}
+                                    <p className="text-[10px] text-gray-400">Max size: 5MB (JPG/PNG)</p>
                                 </div>
                             </div>
                         </div>
@@ -455,395 +452,160 @@ export function AddItem({ onBack, itemToEdit }) {
                                         <div className="text-xs text-gray-500">{group.departmentName}</div>
                                     </div>
                                 </label>
-                            ))}
-                            {/* Image Upload Row */}
-                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
-                                <div className="flex items-start gap-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                {formData.imagePreview ? (
-                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                                                        <p className="text-xs text-gray-500">Upload Image</p>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            setFormData(p => ({
-                                                                ...p,
-                                                                image: file,
-                                                                imagePreview: URL.createObjectURL(file)
-                                                            }));
-                                                        }
-                                                    }}
-                                                />
-                                            </label>
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
-                                                {formData.imagePreview && (
-                                                    <button
-                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
-                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
-                                                    >
-                                                        Remove Image
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="flex items-center gap-2 pt-2">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.showImage}
-                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
-                                        </label>
-                                    </div>
+                            ))}
+                        </div>
+
+                        {/* Item Specific Variations & Custom Overrides */}
+                        <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase">Custom Variations & Price Overrides</h3>
+                                    <p className="text-xs text-gray-500">Add custom variants or import from groups to override prices for this item.</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Item Specific Variations & Custom Overrides */}
-                    <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase">Custom Variations & Price Overrides</h3>
-                                <p className="text-xs text-gray-500">Add custom variants or import from groups to override prices for this item.</p>
-                            </div>
-                        </div>
-
-                        {/* Helper: Import from Selected Groups */}
-                        {formData.itemVariationGroups.length > 0 && (
-                            <div className="mb-4 flex flex-wrap gap-2">
-                                {formData.itemVariationGroups.map(groupId => {
-                                    const group = variationGroups.find(g => g.id === groupId);
-                                    if (!group) return null;
-                                    return (
-                                        <button
-                                            key={group.id}
-                                            onClick={() => {
-                                                // Add variants from this group to the list
-                                                const newVariants = [...formData.variants];
-                                                if (group.Variants && group.Variants.length > 0) {
-                                                    group.Variants.forEach(gv => {
-                                                        // Avoid duplicates by name? Or allow duplicates? 
-                                                        // Best to check if name exists, if so, maybe don't add or warn?
-                                                        // Let's just add them, user can delete.
-                                                        newVariants.push({
-                                                            _key: Math.random().toString(36).substr(2, 9),
-                                                            name: gv.name,
-                                                            price: gv.price || ''
+                            {/* Helper: Import from Selected Groups */}
+                            {formData.itemVariationGroups.length > 0 && (
+                                <div className="mb-4 flex flex-wrap gap-2">
+                                    {formData.itemVariationGroups.map(groupId => {
+                                        const group = variationGroups.find(g => g.id === groupId);
+                                        if (!group) return null;
+                                        return (
+                                            <button
+                                                key={group.id}
+                                                onClick={() => {
+                                                    // Add variants from this group to the list
+                                                    const newVariants = [...formData.variants];
+                                                    if (group.Variants && group.Variants.length > 0) {
+                                                        group.Variants.forEach(gv => {
+                                                            // Avoid duplicates by name? Or allow duplicates? 
+                                                            // Best to check if name exists, if so, maybe don't add or warn?
+                                                            // Let's just add them, user can delete.
+                                                            newVariants.push({
+                                                                _key: Math.random().toString(36).substr(2, 9),
+                                                                name: gv.name,
+                                                                price: gv.price || ''
+                                                            });
                                                         });
-                                                    });
-                                                    setFormData(prev => ({ ...prev, variants: newVariants }));
-                                                } else {
-                                                    alert("No master variants found in this group.");
-                                                }
-                                            }}
-                                            className="text-xs flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors"
-                                        >
-                                            <Plus className="w-3 h-3" /> Import {group.name} Options
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* Table */}
-                        <div className="border rounded-lg overflow-hidden">
-                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                                <table className="w-full text-left">
-                                    <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        <tr>
-                                            <th className="p-3 pl-4 w-12 text-center">#</th>
-                                            <th className="p-3">Variation Name</th>
-                                            <th className="p-3 w-48">Price (₹)</th>
-                                            <th className="p-3 w-20 text-center">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                        <SortableContext items={formData.variants.map(v => v._key)} strategy={verticalListSortingStrategy}>
-                                            {formData.variants.map((variant, index) => (
-                                                <SortableVariantRow
-                                                    key={variant._key}
-                                                    id={variant._key}
-                                                    index={index}
-                                                    variant={variant}
-                                                    handleVariantChange={handleVariantChange}
-                                                    removeVariant={removeVariant}
-                                                />
-                                            ))}
-                                        </SortableContext>
-                                    </tbody>
-                                </table>
-                            </DndContext>
-
-                            {formData.variants.length === 0 && (
-                                <div className="text-center py-6 text-gray-400 text-sm">
-                                    No custom variations added.
+                                                        setFormData(prev => ({ ...prev, variants: newVariants }));
+                                                    } else {
+                                                        alert("No master variants found in this group.");
+                                                    }
+                                                }}
+                                                className="text-xs flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors"
+                                            >
+                                                <Plus className="w-3 h-3" /> Import {group.name} Options
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
+
+                            {/* Table */}
+                            <div className="border rounded-lg overflow-hidden">
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                    <table className="w-full text-left">
+                                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            <tr>
+                                                <th className="p-3 pl-4 w-12 text-center">#</th>
+                                                <th className="p-3">Variation Name</th>
+                                                <th className="p-3 w-48">Price (₹)</th>
+                                                <th className="p-3 w-20 text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                            <SortableContext items={formData.variants.map(v => v._key)} strategy={verticalListSortingStrategy}>
+                                                {formData.variants.map((variant, index) => (
+                                                    <SortableVariantRow
+                                                        key={variant._key}
+                                                        id={variant._key}
+                                                        index={index}
+                                                        variant={variant}
+                                                        handleVariantChange={handleVariantChange}
+                                                        removeVariant={removeVariant}
+                                                    />
+                                                ))}
+                                            </SortableContext>
+                                        </tbody>
+                                    </table>
+                                </DndContext>
+
+                                {formData.variants.length === 0 && (
+                                    <div className="text-center py-6 text-gray-400 text-sm">
+                                        No custom variations added.
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mt-4 flex justify-end">
+                                <button
+                                    onClick={addVariant}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm"
+                                >
+                                    <Plus className="w-4 h-4 text-blue-500" />
+                                    <span>Add Empty Row</span>
+                                </button>
+                            </div>
+
+                            {/* Addon Group */}
+                            <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                <select
+                                    className="w-full p-2 border rounded bg-white text-gray-700 outline-none"
+                                    value={formData.addonGroupIds[0] || ''} // Handle single select for now as per UI
+                                    onChange={(e) => setFormData(p => ({ ...p, addonGroupIds: [e.target.value] }))}
+                                >
+                                    <option value="">Select AddonGroup</option>
+                                    {addonGroups.map(g => (
+                                        <option key={g.id} value={g.id}>{g.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Footer Checkbox */}
+                            <div className="flex items-start gap-2 p-2">
+                                <input type="checkbox" className="mt-1 w-4 h-4 text-red-600 rounded" />
+                                <div>
+                                    <div className="text-sm font-medium text-gray-800">Create Self Item Recipe</div>
+                                    <div className="text-xs text-blue-500">Applicable only when menu item is Purchased but does not have any recipe. After setting this option you can not revert it back.</div>
+                                </div>
+
+                            </div>
                         </div>
 
-                        <div className="mt-4 flex justify-end">
-                            <button
-                                onClick={addVariant}
-                                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm"
-                            >
-                                <Plus className="w-4 h-4 text-blue-500" />
-                                <span>Add Empty Row</span>
+                        {/* Hidden: AI Agent Button (from reference) */}
+                        <div className="fixed bottom-6 right-6 z-50">
+                            <button className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                                <span className="font-bold text-xs">AI Agent</span>
                             </button>
-                            {/* Image Upload Row */}
-                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
-                                <div className="flex items-start gap-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                {formData.imagePreview ? (
-                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                                                        <p className="text-xs text-gray-500">Upload Image</p>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            setFormData(p => ({
-                                                                ...p,
-                                                                image: file,
-                                                                imagePreview: URL.createObjectURL(file)
-                                                            }));
-                                                        }
-                                                    }}
-                                                />
-                                            </label>
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
-                                                {formData.imagePreview && (
-                                                    <button
-                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
-                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
-                                                    >
-                                                        Remove Image
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                        </div>
 
-                                    <div className="flex items-center gap-2 pt-2">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.showImage}
-                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
-                                        </label>
+                        {/* New Category Modal */}
+                        {showNewCategoryInput && (
+                            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-96 p-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="font-bold">Create New Category</h3>
+                                        <button onClick={() => setShowNewCategoryInput(false)}><X className="w-4 h-4" /></button>
+                                    </div>
+                                    <input
+                                        autoFocus
+                                        value={newCategoryName}
+                                        onChange={(e) => setNewCategoryName(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleCreateCategory()}
+                                        className="w-full p-2 border rounded mb-4"
+                                        placeholder="Category Name"
+                                    />
+                                    <div className="flex justify-end gap-2">
+                                        <button onClick={() => setShowNewCategoryInput(false)} className="px-3 py-1 text-gray-600">Cancel</button>
+                                        <button onClick={handleCreateCategory} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-
-                    {/* Addon Group */}
-                    <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <select
-                            className="w-full p-2 border rounded bg-white text-gray-700 outline-none"
-                            value={formData.addonGroupIds[0] || ''} // Handle single select for now as per UI
-                            onChange={(e) => setFormData(p => ({ ...p, addonGroupIds: [e.target.value] }))}
-                        >
-                            <option value="">Select AddonGroup</option>
-                            {addonGroups.map(g => (
-                                <option key={g.id} value={g.id}>{g.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Footer Checkbox */}
-                    <div className="flex items-start gap-2 p-2">
-                        <input type="checkbox" className="mt-1 w-4 h-4 text-red-600 rounded" />
-                        <div>
-                            <div className="text-sm font-medium text-gray-800">Create Self Item Recipe</div>
-                            <div className="text-xs text-blue-500">Applicable only when menu item is Purchased but does not have any recipe. After setting this option you can not revert it back.</div>
-                            {/* Image Upload Row */}
-                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
-                                <div className="flex items-start gap-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                {formData.imagePreview ? (
-                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                                                        <p className="text-xs text-gray-500">Upload Image</p>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            setFormData(p => ({
-                                                                ...p,
-                                                                image: file,
-                                                                imagePreview: URL.createObjectURL(file)
-                                                            }));
-                                                        }
-                                                    }}
-                                                />
-                                            </label>
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
-                                                {formData.imagePreview && (
-                                                    <button
-                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
-                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
-                                                    >
-                                                        Remove Image
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 pt-2">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.showImage}
-                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
-
-            {/* Hidden: AI Agent Button (from reference) */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <button className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2">
-                    <span className="font-bold text-xs">AI Agent</span>
-                </button>
-            </div>
-
-            {/* New Category Modal */}
-            {showNewCategoryInput && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-96 p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold">Create New Category</h3>
-                            <button onClick={() => setShowNewCategoryInput(false)}><X className="w-4 h-4" /></button>
-                        </div>
-                        <input
-                            autoFocus
-                            value={newCategoryName}
-                            onChange={(e) => setNewCategoryName(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleCreateCategory()}
-                            className="w-full p-2 border rounded mb-4"
-                            placeholder="Category Name"
-                        />
-                        <div className="flex justify-end gap-2">
-                            <button onClick={() => setShowNewCategoryInput(false)} className="px-3 py-1 text-gray-600">Cancel</button>
-                            <button onClick={handleCreateCategory} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
-                            {/* Image Upload Row */}
-                            <div className="col-span-12 border-t border-gray-100 pt-4 mt-2">
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Item Image</label>
-                                <div className="flex items-start gap-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                {formData.imagePreview ? (
-                                                    <img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                                                        <p className="text-xs text-gray-500">Upload Image</p>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            setFormData(p => ({
-                                                                ...p,
-                                                                image: file,
-                                                                imagePreview: URL.createObjectURL(file)
-                                                            }));
-                                                        }
-                                                    }}
-                                                />
-                                            </label>
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WEBP. Max size: 5MB.</p>
-                                                {formData.imagePreview && (
-                                                    <button
-                                                        onClick={() => setFormData(p => ({ ...p, image: null, imagePreview: null }))}
-                                                        className="text-xs text-red-600 hover:text-red-700 font-medium"
-                                                    >
-                                                        Remove Image
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 pt-2">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.showImage}
-                                                onChange={(e) => setFormData(p => ({ ...p, showImage: e.target.checked }))}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Image in POS</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

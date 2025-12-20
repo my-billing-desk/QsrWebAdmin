@@ -185,7 +185,7 @@ export function Dashboard() {
                             <TrendingUp className="w-4 h-4" />
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats.totalIncome.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-gray-800 mb-4">₹ {stats?.totalIncome?.toLocaleString()}</div>
                     <div className="text-xs text-gray-500 font-medium">{stats.totalOrders} Orders</div>
                 </div>
 
@@ -289,7 +289,7 @@ export function Dashboard() {
                     <div className="h-64 flex flex-col justify-end relative">
                         {/* Dynamic Chart Area */}
                         <div className="flex items-end h-full relative" style={{ alignItems: 'flex-end', justifyContent: 'space-around' }}>
-                            {chartsData.revenue.labels.length > 0 ? (
+                            {chartsData && chartsData.revenue && chartsData.revenue.labels && chartsData.revenue.labels.length > 0 ? (
                                 chartsData.revenue.labels.map((label, idx) => (
                                     <div key={idx} className="flex flex-col items-center group relative w-full">
                                         <div className="text-xs font-bold text-gray-500 mb-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 bg-white p-1 rounded shadow">₹ {chartsData.revenue.data[idx]}</div>
