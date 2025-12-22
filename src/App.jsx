@@ -16,6 +16,7 @@ import ConsumerMenu from './components/ConsumerMenu';
 import AggregatorConfig from './components/AggregatorConfig';
 
 // Inventory Imports (moved from misplaced section)
+// Inventory Imports
 import AddRawMaterial from './components/inventory/AddRawMaterial';
 import RawMaterialsList from './components/inventory/RawMaterialsList';
 import RecipeList from './components/inventory/RecipeList';
@@ -26,13 +27,21 @@ import { PurchaseOrder } from './components/inventory/PurchaseOrder';
 import { PurchaseReturn } from './components/inventory/PurchaseReturn';
 import { StockTransfer } from './components/inventory/StockTransfer';
 import { Wastage } from './components/inventory/Wastage';
-import { StockStatus, ProductionEntry } from './components/inventory/Placeholders';
+import { ProductionEntry } from './components/inventory/Placeholders';
+import { AvailableStock } from './components/inventory/AvailableStock';
+import { ClosingStock } from './components/inventory/ClosingStock';
+import { StockSummary } from './components/inventory/StockSummary';
 import { OnlineOrders } from './components/orders/OnlineOrders';
 import { RunningOrders } from './components/orders/RunningOrders';
 import { InventoryLayout } from './components/inventory/InventoryLayout';
 import { InventoryDashboard } from './components/inventory/InventoryDashboard';
 import { InventorySettings } from './components/inventory/InventorySettings';
 import { InventoryReports } from './components/inventory/InventoryReports';
+
+// ... (Auth imports in replaced block if overlapped, but tool says StartLine/EndLine. I will target the imports block and the routes block separately or be careful.)
+// Actually the tool supports chunks. I will do this in one go if I can match safely.
+// The imports are around line 18. The routes around line 216.
+// I will use multi_replace for safety.
 
 // Auth and Placeholder Imports (identified as missing from top)
 import Login from './pages/Login';
@@ -213,8 +222,10 @@ function AppRoutes() {
         <Route path="transfer" element={<StockTransfer />} />
         <Route path="wastage" element={<Wastage />} />
         <Route path="production" element={<ProductionEntry />} />
-        <Route path="stock/closing" element={<StockStatus />} />
+        <Route path="stock/available" element={<AvailableStock />} />
+        <Route path="stock/closing" element={<ClosingStock />} />
         <Route path="reports" element={<InventoryReports />} />
+        <Route path="reports/stock-summary" element={<StockSummary />} />
         <Route path="settings" element={<InventorySettings />} />
       </Route>
     </Routes>

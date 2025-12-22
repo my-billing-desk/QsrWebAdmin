@@ -46,6 +46,7 @@ export function InventoryLayout() {
             group: 'Manage Stock',
             icon: Archive,
             items: [
+                { label: 'Available Stock', path: '/inventory/stock/available' },
                 { label: 'Closing Stock', path: '/inventory/stock/closing' },
             ]
         },
@@ -70,6 +71,7 @@ export function InventoryLayout() {
             icon: FileText,
             items: [
                 { label: 'Inventory Reports', path: '/inventory/reports' },
+                { label: 'Stock Summary', path: '/inventory/reports/stock-summary' },
             ]
         },
         {

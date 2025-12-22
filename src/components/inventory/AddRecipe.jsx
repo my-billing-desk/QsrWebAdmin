@@ -17,6 +17,7 @@ export default function AddRecipe() {
     // Form State
     const [selectedItemId, setSelectedItemId] = useState(id || '');
     const [ingredients, setIngredients] = useState([]);
+    const [autoConsumption, setAutoConsumption] = useState(true);
 
     useEffect(() => {
         loadInitialData();
@@ -60,6 +61,7 @@ export default function AddRecipe() {
                     rawMaterialName: ri.RawMaterial?.name || 'Unknown'
                 }));
                 setIngredients(loadedIngredients);
+                setAutoConsumption(res.data.autoConsumption ?? true);
             } else {
                 setIngredients([]);
             }
@@ -103,7 +105,8 @@ export default function AddRecipe() {
                     rawMaterialId: ing.rawMaterialId,
                     quantity: parseFloat(ing.quantity),
                     unit: ing.unit
-                }))
+                })),
+                autoConsumption
             };
 
             await axios.post(`${API_URL}/inventory/recipes`, payload);
@@ -166,7 +169,16 @@ export default function AddRecipe() {
                                     <p className="text-sm text-red-500 mt-1">No recipe data is available for this item.</p>
                                 )}
                             </div>
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 items-center">
+                                <div className="flex items-center gap-2 mr-4 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                                    <span className="text-sm font-medium text-gray-700">Auto Consumption</span>
+                                    <button
+                                        onClick={() => setAutoConsumption(!autoConsumption)}
+                                        className={`w-10 h-5 rounded-full transition-colors relative ${autoConsumption ? 'bg-green-500' : 'bg-gray-300'}`}
+                                    >
+                                        <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all ${autoConsumption ? 'left-6' : 'left-1'}`} />
+                                    </button>
+                                </div>
                                 <button
                                     onClick={handleAddIngredient}
                                     className="px-4 py-2 bg-white border border-red-500 text-red-600 rounded-lg font-bold hover:bg-red-50 flex items-center gap-2 text-sm"
