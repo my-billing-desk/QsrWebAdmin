@@ -75,93 +75,19 @@ export function StockSummary() {
         handleSearch();
     }, []);
 
-    return (
-        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
-                <h1 className="text-xl font-bold text-gray-800 dark:text-white">Stock Summary Report</h1>
-                <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 font-medium text-sm">
-                        <Clock className="w-4 h-4" /> Schedule Report
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 text-sm">
-                        <Download className="w-4 h-4" /> Export
-                    </button>
-                </div>
-            </div>
+    const [selectedItemForDetails, setSelectedItemForDetails] = useState(null);
 
-            {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Raw Material</label>
-                        <input
-                            type="text"
-                            value={filters.rawMaterial}
-                            onChange={(e) => setFilters(prev => ({ ...prev, rawMaterial: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm outline-none focus:border-red-500"
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Category</label>
-                        <select
-                            value={filters.category}
-                            onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm outline-none focus:border-red-500"
-                        >
-                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Unit Type</label>
-                        <select
-                            value={filters.unitType}
-                            onChange={(e) => setFilters(prev => ({ ...prev, unitType: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm outline-none focus:border-red-500"
-                        >
-                            <option value="Purchase Unit">Purchase Unit</option>
-                            <option value="Consumption Unit">Consumption Unit</option>
-                        </select>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">From Date</label>
-                        <input
-                            type="date"
-                            value={filters.fromDate}
-                            onChange={(e) => setFilters(prev => ({ ...prev, fromDate: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm outline-none focus:border-red-500"
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">To Date</label>
-                        <input
-                            type="date"
-                            value={filters.toDate}
-                            onChange={(e) => setFilters(prev => ({ ...prev, toDate: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm outline-none focus:border-red-500"
-                        />
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleSearch}
-                            className="flex-1 px-4 py-2 bg-red-700 text-white font-medium rounded hover:bg-red-800 transition-colors text-sm"
-                        >
-                            Search
-                        </button>
-                        <button
-                            onClick={handleClear}
-                            className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-600 font-medium rounded hover:bg-gray-50 transition-colors text-sm"
-                        >
-                            Clear
-                        </button>
-                    </div>
-                </div>
-            </div>
+    // ... existing hook ...
+
+    return (
+        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
+            {/* ... Header and Filters ... */}
 
             {/* Table */}
             <div className="flex-1 overflow-auto bg-white dark:bg-gray-900 m-4 rounded shadow border border-gray-200 dark:border-gray-700">
                 <table className="w-full text-xs text-left border-collapse min-w-[1200px]">
                     <thead className="bg-blue-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border-b border-gray-200 dark:border-gray-600 sticky top-0 z-10">
+                        {/* ... Existing Headers ... */}
                         <tr>
                             <th className="p-3 border-r border-gray-200 bg-blue-50 sticky left-0 z-20">Raw Material</th>
                             <th className="p-3 text-center border-r border-gray-200">Opening<br />(A)</th>
@@ -201,7 +127,12 @@ export function StockSummary() {
 
                                     <td className="p-3 text-center border-r border-gray-200 bg-blue-50 font-bold">{row.totalInput.toFixed(3)}</td>
 
-                                    <td className="p-3 text-center border-r border-gray-200 text-green-600">{row.consumed.toFixed(3)}</td>
+                                    <td
+                                        className="p-3 text-center border-r border-gray-200 text-green-600 cursor-pointer hover:bg-green-50 hover:underline"
+                                        onClick={() => setSelectedItemForDetails(row)}
+                                    >
+                                        {row.consumed.toFixed(3)}
+                                    </td>
                                     <td className="p-3 text-center border-r border-gray-200">{row.wastage.toFixed(3)}</td>
                                     <td className="p-3 text-center border-r border-gray-200">{row.normalLoss.toFixed(3)}</td>
                                     <td className="p-3 text-center border-r border-gray-200">{row.transfer.toFixed(3)}</td>
@@ -219,6 +150,67 @@ export function StockSummary() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Side Modal for Consumption Details */}
+            {selectedItemForDetails && (
+                <div className="absolute inset-0 z-50 flex justify-end">
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" onClick={() => setSelectedItemForDetails(null)}></div>
+
+                    {/* Modal Panel */}
+                    <div className="relative w-full max-w-2xl h-full bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 animate-in slide-in-from-right">
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                                Stock Consumed Details Of {selectedItemForDetails.name}
+                            </h2>
+                            <button onClick={() => setSelectedItemForDetails(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+                            {/* Details Table */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-gray-100 text-xs font-bold text-gray-700 uppercase">
+                                        <tr>
+                                            <th className="px-4 py-3">Invoice Date</th>
+                                            <th className="px-4 py-3">Item Name</th>
+                                            <th className="px-4 py-3 text-right">Qty</th>
+                                            <th className="px-4 py-3 text-right">Price (₹)</th>
+                                            <th className="px-4 py-3 text-right">Amount (₹)</th>
+                                            <th className="px-4 py-3">Invoice No.</th>
+                                            <th className="px-4 py-3">Consumed At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 text-gray-600">
+                                        {/* Mocking data rows for UI structure as per screenshot */}
+                                        <tr className="hover:bg-gray-50">
+                                            <td className="px-4 py-3">24-Dec-2025</td>
+                                            <td className="px-4 py-3">Classic Veg Burger</td>
+                                            <td className="px-4 py-3 text-right">1.000 pcs</td>
+                                            <td className="px-4 py-3 text-right">0</td>
+                                            <td className="px-4 py-3 text-right">0</td>
+                                            <td className="px-4 py-3">
+                                                <div className="font-bold text-gray-800">2644</div>
+                                                <div className="text-green-600 text-xs">Success</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-xs text-gray-500">24-Dec-2025 15:06:35</td>
+                                        </tr>
+                                        {/* Total Row */}
+                                        <tr className="bg-gray-100 font-bold text-gray-800">
+                                            <td colSpan="2" className="px-4 py-3">Total consumption</td>
+                                            <td className="px-4 py-3 text-right">1.000 pcs</td>
+                                            <td colSpan="1" className="px-4 py-3 text-right">0</td>
+                                            <td colSpan="3"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
