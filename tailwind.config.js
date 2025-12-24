@@ -12,28 +12,28 @@ export default {
                 display: ['Outfit', 'sans-serif'],
             },
             colors: {
-                // Primary Brand Colors (Red based per user request)
+                // Primary Brand Colors (Vibrant Indigo - Total Departure from Red)
                 primary: {
-                    50: '#fef2f2',
-                    100: '#fee2e2',
-                    200: '#fecaca',
-                    300: '#fca5a5',
-                    400: '#f87171',
-                    500: '#ef4444',
-                    600: '#dc2626',
-                    700: '#b91c1c',
-                    800: '#991b1b',
-                    900: '#7f1d1d',
-                    950: '#450a0a',
+                    50: '#eef2ff',
+                    100: '#e0e7ff',
+                    200: '#c7d2fe',
+                    300: '#a5b4fc',
+                    400: '#818cf8',
+                    500: '#6366f1', // Indigo 500
+                    600: '#4f46e5', // Indigo 600 (Main Brand)
+                    700: '#4338ca',
+                    800: '#3730a3',
+                    900: '#312e81',
+                    950: '#1e1b4b',
                 },
-                // Secondary/Accent (Darker Red or complementary)
+                // Secondary/Accent (Emerald green for success/contrast)
                 secondary: {
-                    50: '#fff1f2',
-                    100: '#ffe4e6',
-                    500: '#f43f5e',
-                    600: '#e11d48',
+                    50: '#ecfdf5',
+                    100: '#d1fae5',
+                    500: '#10b981',
+                    600: '#059669',
                 },
-                // Neutral Slate (for better contrast than gray)
+                // Neutral Slate (Modern, clean, slight blueish tint)
                 gray: {
                     50: '#f8fafc',
                     100: '#f1f5f9',

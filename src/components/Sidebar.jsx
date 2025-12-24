@@ -35,10 +35,10 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                     if (item.forceExpanded) return; // Prevent collapse if forced
                     hasSubItems ? toggleGroup(item.id) : onNavigate(item.path);
                 }}
-                className={`w-full flex items-center justify-between py-1.5 px-3 rounded-lg transition-all duration-200 group relative
+                className={`w-full flex items-center justify-between py-2 px-3 rounded-lg transition-all duration-200 group relative
                     ${active && !hasSubItems
-                        ? 'bg-red-50 text-red-600 shadow-sm shadow-red-100 dark:bg-red-900/20 dark:text-red-400 dark:shadow-none font-semibold'
-                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-200 font-medium'
+                        ? 'bg-primary-600 text-white shadow-lg shadow-indigo-500/20 font-semibold' // Active State: Deep Indigo
+                        : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' // Inactive: Ghost Slate
                     }
                     ${!isSidebarOpen ? 'justify-center' : ''}
                     ${item.forceExpanded ? 'cursor-default' : 'cursor-pointer'}
@@ -46,16 +46,16 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                 style={{ paddingLeft: isSidebarOpen ? `${totalPadding}rem` : '0.75rem' }}
                 title={!isSidebarOpen ? item.label : ''}
             >
-                <div className={`flex items-center gap-2.5 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
+                <div className={`flex items-center gap-3 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
                     {Icon && (
-                        <Icon className={`w-4 h-4 shrink-0 transition-colors ${active && !hasSubItems ? 'text-red-600 dark:text-red-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}`} />
+                        <Icon className={`w-5 h-5 shrink-0 transition-colors ${active && !hasSubItems ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
                     )}
 
                     {isSidebarOpen && (
                         <>
-                            <span className="truncate text-xs flex-1 text-left">{item.label}</span>
+                            <span className="truncate text-xs flex-1 text-left tracking-wide">{item.label}</span>
                             {item.badge && (
-                                <span className="text-[9px] px-1.5 py-0 rounded bg-blue-100 text-blue-600 font-bold ml-2">
+                                <span className="text-[9px] px-1.5 py-0 rounded bg-indigo-500/20 text-indigo-300 font-bold ml-2">
                                     {item.badge}
                                 </span>
                             )}
@@ -64,7 +64,7 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                 </div>
                 {hasSubItems && isSidebarOpen && !item.forceExpanded && (
                     <div className="ml-2 shrink-0">
-                        {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                        {isExpanded ? <ChevronDown className="w-3 h-3 text-slate-500" /> : <ChevronRight className="w-3 h-3 text-slate-500" />}
                     </div>
                 )}
             </button>
@@ -128,47 +128,47 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
     // Let's render Quick Links separately after the main groups loop or as a special group.
     // Since we map over groups, mapping over Quick Links separately is cleaner.
     return (
-        <div className={`h-screen flex flex-col z-20 transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}>
+        <div className={`h-screen flex flex-col z-20 transition-all duration-300 bg-slate-900 border-r border-slate-800 shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}>
 
-            {/* Header */}
-            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-6' : 'justify-center'} border-b border-gray-100 dark:border-gray-800/50`}>
-                <div className={`flex items-center ${isOpen ? 'gap-6' : 'flex-col gap-4'}`}>
+            {/* Header / Logo Area */}
+            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-6' : 'justify-center'} border-b border-slate-800`}>
+                <div className={`flex items-center ${isOpen ? 'gap-4' : 'flex-col gap-4'}`}>
                     <button
                         onClick={onToggleSidebar}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-red-600"
+                        className="p-1 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
                     >
                         <Menu className="w-6 h-6" />
                     </button>
 
                     <div className={`flex items-center gap-3 ${!isOpen && 'hidden'}`}>
-                        <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl shadow-lg shadow-red-500/30 flex items-center justify-center text-white font-display font-bold text-xl shrink-0">
-                            <Store className="w-6 h-6" />
+                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-lg shadow-lg shadow-indigo-500/20 flex items-center justify-center text-white font-display font-bold text-lg shrink-0">
+                            <Store className="w-5 h-5" />
                         </div>
                         <div className="flex flex-col leading-none">
-                            <span className="text-[10px] font-bold text-gray-400 tracking-wider">MY POSS</span>
-                            <span className="font-display font-bold text-xl text-gray-800 dark:text-gray-100 tracking-tight">POSS</span>
+                            <span className="text-[10px] font-bold text-slate-500 tracking-wider">ADMIN</span>
+                            <span className="font-display font-bold text-lg text-white tracking-tight">POSS</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Scrollable Nav */}
-            <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
+            <nav className="flex-1 overflow-y-auto p-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-700">
                 {menuLayout.map((group, idx) => (
                     <div key={idx} className="space-y-1">
                         {/* Group Title */}
                         {group.title && isOpen && (
-                            <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider font-display">
+                            <h3 className="px-3 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-display">
                                 {group.title}
                             </h3>
                         )}
 
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                             {group.items.map((item, iIdx) => (
                                 <SidebarItem
                                     key={item.id || iIdx}
                                     item={item}
-                                    depth={0} // Top level
+                                    depth={0}
                                     isActive={isActive}
                                     onNavigate={handleNavigation}
                                     expandedGroups={expandedGroups}
@@ -181,26 +181,26 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                 ))}
 
                 {/* Quick Links Section */}
-                <div className="space-y-1 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="space-y-1 pt-4 border-t border-slate-800">
                     {isOpen && (
                         <div className="flex items-center justify-between px-3 mb-2">
-                            <h3 className="text-xs font-bold text-gray-800 dark:text-gray-200 font-display">
+                            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-display">
                                 Quick Links
                             </h3>
                             <button
                                 onClick={() => handleNavigation('/quick-links')}
-                                className="flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full transition-colors"
+                                className="flex items-center gap-1 text-[10px] font-bold text-primary-400 hover:text-primary-300 transition-colors"
                             >
                                 <Plus className="w-3 h-3" /> Add
                             </button>
                         </div>
                     )}
 
-                    <div className="space-y-0.5">
+                    <div className="space-y-1">
                         {quickLinks.map((link, idx) => (
                             <SidebarItem
                                 key={`ql_${link.id}`}
-                                item={{ ...link, icon: Zap }} // Force Zap icon for quick links
+                                item={{ ...link, icon: Zap }}
                                 depth={0}
                                 isActive={isActive}
                                 onNavigate={handleNavigation}
@@ -214,10 +214,10 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
             </nav>
 
             {/* Footer Actions */}
-            <div className="p-4 border-t border-gray-100 dark:border-gray-800/50">
+            <div className="p-3 border-t border-slate-800 bg-slate-900/50">
                 <button
                     onClick={logout}
-                    className="w-full flex items-center p-3 rounded-xl text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all group"
+                    className="w-full flex items-center p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all group"
                 >
                     <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                     {isOpen && <span className="ml-3 font-medium text-sm">Logout</span>}
