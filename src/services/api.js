@@ -121,6 +121,7 @@ export const inventoryService = {
     createWastage: (data) => api.post('/inventory/wastage', data),
 
     getStats: () => api.get('/inventory/stats'),
+    updateClosingStock: (data) => api.post('/inventory/closing-stock', data),
     getClosingStockReport: () => api.get('/inventory/reports/closing-stock'),
     getStockSummaryReport: (params) => api.get('/inventory/reports/stock-summary', { params }), // New
     getOrderWiseConsumptionReport: (params) => api.get('/inventory/reports/order-consumption', { params }), // New

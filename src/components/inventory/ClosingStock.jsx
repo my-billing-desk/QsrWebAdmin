@@ -1,169 +1,351 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Save, MoreHorizontal, MessageCircle } from 'lucide-react';
-import { inventoryService } from '../../services/api';
+import { Search, Save, ChevronLeft, ChevronRight, Calculator, FileText, Calendar, Filter, RotateCcw } from 'lucide-react';
+import { inventoryService, menuService } from '../../services/api';
+import toast from 'react-hot-toast';
 
 export function ClosingStock() {
     const [materials, setMaterials] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    // Store closing stock inputs: { [itemId_unit]: value }
-    const [inputs, setInputs] = useState({});
+
+    // Filters
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [updateFrequency, setUpdateFrequency] = useState('Daily');
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
+    // Inputs: { [itemId]: { closingStock: val, unit: unit, comments: text } }
+    // We'll store keyed by ID.
+    const [inputData, setInputData] = useState({});
 
     useEffect(() => {
-        fetchMaterials();
+        loadData();
     }, []);
 
-    const fetchMaterials = async () => {
+    const loadData = async () => {
+        setLoading(true);
         try {
-            const res = await inventoryService.getRawMaterials();
-            setMaterials(res.data);
+            const [matRes, catRes] = await Promise.all([
+                inventoryService.getRawMaterials(),
+                menuService.getCategories() // or relevant category service if RawMaterial has specific categories
+            ]);
+
+            // RawMaterial categories might be simple strings or IDs. 
+            // The mock data previously had strings like 'Dairy'. 
+            // In DB they are linked. Let's assume we fetch them correctly.
+            setMaterials(matRes.data);
+
+            // Extract unique categories from materials if they are strings, or use fetched
+            // For now, let's extract from materials to be safe if they drift from Menu categories
+            const uniqueCats = [...new Set(matRes.data.map(m => m.category || 'Uncategorized'))];
+            setCategories(uniqueCats);
         } catch (error) {
-            console.error("Failed to fetch materials:", error);
+            console.error("Failed to load data", error);
+            toast.error("Failed to load stock data");
         } finally {
             setLoading(false);
         }
     };
 
     const handleInputChange = (id, field, value) => {
-        setInputs(prev => ({
+        setInputData(prev => ({
             ...prev,
-            [`${id}_${field}`]: value
+            [id]: {
+                ...prev[id],
+                [field]: value
+            }
         }));
     };
 
+    const handleSave = async () => {
+        const updates = Object.entries(inputData).map(([id, data]) => ({
+            id: parseInt(id),
+            closingStock: parseFloat(data.closingStock),
+            unit: data.unit, // Optional validation if generic
+            comments: data.comments,
+            date: selectedDate
+        })).filter(u => !isNaN(u.closingStock)); // Only send valid updates
+
+        if (updates.length === 0) {
+            toast('No changes to save');
+            return;
+        }
+
+        try {
+            await inventoryService.updateClosingStock({ updates });
+            toast.success("Closing stock updated successfully");
+            loadData(); // Refresh to see updated current stock
+            setInputData({}); // Clear inputs? Or keep them? Usually clear or show success.
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to save stock");
+        }
+    };
+
+    // Filter Logic
+    const filteredMaterials = materials.filter(m => {
+        const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'All' || m.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
+    // Pagination Logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredMaterials.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredMaterials.length / itemsPerPage);
+
+    const changePage = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
     return (
-        <div className="flex h-full bg-gray-50 dark:bg-gray-900 overflow-hidden">
-            {/* Sidebar / Filter placeholder from screenshot Left Side */}
-            <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 font-bold text-gray-700 dark:text-gray-200">
-                    Manage Stock
-                </div>
-                <div className="p-4 space-y-4 overflow-y-auto flex-1">
-                    {/* Categories List (Mock) */}
-                    <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categories</div>
-                        {['Dairy', 'Vegetable', 'Bakery', 'Frozen', 'Spices', 'Beverage'].map(cat => (
-                            <div key={cat} className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                                <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                                {cat}
-                            </div>
-                        ))}
+        <div className="flex h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 font-sans text-sm">
+            {/* Sidebar (Keeping it valid as per request/screenshot having a sidebar) */}
+            <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0 hidden md:flex">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                    <div className="bg-red-100 p-2 rounded-lg text-red-600">
+                        <FileText size={20} />
                     </div>
+                    <span className="font-bold text-gray-700 dark:text-gray-200">Manage Stock</span>
+                </div>
+                <div className="p-2 space-y-1 overflow-y-auto flex-1">
+                    <button className="w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-700 rounded-lg font-medium transition-colors">
+                        <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                        Closing Stock
+                    </button>
+                    {/* Other placeholders */}
+                    {['Opening Stock', 'Wastage', 'Indent'].map(item => (
+                        <button key={item} className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg font-medium transition-colors">
+                            <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                            {item}
+                        </button>
+                    ))}
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
-                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex justify-between items-center shrink-0">
-                    <div className="relative w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search Items..."
-                            className="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-900 border-transparent rounded focus:bg-white focus:ring-2 focus:ring-red-500 transition-colors text-sm outline-none"
-                        />
-                    </div>
-                    <div className="flex gap-2">
-                        <div className="flex bg-gray-100 dark:bg-gray-700 rounded p-1">
-                            {[1, 2, 3].map(p => (
-                                <button key={p} className={`w-8 h-8 flex items-center justify-center rounded text-xs font-medium ${p === 1 ? 'bg-white shadow text-black' : 'text-gray-500 hover:bg-gray-200'}`}>
-                                    {p}
-                                </button>
-                            ))}
-                            <button className="w-8 h-8 flex items-center justify-center rounded text-xs font-medium text-gray-500 hover:bg-gray-200">Next</button>
-                        </div>
-                        <button className="w-8 h-8 bg-red-800 text-white rounded flex items-center justify-center hover:bg-red-900">
-                            <Save className="w-4 h-4" />
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                {/* Header Title */}
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center shrink-0">
+                    <h1 className="text-xl font-bold text-gray-800 dark:text-white">Closing Stock</h1>
+                    <div className="flex gap-3">
+                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 font-bold hover:bg-red-700 shadow-lg shadow-red-600/20 text-xs">
+                            <Save className="w-4 h-4" /> Add Stock
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 font-medium hover:bg-gray-50 text-xs text-gray-600">
+                            <FileText className="w-4 h-4" /> Files
                         </button>
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="flex-1 overflow-auto bg-white dark:bg-gray-900">
-                    <table className="w-full text-sm border-collapse">
-                        <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase sticky top-0 z-10 shadow-sm">
-                            <tr>
-                                <th className="p-4 text-left border-b border-gray-200 dark:border-gray-700 w-1/4">Item Name</th>
-                                <th className="p-4 text-left border-b border-gray-200 dark:border-gray-700 w-1/4">Available Stock</th>
-                                <th className="p-4 text-left border-b border-gray-200 dark:border-gray-700 w-1/3">Closing Stock</th>
-                                <th className="p-4 text-left border-b border-gray-200 dark:border-gray-700">Comments</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {materials.map((item, idx) => (
-                                <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-purple-50/30 dark:bg-gray-800/30'} hover:bg-gray-50 transition-colors`}>
-                                    <td className="p-4 align-top">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                                            <div>
-                                                <div className="font-bold text-gray-700 dark:text-gray-200 text-sm">{item.name}</div>
-                                                <div className="text-xs text-gray-400 mt-0.5 uppercase tracking-wide">{item.category}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-4 align-top">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-gray-500 w-20">Current:</span>
-                                                <span className="font-medium bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">
-                                                    {item.currentStock} {item.consumptionUnit}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-4 align-top">
-                                        <div className="flex flex-col gap-2">
-                                            {/* Purchase Unit Input */}
+                {/* Filter Bar (Matching Screenshot) */}
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-end shrink-0">
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-500 uppercase">Raw Material</label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 text-xs bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                                placeholder="Search..."
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-500 uppercase">Category</label>
+                        <select
+                            value={selectedCategory}
+                            onChange={e => setSelectedCategory(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 text-xs bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                        >
+                            <option value="All">All</option>
+                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-500 uppercase">Date</label>
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={e => setSelectedDate(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 text-xs bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-500 uppercase">Closing Stock Updated On</label>
+                        <select
+                            value={updateFrequency}
+                            onChange={e => setUpdateFrequency(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 text-xs bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                        >
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                        </select>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <button className="flex-1 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 font-bold text-xs">
+                            Load
+                        </button>
+                        <button
+                            onClick={() => { setSearchTerm(''); setSelectedCategory('All'); }}
+                            className="flex-1 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium text-xs"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                {/* Table Content */}
+                <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <table className="w-full text-left">
+                            <thead className="bg-purple-50/50 dark:bg-gray-700/50 text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
+                                <tr>
+                                    <th className="p-4">Category</th>
+                                    <th className="p-4">Raw Material</th>
+                                    <th className="p-4">Closing Stock ({selectedDate})</th>
+                                    <th className="p-4 w-96">Update Your Closing Stock</th>
+                                    <th className="p-4">Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="5" className="p-8 text-center text-gray-500">Loading...</td>
+                                    </tr>
+                                ) : currentItems.map(item => (
+                                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td className="p-4 text-gray-500 font-medium">
+                                            {item.category}
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="font-bold text-gray-800 dark:text-white">{item.name}</div>
+                                            <div className="text-xs text-gray-400 mt-1">[ Unit: {item.consumptionUnit} ]</div>
+                                        </td>
+                                        <td className="p-4 font-bold text-gray-700 dark:text-gray-300">
+                                            {item.currentStock} {item.consumptionUnit}
+                                        </td>
+                                        <td className="p-4">
                                             <div className="flex items-center gap-2">
                                                 <div className="relative flex-1">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Closing Stock</span>
                                                     <input
                                                         type="number"
-                                                        className="w-full pl-24 pr-12 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none"
-                                                        placeholder="0"
-                                                        value={inputs[`${item.id}_purchase`] || ''}
-                                                        onChange={e => handleInputChange(item.id, 'purchase', e.target.value)}
+                                                        value={inputData[item.id]?.closingStock || ''}
+                                                        onChange={e => handleInputChange(item.id, 'closingStock', e.target.value)}
+                                                        className="w-full pr-12 pl-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 text-sm"
+                                                        placeholder="Closing Stock"
                                                     />
-                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-bold">/{item.purchaseUnit}</span>
+                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                                                        / {item.consumptionUnit}
+                                                    </span>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <input
+                                                type="text"
+                                                value={inputData[item.id]?.comments || ''}
+                                                onChange={e => handleInputChange(item.id, 'comments', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-gray-400 text-sm placeholder-gray-300"
+                                                placeholder="Comments"
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                                {!loading && currentItems.length === 0 && (
+                                    <tr>
+                                        <td colSpan="5" className="p-8 text-center text-gray-500">No items found matching your filters.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                                            {/* Consumption Unit Input (if different) */}
-                                            {item.purchaseUnit !== item.consumptionUnit && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="relative flex-1">
-                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Closing Stock</span>
-                                                        <input
-                                                            type="number"
-                                                            className="w-full pl-24 pr-12 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none"
-                                                            placeholder="0"
-                                                            value={inputs[`${item.id}_consumption`] || ''}
-                                                            onChange={e => handleInputChange(item.id, 'consumption', e.target.value)}
-                                                        />
-                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-bold">/{item.consumptionUnit}</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="p-4 align-top">
-                                        <input
-                                            type="text"
-                                            placeholder="Comments"
-                                            className="w-full border border-gray-200 dark:border-gray-700 rounded px-3 py-1.5 text-sm bg-transparent focus:bg-white transition-colors outline-none focus:border-gray-400"
-                                        />
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                {/* Footer / Pagination */}
+                <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center shrink-0">
+                    <div className="text-xs text-gray-500 font-medium">
+                        Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredMaterials.length)} of {filteredMaterials.length} items
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <div className="flex mr-4">
+                            <button
+                                onClick={() => changePage(1)}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1.5 border border-gray-200 rounded-l-lg hover:bg-gray-50 text-xs font-bold disabled:opacity-50"
+                            >
+                                First
+                            </button>
+                            <button
+                                onClick={() => changePage(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1.5 border-t border-b border-gray-200 hover:bg-gray-50 text-xs font-bold disabled:opacity-50"
+                            >
+                                Prev
+                            </button>
+                            {/* Mock Page Numbers */}
+                            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                                const page = currentPage > 2 && totalPages > 3 ? currentPage - 1 + i : i + 1;
+                                if (page > totalPages) return null;
+                                return (
+                                    <button
+                                        key={page}
+                                        onClick={() => changePage(page)}
+                                        className={`px-3 py-1.5 border border-gray-200 text-xs font-bold hover:bg-gray-50 ${currentPage === page ? 'bg-red-50 text-red-600 border-red-200' : ''}`}
+                                    >
+                                        {page}
+                                    </button>
+                                );
+                            })}
+                            {totalPages > 3 && <span className="px-2 text-gray-400">...</span>}
+                            <button
+                                onClick={() => changePage(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-1.5 border-t border-b border-gray-200 hover:bg-gray-50 text-xs font-bold disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                            <button
+                                onClick={() => changePage(totalPages)}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-1.5 border border-gray-200 rounded-r-lg hover:bg-gray-50 text-xs font-bold disabled:opacity-50"
+                            >
+                                Last
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={handleSave}
+                            className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-red-600/20 hover:bg-red-700 transition-colors text-sm flex items-center gap-2"
+                        >
+                            <Save className="w-4 h-4" /> Save Closing Stock
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* FAB for Comments/Support */}
+            {/* FAB for Support - keeping if desired or removing if conflicting. Screenshot showed Save button at bottom right, so I placed Save there. I will keep FAB hidden unless needed or move it. Screenshot didn't show FAB. */}
             <div className="fixed bottom-6 right-6">
-                <button className="w-12 h-12 bg-red-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-900 transition-colors">
-                    <MessageCircle className="w-6 h-6" />
+                <button className="w-12 h-12 bg-red-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-800 transition-colors">
+                    <FileText className="w-5 h-5" />
                 </button>
             </div>
         </div>
