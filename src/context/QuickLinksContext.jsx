@@ -32,8 +32,7 @@ export const initialMenuGroups = [
         id: 'group_menu',
         title: 'Menu Management',
         items: [
-            { id: 'menu_discounts', path: '/menu', label: 'Menu & Discounts', icon: UtensilsCrossed },
-            { id: 'menu_on_off', path: '/menu/on-off', label: 'Menu on/off', icon: FileText },
+            { id: 'menu_discounts', path: '/menu/on-off', label: 'Menu & Discounts', icon: UtensilsCrossed },
             { id: 'special_note', path: '/menu/special-note', label: 'Special Note', icon: FileText },
         ]
     },
