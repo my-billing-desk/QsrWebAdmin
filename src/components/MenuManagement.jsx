@@ -12,8 +12,8 @@ import { TaxesView } from './menu/TaxesView';
 import { DiscountsView } from './menu/DiscountsView';
 
 export function MenuManagement() {
-    const [view, setView] = useState('hub'); // 'hub' | 'detail'
-    const [activeTab, setActiveTab] = useState('Items');
+    const [view, setView] = useState('detail'); // Default to detail view
+    const [activeTab, setActiveTab] = useState('Availability'); // Default to Availability tab
     const [dashboardProps, setDashboardProps] = useState({ initialTab: 'online', initialChannel: 'all' });
 
     const handleNavigate = (tab, props = {}) => {

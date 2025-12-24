@@ -115,7 +115,7 @@ function AppRoutes() {
       {/* Main App Routes */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/menu" element={<Navigate to="/menu/on-off" replace />} />
+        <Route path="/menu" element={<MenuManagement />} />
         <Route path="/orders" element={<AllOrders />} />
         <Route path="/orders/online" element={<OnlineOrders />} />
         <Route path="/orders/kot" element={<KOT />} />
