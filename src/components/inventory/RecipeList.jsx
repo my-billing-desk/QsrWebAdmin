@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MoreHorizontal, ChefHat, Sparkles } from 'lucide-react';
+import { Plus, Search, Filter, MoreHorizontal, ChefHat, Sparkles, Pencil, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { menuService } from '../../services/api';
@@ -216,13 +216,31 @@ export default function RecipeList() {
                             </div>
                             <div className="w-48 flex items-center gap-2">
                                 {item.recipe ? (
-                                    <button
-                                        onClick={() => navigate(`/inventory/recipes/edit/${item.id}`)}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                                        title="Edit Recipe"
-                                    >
-                                        <Plus className="w-4 h-4 rotate-45" /> {/* Use X icon simulation or edit icon, but user has + in screenshot. But if generic, + adds. Changing to Edit icon if exists is better UX but I stick to user screenshot which had + */}
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() => navigate(`/inventory/recipes/edit/${item.id}`)}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                            title="Edit Recipe"
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm('Are you sure you want to delete this recipe?')) {
+                                                    // Add delete logic directly or via service
+                                                    axios.delete(`${API_URL}/inventory/recipes/${item.recipe.id}`)
+                                                        .then(() => {
+                                                            fetchData(); // Refresh
+                                                        })
+                                                        .catch(err => console.error(err));
+                                                }
+                                            }}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                                            title="Delete Recipe"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </>
                                 ) : (
                                     <button
                                         onClick={() => navigate(`/inventory/recipes/edit/${item.id}`)}
