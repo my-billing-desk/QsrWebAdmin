@@ -177,23 +177,23 @@ export function StockSummary() {
                                                 <span className="text-[10px] text-slate-400 uppercase tracking-wider">{row.unit}</span>
                                             </div>
                                         </td>
-                                        <td className="text-center text-slate-500">{row.opening.toFixed(2)}</td>
-                                        <td className="text-center text-emerald-600 font-bold bg-emerald-50/50 dark:bg-emerald-900/10 rounded-lg">{row.purchase.toFixed(2)}</td>
-                                        <td className="text-center text-slate-500">{row.totalInput.toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{(row.opening || 0).toFixed(2)}</td>
+                                        <td className="text-center text-emerald-600 font-bold bg-emerald-50/50 dark:bg-emerald-900/10 rounded-lg">{(row.purchase || 0).toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{(row.totalInput || 0).toFixed(2)}</td>
 
                                         <td
                                             className="text-center text-rose-600 font-bold cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors underline decoration-dotted underline-offset-4"
                                             onClick={() => setSelectedItemForDetails(row)}
                                         >
-                                            {row.consumed.toFixed(2)}
+                                            {(row.consumed || 0).toFixed(2)}
                                         </td>
 
-                                        <td className="text-center text-slate-500">{row.wastage.toFixed(2)}</td>
-                                        <td className="text-center text-slate-500">{row.totalOutput.toFixed(2)}</td>
-                                        <td className="text-center font-extrabold text-slate-800 dark:text-white bg-slate-50/50 dark:bg-slate-700/30">{row.closingStock.toFixed(2)}</td>
-                                        <td className="text-center text-slate-500">{row.closingSummary.toFixed(2)}</td>
-                                        <td className={`text-center font-bold ${row.difference < 0 ? 'text-red-500' : 'text-slate-400'}`}>
-                                            {row.difference.toFixed(2)}
+                                        <td className="text-center text-slate-500">{(row.wastage || 0).toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{(row.totalOutput || 0).toFixed(2)}</td>
+                                        <td className="text-center font-extrabold text-slate-800 dark:text-white bg-slate-50/50 dark:bg-slate-700/30">{(row.closingStock || 0).toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{(row.closingSummary || 0).toFixed(2)}</td>
+                                        <td className={`text-center font-bold ${(row.difference || 0) < 0 ? 'text-red-500' : 'text-slate-400'}`}>
+                                            {(row.difference || 0).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))
