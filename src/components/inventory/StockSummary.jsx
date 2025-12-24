@@ -80,129 +80,176 @@ export function StockSummary() {
     // ... existing hook ...
 
     return (
-        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
-            {/* ... Header and Filters ... */}
-
-            {/* Table */}
-            <div className="flex-1 overflow-auto bg-white dark:bg-gray-900 m-4 rounded shadow border border-gray-200 dark:border-gray-700">
-                <table className="w-full text-xs text-left border-collapse min-w-[1200px]">
-                    <thead className="bg-blue-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border-b border-gray-200 dark:border-gray-600 sticky top-0 z-10">
-                        {/* ... Existing Headers ... */}
-                        <tr>
-                            <th className="p-3 border-r border-gray-200 bg-blue-50 sticky left-0 z-20">Raw Material</th>
-                            <th className="p-3 text-center border-r border-gray-200">Opening<br />(A)</th>
-                            <th className="p-3 text-center border-r border-gray-200 text-green-600">Purchase<br />(B)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Excess<br />(C)</th>
-                            <th className="p-3 text-center border-r border-gray-200 bg-blue-100 font-bold text-blue-800">Total<br />(A+B+C)</th>
-
-                            <th className="p-3 text-center border-r border-gray-200 text-green-600">Consumed<br />(D)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Wastage<br />(E)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Normal Loss<br />(F)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Transfer<br />(G)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Shortage<br />(H)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Conversion<br />(I)</th>
-
-                            <th className="p-3 text-center border-r border-gray-200 bg-blue-100 font-bold text-blue-800">Total<br />(Out)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Closing Stock<br />(Calc)</th>
-                            <th className="p-3 text-center border-r border-gray-200">Closing Summary<br />(Actual)</th>
-                            <th className="p-3 text-center font-bold">Difference</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {loading ? (
-                            <tr><td colSpan="15" className="p-8 text-center">Loading...</td></tr>
-                        ) : summary.length === 0 ? (
-                            <tr><td colSpan="15" className="p-8 text-center text-gray-500">No data found</td></tr>
-                        ) : (
-                            summary.map((row) => (
-                                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td className="p-3 font-medium border-r border-gray-200 sticky left-0 bg-white group-hover:bg-gray-50 z-10 w-48">
-                                        <div className="truncate w-40" title={row.name}>{row.name}</div>
-                                        <div className="text-[10px] text-gray-400">[{row.unit}]</div>
-                                    </td>
-
-                                    <td className="p-3 text-center border-r border-gray-200">{row.opening.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200 text-green-600 bg-green-50/30">{row.purchase.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.excess.toFixed(3)}</td>
-
-                                    <td className="p-3 text-center border-r border-gray-200 bg-blue-50 font-bold">{row.totalInput.toFixed(3)}</td>
-
-                                    <td
-                                        className="p-3 text-center border-r border-gray-200 text-green-600 cursor-pointer hover:bg-green-50 hover:underline"
-                                        onClick={() => setSelectedItemForDetails(row)}
-                                    >
-                                        {row.consumed.toFixed(3)}
-                                    </td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.wastage.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.normalLoss.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.transfer.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.shortage.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.conversion.toFixed(3)}</td>
-
-                                    <td className="p-3 text-center border-r border-gray-200 bg-blue-50 font-bold">{row.totalOutput.toFixed(3)}</td>
-
-                                    <td className="p-3 text-center border-r border-gray-200 font-bold">{row.closingStock.toFixed(3)}</td>
-                                    <td className="p-3 text-center border-r border-gray-200">{row.closingSummary.toFixed(3)}</td>
-                                    <td className={`p-3 text-center font-bold ${row.difference !== 0 ? 'text-red-500' : 'text-gray-800'}`}>{row.difference.toFixed(3)}</td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+        <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden relative">
+            {/* Header */}
+            <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6 flex justify-between items-center shrink-0">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Stock Summary</h1>
+                    <p className="text-slate-500 text-sm mt-1">Real-time inventory tracking and valuation</p>
+                </div>
+                <div className="flex gap-3">
+                    <button className="btn-secondary">
+                        <Clock className="w-4 h-4" /> Schedule
+                    </button>
+                    <button className="btn-secondary">
+                        <Download className="w-4 h-4" /> Export
+                    </button>
+                </div>
             </div>
 
-            {/* Side Modal for Consumption Details */}
+            {/* Filters */}
+            <div className="bg-white dark:bg-slate-800 px-6 py-4 shadow-sm border-b border-slate-200 dark:border-slate-700 shrink-0">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                    <div className="space-y-1">
+                        <label className="form-label">Raw Material</label>
+                        <input
+                            type="text"
+                            value={filters.rawMaterial}
+                            onChange={(e) => setFilters(prev => ({ ...prev, rawMaterial: e.target.value }))}
+                            className="input-field"
+                            placeholder="Search item..."
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="form-label">Category</label>
+                        <select
+                            value={filters.category}
+                            onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+                            className="input-field"
+                        >
+                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    {/* Simplified Filters for Modern Look */}
+                    <div className="space-y-1">
+                        <label className="form-label">Date Range</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="date"
+                                value={filters.fromDate}
+                                onChange={(e) => setFilters(prev => ({ ...prev, fromDate: e.target.value }))}
+                                className="input-field"
+                            />
+                            <span className="text-slate-400">-</span>
+                            <input
+                                type="date"
+                                value={filters.toDate}
+                                onChange={(e) => setFilters(prev => ({ ...prev, toDate: e.target.value }))}
+                                className="input-field"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                        {/* Spacer or additional filter, simplified to button here */}
+                        <label className="form-label opacity-0">Action</label>
+                        <div className="flex gap-2">
+                            <button onClick={handleSearch} className="btn-primary w-full">
+                                <Search className="w-4 h-4" /> Generate Report
+                            </button>
+                            <button onClick={handleClear} className="btn-secondary">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modern Table Area */}
+            <div className="flex-1 overflow-auto p-6">
+                <div className="table-container bg-white dark:bg-slate-800">
+                    <table className="table-modern">
+                        <thead className="sticky top-0 z-10">
+                            <tr>
+                                <th className="sticky left-0 bg-slate-50 dark:bg-slate-800 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Item Details</th>
+                                <th className="text-center">Opening</th>
+                                <th className="text-center text-emerald-600">Purchase</th>
+                                <th className="text-center">Total In</th>
+                                <th className="text-center text-rose-600">Consumed</th>
+                                <th className="text-center">Wastage</th>
+                                <th className="text-center">Total Out</th>
+                                <th className="text-center font-extrabold text-slate-700 dark:text-slate-200">Closing</th>
+                                <th className="text-center">Actual</th>
+                                <th className="text-center">Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr><td colSpan="10" className="p-12 text-center text-slate-400">Loading inventory data...</td></tr>
+                            ) : summary.length === 0 ? (
+                                <tr><td colSpan="10" className="p-12 text-center text-slate-400">Specify filters to generate report</td></tr>
+                            ) : (
+                                summary.map((row) => (
+                                    <tr key={row.id}>
+                                        <td className="sticky left-0 bg-white dark:bg-slate-800 z-10 font-medium group-hover:bg-slate-50 dark:group-hover:bg-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                                            <div className="flex flex-col">
+                                                <span className="text-slate-700 dark:text-slate-200 font-bold">{row.name}</span>
+                                                <span className="text-[10px] text-slate-400 uppercase tracking-wider">{row.unit}</span>
+                                            </div>
+                                        </td>
+                                        <td className="text-center text-slate-500">{row.opening.toFixed(2)}</td>
+                                        <td className="text-center text-emerald-600 font-bold bg-emerald-50/50 dark:bg-emerald-900/10 rounded-lg">{row.purchase.toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{row.totalInput.toFixed(2)}</td>
+
+                                        <td
+                                            className="text-center text-rose-600 font-bold cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors underline decoration-dotted underline-offset-4"
+                                            onClick={() => setSelectedItemForDetails(row)}
+                                        >
+                                            {row.consumed.toFixed(2)}
+                                        </td>
+
+                                        <td className="text-center text-slate-500">{row.wastage.toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{row.totalOutput.toFixed(2)}</td>
+                                        <td className="text-center font-extrabold text-slate-800 dark:text-white bg-slate-50/50 dark:bg-slate-700/30">{row.closingStock.toFixed(2)}</td>
+                                        <td className="text-center text-slate-500">{row.closingSummary.toFixed(2)}</td>
+                                        <td className={`text-center font-bold ${row.difference < 0 ? 'text-red-500' : 'text-slate-400'}`}>
+                                            {row.difference.toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Modal Re-implementation with new styles */}
             {selectedItemForDetails && (
                 <div className="absolute inset-0 z-50 flex justify-end">
-                    {/* Backdrop */}
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" onClick={() => setSelectedItemForDetails(null)}></div>
-
-                    {/* Modal Panel */}
-                    <div className="relative w-full max-w-2xl h-full bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 animate-in slide-in-from-right">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                            <h2 className="text-lg font-bold text-gray-800 dark:text-white">
-                                Stock Consumed Details Of {selectedItemForDetails.name}
-                            </h2>
-                            <button onClick={() => setSelectedItemForDetails(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
+                    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]" onClick={() => setSelectedItemForDetails(null)}></div>
+                    <div className="relative w-full max-w-2xl h-full bg-white dark:bg-slate-800 shadow-2xl border-l border-slate-200 dark:border-slate-700 flex flex-col transform transition-transform duration-300 animate-in slide-in-from-right">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-white">Consumption Details</h2>
+                                <p className="text-sm text-slate-500">Breakdown for <span className="text-primary-600 font-bold">{selectedItemForDetails.name}</span></p>
+                            </div>
+                            <button onClick={() => setSelectedItemForDetails(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 transition-colors">
                                 ✕
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-                            {/* Details Table */}
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-gray-100 text-xs font-bold text-gray-700 uppercase">
+                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-900/50">
+                            <div className="card p-0 overflow-hidden">
+                                <table className="table-modern">
+                                    <thead>
                                         <tr>
-                                            <th className="px-4 py-3">Invoice Date</th>
-                                            <th className="px-4 py-3">Item Name</th>
-                                            <th className="px-4 py-3 text-right">Qty</th>
-                                            <th className="px-4 py-3 text-right">Price (₹)</th>
-                                            <th className="px-4 py-3 text-right">Amount (₹)</th>
-                                            <th className="px-4 py-3">Invoice No.</th>
-                                            <th className="px-4 py-3">Consumed At</th>
+                                            <th>Date</th>
+                                            <th>Item</th>
+                                            <th className="text-right">Qty</th>
+                                            <th>Invoice</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100 text-gray-600">
-                                        {/* Mocking data rows for UI structure as per screenshot */}
-                                        <tr className="hover:bg-gray-50">
-                                            <td className="px-4 py-3">24-Dec-2025</td>
-                                            <td className="px-4 py-3">Classic Veg Burger</td>
-                                            <td className="px-4 py-3 text-right">1.000 pcs</td>
-                                            <td className="px-4 py-3 text-right">0</td>
-                                            <td className="px-4 py-3 text-right">0</td>
-                                            <td className="px-4 py-3">
-                                                <div className="font-bold text-gray-800">2644</div>
-                                                <div className="text-green-600 text-xs">Success</div>
+                                    <tbody>
+                                        {/* Simplified Mock Rows */}
+                                        <tr>
+                                            <td>
+                                                <div className="font-bold text-slate-700 dark:text-slate-200">24 Dec, 2025</div>
+                                                <div className="text-xs text-slate-400">15:06 PM</div>
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-gray-500">24-Dec-2025 15:06:35</td>
-                                        </tr>
-                                        {/* Total Row */}
-                                        <tr className="bg-gray-100 font-bold text-gray-800">
-                                            <td colSpan="2" className="px-4 py-3">Total consumption</td>
-                                            <td className="px-4 py-3 text-right">1.000 pcs</td>
-                                            <td colSpan="1" className="px-4 py-3 text-right">0</td>
-                                            <td colSpan="3"></td>
+                                            <td>Classic Veg Burger</td>
+                                            <td className="text-right font-bold text-rose-600">1.00</td>
+                                            <td>
+                                                <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">#2644</span>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -214,5 +261,3 @@ export function StockSummary() {
         </div>
     );
 }
-
-
