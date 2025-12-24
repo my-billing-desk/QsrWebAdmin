@@ -30,6 +30,8 @@ import { Wastage } from './components/inventory/Wastage';
 import { ProductionEntry } from './components/inventory/Placeholders';
 import { AvailableStock } from './components/inventory/AvailableStock';
 import { ClosingStock } from './components/inventory/ClosingStock';
+import { OpeningStock } from './components/inventory/OpeningStock';
+import { Indent } from './components/inventory/Indent';
 import { StockSummary } from './components/inventory/StockSummary';
 import { OnlineOrders } from './components/orders/OnlineOrders';
 import { RunningOrders } from './components/orders/RunningOrders';
@@ -62,6 +64,7 @@ import { MenuOnOff } from './components/menu/MenuOnOff';
 import { SpecialNote } from './components/menu/SpecialNote';
 import { MarketplaceSetting } from './components/configuration/MarketplaceSetting';
 import { Toaster } from 'react-hot-toast';
+import { GeminiSupport } from './components/GeminiSupport';
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -96,6 +99,7 @@ function MainLayout() {
           <Outlet />
         </main>
       </div>
+      <GeminiSupport />
     </div>
   );
 }
@@ -224,6 +228,8 @@ function AppRoutes() {
         <Route path="production" element={<ProductionEntry />} />
         <Route path="stock/available" element={<AvailableStock />} />
         <Route path="stock/closing" element={<ClosingStock />} />
+        <Route path="stock/opening" element={<OpeningStock />} />
+        <Route path="indent" element={<Indent />} />
         <Route path="reports" element={<InventoryReports />} />
         <Route path="reports/stock-summary" element={<StockSummary />} />
         <Route path="settings" element={<InventorySettings />} />
