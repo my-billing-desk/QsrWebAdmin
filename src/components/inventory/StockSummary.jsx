@@ -18,40 +18,26 @@ export function StockSummary() {
     const handleSearch = async () => {
         setLoading(true);
         try {
-            // In a real app, this would be an aggregation query on backend
-            // For now, we fetch materials and mock the calculation or fetch a report endpoint if it existed
-            // Let's assume we fetch raw materials and display 0s as per screenshot request unless we have real history
-            const res = await inventoryService.getRawMaterials();
-
-            // Map to summary structure
-            const report = res.data.map(item => ({
-                id: item.id,
-                name: item.name,
-                unit: filters.unitType === 'Purchase Unit' ? item.purchaseUnit : item.consumptionUnit,
-                opening: 0,
-                purchase: 0,
-                excess: 0,
-                totalInput: 0, // A+B+C
-                consumed: 0,
-                wastage: 0,
-                normalLoss: 0,
-                transfer: 0,
-                shortage: 0,
-                conversion: 0,
-                totalOutput: 0,
-                closingStock: 0,
-                closingSummary: 0,
-                difference: 0
-            }));
-
-            // Filter by category/search
-            const filtered = report.filter(r => {
-                const matchCat = filters.category === 'All' || true; // item category not in report obj yet, would need join
-                const matchName = !filters.rawMaterial || r.name.toLowerCase().includes(filters.rawMaterial.toLowerCase());
-                return matchCat && matchName;
+            // Fetch real-time calculated report from backend
+            const res = await inventoryService.getStockSummaryReport({
+                fromDate: filters.fromDate,
+                toDate: filters.toDate
             });
 
-            setSummary(filtered);
+            let report = res.data;
+
+            // Client-side filtering for Name and Category
+            // Note: Backend currently returns all materials with calculated values
+            if (filters.category !== 'All' || filters.rawMaterial) {
+                report = report.filter(r => {
+                    // Start matching
+                    const matchesName = !filters.rawMaterial || r.name.toLowerCase().includes(filters.rawMaterial.toLowerCase());
+                    // const matchesCategory = filters.category === 'All' || r.category === filters.category; // Category not yet in payload
+                    return matchesName;
+                });
+            }
+
+            setSummary(report);
 
         } catch (error) {
             console.error("Failed to fetch stock summary:", error);
@@ -68,7 +54,12 @@ export function StockSummary() {
             fromDate: new Date().toISOString().split('T')[0],
             toDate: new Date().toISOString().split('T')[0]
         });
-        setSummary([]);
+        // Trigger generic search to reset view
+        // We don't set summary to [] because we want to show default view (today)
+        // ideally we reset filters state and then trigger search, but due to closure capture in handleSearch if called directly,
+        // we might simplest just reset state and let user click search, or call a separate initial loader.
+        // For 'Clear', let's just empty it or reload default.
+        window.location.reload(); // Simplest reset for now
     };
 
     useEffect(() => {
