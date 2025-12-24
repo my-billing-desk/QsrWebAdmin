@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, AlertTriangle, TrendingDown, DollarSign, Search, ChevronDown, RefreshCw, SlidersHorizontal, Settings, FileText, ArrowRight, TrendingUp } from 'lucide-react';
+import { Package, AlertTriangle, TrendingDown, DollarSign, Search, ChevronRight, Zap, Activity, ArrowUpRight, ArrowDownRight, RefreshCw, Layers } from 'lucide-react';
 import { inventoryService } from '../../services/api';
 
 export function InventoryDashboard() {
@@ -9,8 +9,6 @@ export function InventoryDashboard() {
         totalStockValue: 0,
         totalWastage: 0
     });
-    const [industryMargin] = useState(45);
-    const [actualMargin] = useState(0);
 
     useEffect(() => {
         loadStats();
@@ -26,214 +24,138 @@ export function InventoryDashboard() {
     };
 
     return (
-        <div className="flex flex-col space-y-8 font-sans pb-10 relative">
-            {/* Ambient Background Elements */}
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-rose-400/20 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-violet-400/20 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        <div className="min-h-screen p-2 font-dm-sans">
+            {/* Dynamic background blobs for depth */}
+            <div className="fixed top-20 right-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] pointer-events-none -z-10 animate-pulse"></div>
+            <div className="fixed bottom-20 left-20 w-96 h-96 bg-rose-600/20 rounded-full blur-[128px] pointer-events-none -z-10 animate-pulse delay-700"></div>
 
-            {/* Header / Intro */}
-            <div className="flex justify-between items-end px-2">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-8 px-2">
                 <div>
-                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight">
-                        Inventory Overview
+                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-500 tracking-tighter">
+                        Inventory<span className="text-rose-500">.AI</span>
                     </h1>
-                    <p className="text-gray-500 font-medium mt-2 text-lg">Real-time tracking of stock, recipes, and procurement.</p>
+                    <p className="text-gray-400 font-bold tracking-wide text-xs uppercase mt-1 ml-1">Live Operations Center</p>
                 </div>
-                <button className="flex items-center gap-2 bg-white/50 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white/20 shadow-lg shadow-gray-200/20 hover:bg-white/80 transition-all font-bold text-gray-700 dark:bg-gray-800/50 dark:text-gray-200 dark:border-gray-700">
-                    <RefreshCw className="w-4 h-4" /> Refresh Data
-                </button>
+                <div className="flex gap-4">
+                    <button className="flex items-center gap-2 px-6 py-3 bg-white/10 dark:bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-full text-sm font-bold shadow-lg hover:shadow-rose-500/20 hover:scale-105 transition-all text-gray-700 dark:text-white">
+                        <Zap className="w-4 h-4 text-amber-400" />
+                        AI Insights
+                    </button>
+                    <button className="w-12 h-12 flex items-center justify-center bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full shadow-xl hover:rotate-180 transition-transform duration-700">
+                        <RefreshCw className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
-            {/* Margin Insights Hero Section */}
-            <div className="relative overflow-hidden rounded-[2.5rem] p-1 bg-gradient-to-br from-white/40 to-white/10 dark:from-gray-800/40 dark:to-gray-900/10 backdrop-blur-2xl border border-white/20 shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-violet-500/5 dark:from-rose-500/10 dark:to-violet-500/10"></div>
+            {/* BENTO GRID LAYOUT */}
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 grid-rows-[auto_auto_auto]">
 
-                <div className="relative bg-white/60 dark:bg-gray-900/60 rounded-[2.3rem] p-8 md:p-10">
-                    <div className="flex flex-col md:flex-row justify-between gap-12">
-                        {/* Left: Text & Progress */}
-                        <div className="flex-1 space-y-8">
+                {/* 1. HERO - Margin Analysis (Large: 4x2) */}
+                <div className="col-span-1 md:col-span-4 lg:col-span-4 row-span-2 relative group overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white shadow-2xl shadow-black/20 border border-white/5">
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+                    <div className="absolute -right-20 -top-20 w-[400px] h-[400px] bg-rose-500/30 rounded-full blur-[100px] group-hover:bg-rose-500/40 transition-colors duration-500"></div>
+
+                    <div className="relative z-10 p-10 h-full flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <div>
-                                <h2 className="text-2xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
-                                    <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl text-rose-600 dark:text-rose-400">
-                                        <TrendingUp className="w-6 h-6" />
-                                    </div>
-                                    Margin Insights
-                                </h2>
-                                <p className="text-gray-500 mt-2 font-medium leading-relaxed max-w-lg">
-                                    Your current margin is significantly lower than the industry standard of 45%.
-                                    Optimize recipes to improve profitability.
-                                </p>
+                                <span className="inline-block px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] font-black uppercase tracking-widest mb-4">CRITICAL ALERT</span>
+                                <h2 className="text-5xl font-black leading-tight mb-2 tracking-tight">Margin Gap<br />Detected</h2>
+                                <p className="text-gray-400 max-w-sm text-lg font-medium leading-relaxed">Your actual margin is <span className="text-white font-bold">0%</span> vs industry standard <span className="text-emerald-400 font-bold">45%</span>.</p>
                             </div>
-
-                            <div className="space-y-3">
-                                <div className="flex justify-between text-sm font-bold text-gray-600 dark:text-gray-300 px-1">
-                                    <span>Actual: {actualMargin}%</span>
-                                    <span>Target: {industryMargin}%</span>
-                                </div>
-                                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative shadow-inner">
-                                    {/* Actual Margin Bar */}
-                                    <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-orange-400 to-rose-500 rounded-full transition-all duration-1000" style={{ width: `${Math.max(5, actualMargin)}%` }}></div>
-
-                                    {/* Target Marker */}
-                                    <div className="absolute top-0 bottom-0 w-1 bg-gray-800 dark:bg-white/50 backdrop-blur" style={{ left: `${industryMargin}%` }}></div>
-                                </div>
-                                <p className="text-xs font-bold text-gray-400 text-right uppercase tracking-wider">Gap: {industryMargin - actualMargin}%</p>
+                            <div className="text-right">
+                                <h3 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 tracking-tighter">0%</h3>
+                                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Current Margin</p>
                             </div>
                         </div>
 
-                        {/* Right: Stats Cards */}
-                        <div className="flex gap-6">
-                            <div className="flex-1 min-w-[180px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center text-center">
-                                <span className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Current</span>
-                                <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-gray-800 to-gray-500 dark:from-white dark:to-gray-400">{actualMargin}%</span>
-                            </div>
-                            <div className="flex-1 min-w-[180px] bg-gradient-to-br from-rose-500 to-orange-600 text-white rounded-3xl p-6 shadow-xl shadow-rose-500/20 flex flex-col justify-center items-center text-center">
-                                <span className="text-sm font-bold text-white/70 uppercase tracking-widest mb-2">Projected</span>
-                                <span className="text-5xl font-black text-white">36%</span>
-                            </div>
+                        {/* Interactive Graph Area */}
+                        <div className="w-full h-32 bg-white/5 rounded-3xl mt-8 border border-white/5 flex items-end justify-between px-2 pb-2 gap-1 group-hover:scale-[1.02] transition-transform duration-500">
+                            {[30, 45, 25, 60, 40, 75, 50, 45, 65, 30, 55, 40, 60, 35, 80].map((h, i) => (
+                                <div key={i} className={`w-full bg-gradient-to-t ${i > 10 ? 'from-rose-500/80 to-rose-400' : 'from-gray-700 to-gray-600'} rounded-t-lg transition-all duration-500 hover:opacity-100 opacity-80`} style={{ height: `${h}%` }}></div>
+                            ))}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Main CTA Card */}
-                <div className="md:col-span-1 bg-gray-900 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
-                    <div className="relative z-10 h-full flex flex-col justify-between">
-                        <div>
-                            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/10">
-                                <Package className="w-7 h-7 text-rose-400" />
-                            </div>
-                            <h3 className="text-3xl font-bold leading-tight mb-2">
-                                <span className="text-rose-400">{stats.totalItems}</span> Items<br />in Inventory
-                            </h3>
-                            <p className="text-gray-400 font-medium">42 recipes pending approval.</p>
+                {/* 2. Stock Value (Tall: 2x2) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2 bg-white dark:bg-gray-800/60 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/20 dark:border-gray-700 shadow-xl flex flex-col justify-between group hover:-translate-y-1 transition-transform duration-300">
+                    <div>
+                        <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:rotate-12 transition-transform duration-300">
+                            <DollarSign className="w-7 h-7" />
                         </div>
-                        <button className="bg-white text-gray-900 px-6 py-3 rounded-xl font-bold text-sm mt-8 hover:bg-gray-100 transition-colors flex items-center gap-2 w-max">
-                            Review Actions <ArrowRight className="w-4 h-4" />
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">Stock Value</h3>
+                        <p className="text-sm text-gray-500 font-medium">Total assets currently on hand.</p>
+                    </div>
+                    <div>
+                        <h2 className="text-5xl font-black text-emerald-500 tracking-tight my-4">₹{stats.totalStockValue.toLocaleString()}</h2>
+                        <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl w-max">
+                            <ArrowUpRight className="w-4 h-4 stroke-[3]" />
+                            <span className="text-xs font-bold">+12% vs last week</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. QUICK ACTIONS (Square: 2x1) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-indigo-500/30 flex flex-col justify-between group overflow-hidden relative">
+                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+                    <div className="relative z-10">
+                        <Layers className="w-8 h-8 opacity-80 mb-4" />
+                        <h3 className="text-3xl font-bold leading-none mb-1">{stats.totalItems} Items</h3>
+                        <p className="text-indigo-200 text-sm font-medium">Active Inventory</p>
+                    </div>
+                    <div className="relative z-10 flex justify-end">
+                        <button className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white hover:text-indigo-600 transition-all">
+                            <ArrowUpRight className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
 
-                {/* Glassy Stat Cards */}
-                <GlassAnalysisCard
-                    title="Stock Value"
-                    value={`₹ ${stats.totalStockValue.toLocaleString()}`}
-                    trend="+12% from last month"
-                    icon={DollarSign}
-                    color="text-emerald-600"
-                    bg="bg-emerald-100"
-                />
-                <GlassAnalysisCard
-                    title="Low Stock"
-                    value={stats.lowStockCount}
-                    trend="Requires attention"
-                    icon={AlertTriangle}
-                    color="text-rose-600"
-                    bg="bg-rose-100"
-                />
-            </div>
-
-            {/* Detailed Analytics Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Stock Health */}
-                <div className="lg:col-span-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/40 dark:border-gray-700 rounded-[2.5rem] p-8 shadow-xl">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-800 dark:text-white">Stock Health</h3>
-                            <p className="text-sm text-gray-500 font-medium">Overview of inventory levels and wastage.</p>
+                {/* 4. LOW STOCK (Square: 2x1) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-white dark:bg-gray-800/60 backdrop-blur-xl border border-rose-100 dark:border-rose-900/30 rounded-[2.5rem] p-8 shadow-xl flex flex-col justify-between group hover:border-rose-300 transition-all">
+                    <div className="flex justify-between items-start">
+                        <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center text-rose-600">
+                            <AlertTriangle className="w-5 h-5" />
                         </div>
-                        <div className="flex gap-2">
-                            <button className="px-4 py-2 bg-white dark:bg-gray-700 rounded-xl text-xs font-bold shadow-sm hover:shadow-md transition-all">Daily</button>
-                            <button className="px-4 py-2 bg-transparent text-gray-500 font-bold rounded-xl text-xs hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">Weekly</button>
-                        </div>
+                        <span className="text-xs font-black bg-rose-100 text-rose-600 px-3 py-1 rounded-full uppercase">Urgent</span>
                     </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <HealthMetric label="Total Items" value={stats.totalItems} sub="Active SKUs" />
-                        <HealthMetric label="Wastage" value={`₹ ${stats.totalWastage}`} sub="See breakdown" color="text-rose-600" />
-                        <HealthMetric label="Below Par" value="0" sub="Items" />
-                        <HealthMetric label="Out of Stock" value="0" sub="Urgent" color="text-orange-500" />
+                    <div>
+                        <h3 className="text-4xl font-black text-rose-500">{stats.lowStockCount}</h3>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Items Low Stock</p>
                     </div>
+                </div>
 
-                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between p-4 bg-rose-50 dark:bg-rose-900/20 rounded-2xl border border-rose-100 dark:border-rose-800/30">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white dark:bg-gray-800 rounded-xl text-rose-500 shadow-sm">
-                                    <AlertTriangle className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-rose-700 dark:text-rose-400">Critical Alerts</h4>
-                                    <p className="text-xs text-rose-600/80 dark:text-rose-400/80">You have no critical alerts at this time.</p>
-                                </div>
+                {/* 5. WASTAGE (Square: 2x1) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gray-50 dark:bg-gray-800/40 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-[2.5rem] p-8 flex items-center justify-between group hover:bg-white dark:hover:bg-gray-800 transition-all">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Wastage</p>
+                        <h3 className="text-3xl font-black text-gray-900 dark:text-white">₹{stats.totalWastage}</h3>
+                    </div>
+                    <div className="w-16 h-16 rounded-2xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <TrendingDown className="w-6 h-6 text-gray-500" />
+                    </div>
+                </div>
+
+                {/* 6. AI INSIGHTS BAR (Wide: 6x1) */}
+                <div className="col-span-1 md:col-span-4 lg:col-span-6 bg-gradient-to-r from-gray-900 to-gray-800 dark:from-white dark:to-gray-100 rounded-[2rem] p-1 shadow-2xl">
+                    <div className="h-full w-full bg-gray-900 dark:bg-white rounded-[1.8rem] flex items-center justify-between px-8 py-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 animate-pulse">
+                                <Zap className="w-5 h-5 text-white fill-white" />
                             </div>
-                            <button className="text-xs font-bold text-rose-600 hover:text-rose-700">View All</button>
+                            <div>
+                                <h4 className="font-bold text-white dark:text-gray-900">AI Recommendation</h4>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">Based on recent sales patterns</p>
+                            </div>
                         </div>
+                        <p className="hidden md:block text-sm text-gray-300 dark:text-gray-600 font-medium">"Consider restocking <strong>Mozzarella Cheese</strong> before Friday peak."</p>
+                        <button className="px-5 py-2 bg-white/10 dark:bg-gray-100 rounded-xl text-xs font-bold text-white dark:text-gray-800 hover:bg-white/20 transition-colors">
+                            View Details
+                        </button>
                     </div>
                 </div>
 
-                {/* Insight Columns */}
-                <div className="space-y-6">
-                    <InsightActionCard
-                        title="COGS Breakdown"
-                        desc="Analyze ingredient-level cost drivers to optimize spend."
-                        label="Update Master"
-                        gradient="from-blue-500 to-cyan-500"
-                    />
-                    <InsightActionCard
-                        title="Supplier Performance"
-                        desc="Track fulfillment rates and delivery times."
-                        label="View Report"
-                        gradient="from-violet-500 to-purple-500"
-                    />
-                </div>
             </div>
-        </div>
-    );
-}
-
-function GlassAnalysisCard({ title, value, trend, icon: Icon, color, bg }) {
-    return (
-        <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/40 dark:border-gray-700 p-8 rounded-[2.5rem] shadow-xl hover:-translate-y-1 transition-transform duration-300 group">
-            <div className="flex justify-between items-start mb-6">
-                <div className={`w-12 h-12 ${bg} ${color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="w-6 h-6" />
-                </div>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full bg-white/50 border border-white/20 ${color.replace('text', 'text')}`}>
-                    Live
-                </span>
-            </div>
-            <div>
-                <p className="text-gray-500 font-bold text-sm tracking-wide uppercase mb-1">{title}</p>
-                <h3 className="text-4xl font-black text-gray-900 dark:text-white mb-2">{value}</h3>
-                <p className="text-sm font-medium text-gray-400">{trend}</p>
-            </div>
-        </div>
-    );
-}
-
-function HealthMetric({ label, value, sub, color = "text-gray-900 dark:text-white" }) {
-    return (
-        <div className="bg-white/50 dark:bg-gray-700/30 p-4 rounded-3xl border border-gray-100 dark:border-gray-600 text-center">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{label}</p>
-            <h4 className={`text-2xl font-black ${color} mb-1`}>{value}</h4>
-            <p className="text-[10px] font-bold text-gray-400">{sub}</p>
-        </div>
-    );
-}
-
-function InsightActionCard({ title, desc, label, gradient }) {
-    return (
-        <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/40 dark:border-gray-700 p-6 rounded-[2rem] shadow-lg flex flex-col justify-between h-auto">
-            <div>
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 mb-6 leading-relaxed">{desc}</p>
-            </div>
-            <button className={`w-full py-3 rounded-xl bg-gradient-to-r ${gradient} text-white font-bold text-sm shadow-lg opacity-90 hover:opacity-100 transition-opacity`}>
-                {label}
-            </button>
         </div>
     );
 }
