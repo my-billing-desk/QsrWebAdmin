@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, AlertTriangle, TrendingDown, DollarSign, Search, ChevronDown, RefreshCw, SlidersHorizontal, Settings, FileText, ArrowRight } from 'lucide-react';
+import { Package, AlertTriangle, TrendingDown, DollarSign, Search, ChevronDown, RefreshCw, SlidersHorizontal, Settings, FileText, ArrowRight, TrendingUp } from 'lucide-react';
 import { inventoryService } from '../../services/api';
 
 export function InventoryDashboard() {
@@ -26,179 +26,214 @@ export function InventoryDashboard() {
     };
 
     return (
-        <div className="flex flex-col space-y-8 font-sans pb-10">
+        <div className="flex flex-col space-y-8 font-sans pb-10 relative">
+            {/* Ambient Background Elements */}
+            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-rose-400/20 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-violet-400/20 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+
             {/* Header / Intro */}
-            <div className="flex justify-between items-end">
+            <div className="flex justify-between items-end px-2">
                 <div>
-                    <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white">Inventory Overview</h1>
-                    <p className="text-gray-500 font-medium mt-1">Real-time tracking of stock, recipes, and procurement.</p>
+                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight">
+                        Inventory Overview
+                    </h1>
+                    <p className="text-gray-500 font-medium mt-2 text-lg">Real-time tracking of stock, recipes, and procurement.</p>
                 </div>
-                <button className="text-primary-600 font-bold text-sm bg-primary-50 px-4 py-2 rounded-xl border border-primary-100 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-400">
-                    Older Dashboard
+                <button className="flex items-center gap-2 bg-white/50 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white/20 shadow-lg shadow-gray-200/20 hover:bg-white/80 transition-all font-bold text-gray-700 dark:bg-gray-800/50 dark:text-gray-200 dark:border-gray-700">
+                    <RefreshCw className="w-4 h-4" /> Refresh Data
                 </button>
             </div>
 
-            {/* Margin Insights */}
-            <div className="bg-white dark:bg-gray-900/50 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-50 to-primary-50 dark:from-indigo-900/20 dark:to-primary-900/20 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none opacity-50"></div>
+            {/* Margin Insights Hero Section */}
+            <div className="relative overflow-hidden rounded-[2.5rem] p-1 bg-gradient-to-br from-white/40 to-white/10 dark:from-gray-800/40 dark:to-gray-900/10 backdrop-blur-2xl border border-white/20 shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-violet-500/5 dark:from-rose-500/10 dark:to-violet-500/10"></div>
 
-                <div className="relative z-10">
-                    <div className="flex justify-between items-start mb-8">
-                        <div>
-                            <h2 className="text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                <DollarSign className="w-5 h-5 text-primary-500" /> Margin Insights
-                            </h2>
-                            <p className="text-sm text-gray-500 font-medium mt-1 max-w-xl">Compare your current margins with industry standards to identify performance gaps.</p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
-                        <div className="relative pt-8 md:col-span-1">
-                            <div className="h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full relative overflow-visible">
-                                <div className="absolute top-0 left-0 h-full bg-primary-500 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.5)]" style={{ width: '0%' }}></div>
-
-                                {/* Markers */}
-                                <div className="absolute -top-10 left-[45%] -translate-x-1/2 flex flex-col items-center group cursor-help">
-                                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full shadow-sm whitespace-nowrap z-10">Industry: 45%</span>
-                                    <div className="w-0.5 h-4 bg-emerald-500 mt-1"></div>
-                                </div>
-
-                                <div className="absolute -bottom-10 left-0 flex flex-col items-center">
-                                    <div className="w-0.5 h-3 bg-gray-300 mb-1"></div>
-                                    <div className="text-xs font-bold text-gray-400">0%</div>
-                                </div>
-                                <div className="absolute -bottom-10 right-0 flex flex-col items-center">
-                                    <div className="w-0.5 h-3 bg-gray-300 mb-1"></div>
-                                    <div className="text-xs font-bold text-gray-400">100%</div>
-                                </div>
+                <div className="relative bg-white/60 dark:bg-gray-900/60 rounded-[2.3rem] p-8 md:p-10">
+                    <div className="flex flex-col md:flex-row justify-between gap-12">
+                        {/* Left: Text & Progress */}
+                        <div className="flex-1 space-y-8">
+                            <div>
+                                <h2 className="text-2xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
+                                    <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl text-rose-600 dark:text-rose-400">
+                                        <TrendingUp className="w-6 h-6" />
+                                    </div>
+                                    Margin Insights
+                                </h2>
+                                <p className="text-gray-500 mt-2 font-medium leading-relaxed max-w-lg">
+                                    Your current margin is significantly lower than the industry standard of 45%.
+                                    Optimize recipes to improve profitability.
+                                </p>
                             </div>
-                            <div className="mt-8 text-center">
-                                <span className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-2">
-                                    <AlertTriangle className="w-3 h-3" /> Your Actual Margin: 0%
-                                </span>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-sm font-bold text-gray-600 dark:text-gray-300 px-1">
+                                    <span>Actual: {actualMargin}%</span>
+                                    <span>Target: {industryMargin}%</span>
+                                </div>
+                                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative shadow-inner">
+                                    {/* Actual Margin Bar */}
+                                    <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-orange-400 to-rose-500 rounded-full transition-all duration-1000" style={{ width: `${Math.max(5, actualMargin)}%` }}></div>
+
+                                    {/* Target Marker */}
+                                    <div className="absolute top-0 bottom-0 w-1 bg-gray-800 dark:bg-white/50 backdrop-blur" style={{ left: `${industryMargin}%` }}></div>
+                                </div>
+                                <p className="text-xs font-bold text-gray-400 text-right uppercase tracking-wider">Gap: {industryMargin - actualMargin}%</p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6 md:col-span-2">
-                            <div className="bg-gray-50/80 dark:bg-gray-800/50 p-6 rounded-3xl text-center border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
-                                <h3 className="text-4xl font-display font-bold text-gray-900 dark:text-gray-100">{actualMargin}%</h3>
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Actual Margin</p>
+                        {/* Right: Stats Cards */}
+                        <div className="flex gap-6">
+                            <div className="flex-1 min-w-[180px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-6 border border-white/40 shadow-xl flex flex-col justify-center items-center text-center">
+                                <span className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Current</span>
+                                <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-gray-800 to-gray-500 dark:from-white dark:to-gray-400">{actualMargin}%</span>
                             </div>
-
-                            <div className="bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-gray-800/50 p-6 rounded-3xl text-center border border-indigo-100 dark:border-indigo-800/30 hover:shadow-md transition-shadow">
-                                <h3 className="text-4xl font-display font-bold text-primary-600 dark:text-primary-400">36%</h3>
-                                <p className="text-xs font-bold text-primary-800/60 dark:text-primary-300 uppercase tracking-wide mt-2">Estimated Margin</p>
+                            <div className="flex-1 min-w-[180px] bg-gradient-to-br from-rose-500 to-orange-600 text-white rounded-3xl p-6 shadow-xl shadow-rose-500/20 flex flex-col justify-center items-center text-center">
+                                <span className="text-sm font-bold text-white/70 uppercase tracking-widest mb-2">Projected</span>
+                                <span className="text-5xl font-black text-white">36%</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Action Cards */}
+            {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-br from-violet-600 to-indigo-700 text-white p-8 rounded-[2.5rem] shadow-xl shadow-indigo-500/20 flex flex-col justify-between group">
-                    <div>
-                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm group-hover:scale-110 transition-transform">
-                            <Package className="w-6 h-6 text-white" />
+                {/* Main CTA Card */}
+                <div className="md:col-span-1 bg-gray-900 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                    <div className="relative z-10 h-full flex flex-col justify-between">
+                        <div>
+                            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/10">
+                                <Package className="w-7 h-7 text-rose-400" />
+                            </div>
+                            <h3 className="text-3xl font-bold leading-tight mb-2">
+                                <span className="text-rose-400">{stats.totalItems}</span> Items<br />in Inventory
+                            </h3>
+                            <p className="text-gray-400 font-medium">42 recipes pending approval.</p>
                         </div>
-                        <h4 className="font-display font-bold text-lg leading-tight mb-2">
-                            {stats.totalItems} Items & 42 Recipes Ready
-                        </h4>
-                        <p className="text-indigo-100 text-sm opacity-80">AI-generated recipes pending approval.</p>
+                        <button className="bg-white text-gray-900 px-6 py-3 rounded-xl font-bold text-sm mt-8 hover:bg-gray-100 transition-colors flex items-center gap-2 w-max">
+                            Review Actions <ArrowRight className="w-4 h-4" />
+                        </button>
                     </div>
-                    <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-5 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 w-max mt-6">
-                        Review Now <ArrowRight className="w-4 h-4" />
-                    </button>
                 </div>
 
-                <StatCard count={stats.totalItems} label="Raw Materials" icon={Package} />
-                <StatCard count={42} label="Recipes" icon={FileText} />
+                {/* Glassy Stat Cards */}
+                <GlassAnalysisCard
+                    title="Stock Value"
+                    value={`₹ ${stats.totalStockValue.toLocaleString()}`}
+                    trend="+12% from last month"
+                    icon={DollarSign}
+                    color="text-emerald-600"
+                    bg="bg-emerald-100"
+                />
+                <GlassAnalysisCard
+                    title="Low Stock"
+                    value={stats.lowStockCount}
+                    trend="Requires attention"
+                    icon={AlertTriangle}
+                    color="text-rose-600"
+                    bg="bg-rose-100"
+                />
             </div>
 
-            {/* Inventory Status Grid */}
+            {/* Detailed Analytics Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="space-y-4">
-                    <h3 className="text-lg font-bold font-display ml-1">Current Status</h3>
-                    <StatusCard label="Total Stock Value" value={`₹ ${stats.totalStockValue}`} />
-                    <StatusCard label="Potentially Wasted" value="₹ 0" color="text-rose-500" />
-                    <StatusCard label="Below Par Level" value="0" />
-                    <StatusCard label="Below Min. Level" value={stats.lowStockCount} color="text-orange-500" />
-                </div>
-
-                <div className="lg:col-span-2 bg-white dark:bg-gray-900/50 backdrop-blur border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h4 className="font-bold font-display text-lg">Low Stock Alerts</h4>
-                        <button className="text-xs font-bold bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg text-gray-600 dark:text-gray-300">All Categories</button>
-                    </div>
-
-                    <div className="flex flex-col items-center justify-center h-48 text-center bg-gray-50/50 dark:bg-gray-800/30 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
-                        <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full shadow-sm flex items-center justify-center mb-3">
-                            <Search className="w-6 h-6 text-gray-300" />
+                {/* Stock Health */}
+                <div className="lg:col-span-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/40 dark:border-gray-700 rounded-[2.5rem] p-8 shadow-xl">
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-white">Stock Health</h3>
+                            <p className="text-sm text-gray-500 font-medium">Overview of inventory levels and wastage.</p>
                         </div>
-                        <p className="font-bold text-gray-400 text-sm">No critical alerts found</p>
-                        <p className="text-xs text-gray-400 mt-1">Everything looks good!</p>
+                        <div className="flex gap-2">
+                            <button className="px-4 py-2 bg-white dark:bg-gray-700 rounded-xl text-xs font-bold shadow-sm hover:shadow-md transition-all">Daily</button>
+                            <button className="px-4 py-2 bg-transparent text-gray-500 font-bold rounded-xl text-xs hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">Weekly</button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <HealthMetric label="Total Items" value={stats.totalItems} sub="Active SKUs" />
+                        <HealthMetric label="Wastage" value={`₹ ${stats.totalWastage}`} sub="See breakdown" color="text-rose-600" />
+                        <HealthMetric label="Below Par" value="0" sub="Items" />
+                        <HealthMetric label="Out of Stock" value="0" sub="Urgent" color="text-orange-500" />
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between p-4 bg-rose-50 dark:bg-rose-900/20 rounded-2xl border border-rose-100 dark:border-rose-800/30">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-white dark:bg-gray-800 rounded-xl text-rose-500 shadow-sm">
+                                    <AlertTriangle className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-rose-700 dark:text-rose-400">Critical Alerts</h4>
+                                    <p className="text-xs text-rose-600/80 dark:text-rose-400/80">You have no critical alerts at this time.</p>
+                                </div>
+                            </div>
+                            <button className="text-xs font-bold text-rose-600 hover:text-rose-700">View All</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* COGS & Purchase - Split View */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <InsightCard
-                    title="COGS Breakdown"
-                    desc="Analyze ingredient-level cost drivers."
-                    action="Update Master"
-                    color="blue"
-                />
-                <InsightCard
-                    title="Purchase Insights"
-                    desc="Track purchase trends and supplier performance."
-                    action="View Report"
-                    color="green"
-                />
+                {/* Insight Columns */}
+                <div className="space-y-6">
+                    <InsightActionCard
+                        title="COGS Breakdown"
+                        desc="Analyze ingredient-level cost drivers to optimize spend."
+                        label="Update Master"
+                        gradient="from-blue-500 to-cyan-500"
+                    />
+                    <InsightActionCard
+                        title="Supplier Performance"
+                        desc="Track fulfillment rates and delivery times."
+                        label="View Report"
+                        gradient="from-violet-500 to-purple-500"
+                    />
+                </div>
             </div>
         </div>
     );
 }
 
-function StatCard({ count, label, icon: Icon }) {
+function GlassAnalysisCard({ title, value, trend, icon: Icon, color, bg }) {
     return (
-        <div className="bg-white dark:bg-gray-900/50 backdrop-blur border border-gray-100 dark:border-gray-800 p-8 rounded-[2.5rem] shadow-sm flex flex-col justify-center items-center group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform group-hover:bg-primary-50 group-hover:text-primary-600">
-                {Icon && <Icon className="w-8 h-8 text-gray-400 group-hover:text-primary-600 transition-colors" />}
+        <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/40 dark:border-gray-700 p-8 rounded-[2.5rem] shadow-xl hover:-translate-y-1 transition-transform duration-300 group">
+            <div className="flex justify-between items-start mb-6">
+                <div className={`w-12 h-12 ${bg} ${color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className="w-6 h-6" />
+                </div>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full bg-white/50 border border-white/20 ${color.replace('text', 'text')}`}>
+                    Live
+                </span>
             </div>
-            <h4 className="text-4xl font-display font-bold text-gray-900 dark:text-gray-100 mb-1">{count}</h4>
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+            <div>
+                <p className="text-gray-500 font-bold text-sm tracking-wide uppercase mb-1">{title}</p>
+                <h3 className="text-4xl font-black text-gray-900 dark:text-white mb-2">{value}</h3>
+                <p className="text-sm font-medium text-gray-400">{trend}</p>
+            </div>
         </div>
     );
 }
 
-function StatusCard({ label, value, color = 'text-gray-900 dark:text-gray-100' }) {
+function HealthMetric({ label, value, sub, color = "text-gray-900 dark:text-white" }) {
     return (
-        <div className="bg-white dark:bg-gray-900/50 backdrop-blur border border-gray-100 dark:border-gray-800 p-5 rounded-2xl flex justify-between items-center shadow-sm hover:translate-x-1 transition-transform cursor-pointer group">
-            <span className="text-sm font-medium text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200 transition-colors">{label}</span>
-            <span className={`font-bold text-lg ${color}`}>{value}</span>
+        <div className="bg-white/50 dark:bg-gray-700/30 p-4 rounded-3xl border border-gray-100 dark:border-gray-600 text-center">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{label}</p>
+            <h4 className={`text-2xl font-black ${color} mb-1`}>{value}</h4>
+            <p className="text-[10px] font-bold text-gray-400">{sub}</p>
         </div>
     );
 }
 
-function InsightCard({ title, desc, action, color }) {
-    const colors = {
-        blue: 'bg-blue-50/50 border-blue-100',
-        green: 'bg-emerald-50/50 border-emerald-100'
-    };
-
+function InsightActionCard({ title, desc, label, gradient }) {
     return (
-        <div className="bg-white dark:bg-gray-900/50 backdrop-blur border border-gray-100 dark:border-gray-800 p-8 rounded-[2.5rem] shadow-sm">
-            <h3 className="font-bold font-display text-lg mb-1">{title}</h3>
-            <p className="text-sm text-gray-500 mb-6">{desc}</p>
-
-            <div className={`p-8 rounded-3xl border border-dashed flex flex-col items-center justify-center text-center ${colors[color] || 'bg-gray-50'}`}>
-                <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-2">Detailed Analysis Required</h4>
-                <p className="text-xs text-gray-500 max-w-xs mb-4">Please update your records to generate this report.</p>
-                <button className="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    {action}
-                </button>
+        <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/40 dark:border-gray-700 p-6 rounded-[2rem] shadow-lg flex flex-col justify-between h-auto">
+            <div>
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{title}</h3>
+                <p className="text-sm text-gray-500 mb-6 leading-relaxed">{desc}</p>
             </div>
+            <button className={`w-full py-3 rounded-xl bg-gradient-to-r ${gradient} text-white font-bold text-sm shadow-lg opacity-90 hover:opacity-100 transition-opacity`}>
+                {label}
+            </button>
         </div>
     );
 }
