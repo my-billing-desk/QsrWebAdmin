@@ -62,13 +62,35 @@ export function ClosingStock() {
     };
 
     const handleSave = async () => {
-        const updates = Object.entries(inputData).map(([id, data]) => ({
-            id: parseInt(id),
-            closingStock: parseFloat(data.closingStock),
-            unit: data.unit, // Optional validation if generic
-            comments: data.comments,
-            date: selectedDate
-        })).filter(u => !isNaN(u.closingStock)); // Only send valid updates
+        const updates = Object.entries(inputData).map(([idStr, data]) => {
+            const id = parseInt(idStr);
+            const item = materials.find(m => m.id === id);
+            if (!item) return null;
+
+            // Gather inputs
+            const pQty = parseFloat(data.purchaseQty || 0);
+            const cQty = parseFloat(data.consumptionQty || 0);
+
+            // If user hasn't touched either input or comments, skip? 
+            // Better to check if keys exist or if value is not empty string, 
+            // but for mass save, let's assume we only send what's typed.
+            // However, 0 is a valid value.
+            const hasPurchase = data.hasOwnProperty('purchaseQty') && data.purchaseQty !== '';
+            const hasConsumption = data.hasOwnProperty('consumptionQty') && data.consumptionQty !== '';
+
+            if (!hasPurchase && !hasConsumption && !data.comments) return null;
+
+            const conversion = item.conversionFactor || 1;
+            const totalStock = (pQty * conversion) + cQty;
+
+            return {
+                id: item.id,
+                closingStock: totalStock,
+                unit: item.consumptionUnit, // Always store in base consumption unit
+                comments: data.comments,
+                date: selectedDate
+            };
+        }).filter(u => u !== null);
 
         if (updates.length === 0) {
             toast('No changes to save');
@@ -79,7 +101,7 @@ export function ClosingStock() {
             await inventoryService.updateClosingStock({ updates });
             toast.success("Closing stock updated successfully");
             loadData(); // Refresh to see updated current stock
-            setInputData({}); // Clear inputs? Or keep them? Usually clear or show success.
+            setInputData({}); // Clear inputs
         } catch (error) {
             console.error(error);
             toast.error("Failed to save stock");
@@ -240,22 +262,63 @@ export function ClosingStock() {
                                             <div className="text-xs text-gray-400 mt-1">[ Unit: {item.consumptionUnit} ]</div>
                                         </td>
                                         <td className="p-4 font-bold text-gray-700 dark:text-gray-300">
-                                            {item.currentStock} {item.consumptionUnit}
+                                            {(() => {
+                                                const stock = item.currentStock || 0;
+                                                const factor = item.conversionFactor || 1;
+
+                                                if (factor > 1 && item.purchaseUnit !== item.consumptionUnit) {
+                                                    const pQty = Math.floor(stock / factor);
+                                                    const cQty = stock % factor;
+
+                                                    // Display: "2 Pkts" or "2 Pkts (5 Pcs)"
+                                                    let display = `${pQty} ${item.purchaseUnit}`;
+                                                    if (cQty > 0) {
+                                                        display += ` (${cQty % 1 === 0 ? cQty : cQty.toFixed(2)} ${item.consumptionUnit})`;
+                                                    }
+                                                    // If stock is less than 1 purchase unit
+                                                    if (pQty === 0) {
+                                                        display = `${cQty % 1 === 0 ? cQty : cQty.toFixed(2)} ${item.consumptionUnit}`;
+                                                    }
+                                                    return display;
+                                                }
+                                                return `${stock} ${item.consumptionUnit}`;
+                                            })()}
                                         </td>
                                         <td className="p-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="relative flex-1">
-                                                    <input
-                                                        type="number"
-                                                        value={inputData[item.id]?.closingStock || ''}
-                                                        onChange={e => handleInputChange(item.id, 'closingStock', e.target.value)}
-                                                        className="w-full pr-12 pl-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 text-sm"
-                                                        placeholder="Closing Stock"
-                                                    />
-                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
-                                                        / {item.consumptionUnit}
-                                                    </span>
+                                            <div className="flex flex-col gap-2">
+                                                {/* Purchase Unit Input */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="relative flex-1">
+                                                        <input
+                                                            type="number"
+                                                            value={inputData[item.id]?.purchaseQty || ''}
+                                                            onChange={e => handleInputChange(item.id, 'purchaseQty', e.target.value)}
+                                                            className="w-full pr-12 pl-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 text-sm"
+                                                            placeholder="0"
+                                                        />
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                                                            / {item.purchaseUnit}
+                                                        </span>
+                                                    </div>
                                                 </div>
+
+                                                {/* Consumption Unit Input - Only if different */}
+                                                {item.purchaseUnit !== item.consumptionUnit && (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="relative flex-1">
+                                                            <input
+                                                                type="number"
+                                                                value={inputData[item.id]?.consumptionQty || ''}
+                                                                onChange={e => handleInputChange(item.id, 'consumptionQty', e.target.value)}
+                                                                className="w-full pr-12 pl-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 text-sm"
+                                                                placeholder="0"
+                                                            />
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                                                                / {item.consumptionUnit}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="p-4">
