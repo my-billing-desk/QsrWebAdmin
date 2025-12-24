@@ -1,16 +1,27 @@
-# React + Vite
+# QSR Web Admin & POS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive, cloud-based Point of Sale (POS) and administration platform designed for Quick Service Restaurants.
 
-Currently, two official plugins are available:
+## 🚀 Software Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Order-Type Setup** (Dine-in / Delivery / Take-away)
+- **KOT Generation**
+- **Billing Operations**
+- **Cloud-based Billing software**
+- **User-friendly Interface** in a PoS platform
+- **Online and Offline modes** (PoS)
+- **Keyboard-based and Touch-based interfaces** available
+- **User-based roles and privileges**
+- **Ebill feature** - Send digital bills
+- **Menu Management** with Customization
+- **Table Management** (Live) View
+- **Desktop Reports** (Sales Summary, Item, Category and more)
+- **CRM** for customers insights
+- **Area-wise Pricing Module**
+- **Live view** of Dine-in/Delivery/Take-away Orders and KOTs
+- **SMS alerts** on daily sales volume
+- **Multiple-Billing stations** (Screens)
+- **Admin control** for all of your outlets in single-click
+- **Live view** of (Dine-in / Delivery / Take-away) business
+- **Multiple-outlet Sales summary**
+- **Real-time statistics** of billing
