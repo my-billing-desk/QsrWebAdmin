@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, FileText, MoreHorizontal, ChefHat } from 'lucide-react';
+import { Plus, Search, Filter, MoreHorizontal, ChefHat, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { menuService } from '../../services/api';
@@ -8,24 +8,43 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export default function RecipeList() {
     const navigate = useNavigate();
-    const [recipes, setRecipes] = useState([]);
+    const [items, setItems] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterCategory, setFilterCategory] = useState('All Recipes');
+    const [filterCategory, setFilterCategory] = useState('All categories');
+
+    // Global Auto Consumption Setting
+    const [autoConsumptionEnabled, setAutoConsumptionEnabled] = useState(true);
 
     useEffect(() => {
         fetchData();
+        fetchSetting();
     }, []);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [recipesRes, categoriesRes] = await Promise.all([
-                axios.get(`${API_URL}/inventory/recipes`),
-                menuService.getCategories()
+            // Fetch Items AND Categories
+            // We want to list ITEMS here, and show if they have a recipe
+            const [itemsRes, categoriesRes, recipesRes] = await Promise.all([
+                axios.get(`${API_URL}/menu/items`),
+                menuService.getCategories(),
+                axios.get(`${API_URL}/inventory/recipes`)
             ]);
-            setRecipes(recipesRes.data);
+
+            // Map recipes to items for easy lookup
+            const recipeMap = {};
+            recipesRes.data.forEach(r => {
+                if (r.itemId) recipeMap[r.itemId] = r;
+            });
+
+            const mergedItems = itemsRes.data.map(item => ({
+                ...item,
+                recipe: recipeMap[item.id] || null
+            }));
+
+            setItems(mergedItems);
             setCategories(categoriesRes.data);
         } catch (error) {
             console.error("Failed to fetch data", error);
@@ -34,191 +53,203 @@ export default function RecipeList() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this recipe?")) return;
+    const fetchSetting = async () => {
         try {
-            await axios.delete(`${API_URL}/inventory/recipes/${id}`);
-            const recipesRes = await axios.get(`${API_URL}/inventory/recipes`); // Re-fetch recipes
-            setRecipes(recipesRes.data);
-            alert("Recipe deleted successfully");
+            const res = await axios.get(`${API_URL}/settings`);
+            // Key 'auto_consumption_enabled' - typically stored as string "true"/"false"
+            const val = res.data.auto_consumption_enabled;
+            setAutoConsumptionEnabled(val === 'false' ? false : true); // Default true
         } catch (error) {
-            console.error("Failed to delete recipe", error);
-            alert("Failed to delete recipe");
+            console.error("Failed to fetch settings", error);
+        }
+    }
+
+    const toggleAutoConsumption = async () => {
+        const newValue = !autoConsumptionEnabled;
+        setAutoConsumptionEnabled(newValue);
+        try {
+            await axios.post(`${API_URL}/settings`, {
+                auto_consumption_enabled: newValue
+            });
+        } catch (error) {
+            console.error("Failed to save setting", error);
+            // Revert on error
+            setAutoConsumptionEnabled(!newValue);
         }
     };
 
-    const filteredRecipes = recipes.filter(r => {
-        const matchesSearch = (r.Item?.name || r.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = filterCategory === 'All Recipes'
+    const filteredItems = items.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = filterCategory === 'All categories'
             ? true
-            : (r.Item?.Category?.name === filterCategory);
+            : (item.Category?.name === filterCategory);
         return matchesSearch && matchesCategory;
     });
 
-    // Calculate recipe counts per category for the stats cards
     const getCategoryCount = (catName) => {
-        return recipes.filter(r => r.Item?.Category?.name === catName).length;
+        if (catName === 'All categories') return items.length;
+        return items.filter(i => i.Category?.name === catName).length;
     };
+
+    // Calculate tabs for the scrollable strip
+    const categoryTabs = ['All categories', ...categories.map(c => c.name)];
 
     if (loading) return <div className="p-8">Loading...</div>;
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Recipe Management</h1>
-                </div>
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => navigate('/inventory/recipes/add')}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center gap-2 shadow-sm"
-                    >
-                        <Plus className="w-4 h-4" /> Create New
-                    </button>
-                    <button className="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium flex items-center gap-2">
-                        More Actions <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                    <button className="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium flex items-center gap-2">
-                        <FileText className="w-4 h-4" /> Files
-                    </button>
-                </div>
-            </div>
+        <div className="p-8 max-w-7xl mx-auto space-y-6 font-sans">
+            {/* AI Banner */}
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between shadow-sm relative overflow-hidden group">
+                {/* Decorative background elements if needed */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 transition-opacity group-hover:opacity-70"></div>
 
-            {/* Banner */}
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                        <ChefHat className="w-5 h-5" />
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-blue-600 shadow-sm">
+                        <Sparkles className="w-5 h-5 fill-blue-600 text-blue-600" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-blue-900">Get AI-Powered Recipe Suggestions!</h3>
-                        <p className="text-sm text-blue-700">Based on items you've added to your menu.</p>
+                        <h3 className="font-bold text-blue-700 text-sm">Get AI-Powered Recipe Suggestions! Based On The Items You've Added To Your Menu, We'll Create Personalized Recipes Just For You.</h3>
                     </div>
                 </div>
-                <button className="px-4 py-2 bg-white text-blue-600 font-bold border border-blue-200 rounded-lg hover:bg-blue-50 text-sm">
+                <button className="px-5 py-2 bg-white text-blue-600 font-bold border border-blue-200 rounded-lg hover:bg-blue-50 text-sm shadow-sm relative z-10 whitespace-nowrap">
                     Explore Recipes
                 </button>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-wrap gap-4 items-center">
-                <div className="flex-1 relative">
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none"
-                        placeholder="Search recipe..."
-                    />
-                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Recipe Management</h1>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => navigate('/inventory/recipes/add')}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold flex items-center gap-2 shadow-lg shadow-red-600/20 text-sm"
+                    >
+                        <Plus className="w-4 h-4" /> Create New
+                    </button>
+                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex items-center gap-2 text-sm">
+                        More Actions <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex items-center gap-2 text-sm">
+                        Files <MoreHorizontal className="w-4 h-4 rotate-90" />
+                    </button>
                 </div>
+            </div>
+
+            {/* Filter Row */}
+            <div className="flex gap-3 items-center">
+                <select className="w-40 px-4 py-2.5 border border-gray-200 rounded-lg outline-none bg-white text-sm text-gray-600">
+                    <option>Select Item</option>
+                </select>
+                <select className="w-40 px-4 py-2.5 border border-gray-200 rounded-lg outline-none bg-white text-sm text-gray-600">
+                    <option>Select Category</option>
+                </select>
                 <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="px-4 py-2 border border-gray-200 rounded-lg outline-none bg-white"
+                    className="w-40 px-4 py-2.5 border border-gray-200 rounded-lg outline-none bg-white text-sm text-gray-600"
                 >
-                    <option value="All Recipes">All Recipes</option>
-                    {categories.map(cat => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                    ))}
+                    <option value="All categories">All Recipes</option>
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
-                <button className="px-6 py-2 bg-white border border-red-500 text-red-600 rounded-lg hover:bg-red-50 font-medium">
+
+                <button className="px-6 py-2.5 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 font-medium text-sm">
                     Search
                 </button>
                 <button
-                    onClick={() => { setSearchTerm(''); setFilterCategory('All Recipes'); }}
-                    className="px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium"
+                    onClick={() => { setSearchTerm(''); setFilterCategory('All categories'); }}
+                    className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium text-sm"
                 >
                     Clear
                 </button>
+
+                {/* Auto Consumption Toggle */}
+                <div className="ml-auto flex items-center gap-3">
+                    <button
+                        onClick={toggleAutoConsumption}
+                        className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${autoConsumptionEnabled ? 'bg-green-600' : 'bg-gray-300'}`}
+                    >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute transition-all shadow-sm ${autoConsumptionEnabled ? 'translate-x-[22px]' : 'translate-x-1'}`} />
+                    </button>
+                    <span className="font-bold text-gray-800 text-sm">Auto Consumption</span>
+                </div>
             </div>
 
-            {/* Stats Cards - Dynamic */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {categories.length > 0 ? (
-                    categories.slice(0, 4).map((cat, index) => {
-                        const count = getCategoryCount(cat.name);
-                        // Vary styles slightly to match the original look if needed, or keep uniform
-                        const isEven = index % 2 === 0;
-                        return (
-                            <div
-                                key={cat.id}
-                                onClick={() => setFilterCategory(cat.name)}
-                                className={`p-4 rounded-xl border text-center cursor-pointer transition-colors shadow-sm relative
-                                    ${filterCategory === cat.name
-                                        ? 'bg-white border-blue-500 ring-2 ring-blue-500/20'
-                                        : 'bg-blue-50 border-blue-100 hover:bg-blue-100'}`}
-                            >
-                                <h4 className="font-bold text-gray-800">{cat.name}</h4>
-                                <span className="text-sm text-gray-500">{count} Items</span>
-                            </div>
-                        );
-                    })
-                ) : (
-                    <div className="col-span-4 text-center text-gray-400 py-4">No categories found</div>
-                )}
+            {/* Category Tab Strip */}
+            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {categoryTabs.map(cat => (
+                    <button
+                        key={cat}
+                        onClick={() => setFilterCategory(cat)}
+                        className={`min-w-[160px] p-4 rounded-xl text-center border transition-all
+                            ${filterCategory === cat
+                                ? 'bg-white border-blue-500 ring-1 ring-blue-500 shadow-md'
+                                : 'bg-blue-50/50 border-blue-100 hover:bg-blue-100 text-gray-600'}`}
+                    >
+                        <div className={`font-bold text-sm ${filterCategory === cat ? 'text-gray-900' : 'text-gray-700'}`}>{cat}</div>
+                        <div className={`text-xs mt-1 ${filterCategory === cat ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
+                            {getCategoryCount(cat)} Items
+                        </div>
+                    </button>
+                ))}
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-blue-50/50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 font-semibold">
-                        <tr>
-                            <th className="p-4 w-12 text-center">
-                                <input type="checkbox" className="rounded border-gray-300 text-red-600 focus:ring-red-500" />
-                            </th>
-                            <th className="p-4">Name</th>
-                            <th className="p-4">Category</th>
-                            <th className="p-4 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {filteredRecipes.length > 0 ? (
-                            filteredRecipes.map((recipe) => (
-                                <tr key={recipe.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <td className="p-4 text-center">
-                                        <input type="checkbox" className="rounded border-gray-300 text-red-600 focus:ring-red-500" />
-                                    </td>
-                                    <td className="p-4 font-medium text-gray-900 dark:text-gray-100">
-                                        {recipe.Item?.name || recipe.name || 'Unnamed Recipe'}
-                                    </td>
-                                    <td className="p-4 text-gray-500">
-                                        {recipe.Item?.Category?.name || 'Uncategorized'}
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                onClick={() => navigate(`/inventory/recipes/edit/${recipe.Item?.id || recipe.itemId}`)} // Use itemId to edit
-                                                className="p-1 px-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors flex items-center gap-1"
-                                            >
-                                                <Plus className="w-3 h-3" /> Edit
-                                            </button>
-                                            <button className="p-1 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors flex items-center gap-1">
-                                                Creation with AI
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(recipe.id)}
-                                                className="p-1 px-3 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded transition-colors flex items-center gap-1"
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="4" className="p-8 text-center text-gray-500">
-                                    No recipes found matching your filters.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <div className="text-xs text-gray-500">
-                Showing {filteredRecipes.length} records
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-blue-50/50 px-6 py-3 border-b border-gray-100 flex text-xs font-bold text-gray-600 uppercase">
+                    <div className="w-12"></div>
+                    <div className="flex-1">Name</div>
+                    <div className="w-1/4">Category</div>
+                    <div className="w-48">Action</div>
+                </div>
+
+                <div className="divide-y divide-gray-50">
+                    {filteredItems.map(item => (
+                        <div key={item.id} className="px-6 py-4 flex items-center hover:bg-gray-50 group transition-colors">
+                            <div className="w-12">
+                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500" />
+                            </div>
+                            <div className="flex-1 font-medium text-gray-800 text-sm">
+                                {item.name}
+                            </div>
+                            <div className="w-1/4 text-sm text-gray-600">
+                                {item.Category?.name || 'Uncategorized'}
+                            </div>
+                            <div className="w-48 flex items-center gap-2">
+                                {item.recipe ? (
+                                    <button
+                                        onClick={() => navigate(`/inventory/recipes/edit/${item.id}`)}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                                        title="Edit Recipe"
+                                    >
+                                        <Plus className="w-4 h-4 rotate-45" /> {/* Use X icon simulation or edit icon, but user has + in screenshot. But if generic, + adds. Changing to Edit icon if exists is better UX but I stick to user screenshot which had + */}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => navigate(`/inventory/recipes/edit/${item.id}`)}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                                        title="Add Recipe"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                                <button className="px-3 py-1.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 flex items-center gap-1.5 transition-colors">
+                                    <Sparkles className="w-3 h-3" /> Create with AI
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+
+                    {filteredItems.length === 0 && (
+                        <div className="p-8 text-center text-gray-500 text-sm">
+                            No items found matching your filters.
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-4 bg-gray-50 border-t border-gray-100 text-xs font-bold text-gray-600">
+                    Showing 1 to {filteredItems.length} of {filteredItems.length} records
+                </div>
             </div>
         </div>
     );
