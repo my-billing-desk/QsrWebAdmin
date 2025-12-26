@@ -20,7 +20,7 @@ export default function Login() {
                 id: searchParams.get('id'),
                 username: searchParams.get('username'),
                 role: searchParams.get('role'),
-                name: searchParams.get('username') // Fallback if name not sent separately or use username
+                name: searchParams.get('name') || searchParams.get('username')
             };
             loginWithToken(token, user);
             navigate('/'); // clean URL
@@ -110,19 +110,9 @@ export default function Login() {
                     </button>
                 </form>
 
-                <div className="mt-6 text-center text-xs text-gray-400">
-                    <p>Default Admin: admin / password123</p>
-                </div>
 
-                <div className="mt-4 text-center">
-                    <button
-                        type="button"
-                        onClick={() => login('admin', 'password123')} // Auto-login as admin for 'Skip'
-                        className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500 underline"
-                    >
-                        Skip for now
-                    </button>
-                </div>
+
+
             </div>
         </div>
     );
