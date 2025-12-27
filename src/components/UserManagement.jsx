@@ -228,7 +228,7 @@ export function UserManagement() {
                                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
                             >
                                 <option value="cashier">Cashier</option>
-                                <option value="manager">Manager</option>
+                                <option value="manager">Restaurant Manager</option>
                                 {currentUser?.role === 'super_admin' && <option value="admin">Admin</option>}
                             </select>
                         </InputGroup>

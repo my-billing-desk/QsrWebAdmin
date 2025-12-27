@@ -100,10 +100,7 @@ export const initialMenuGroups = [
                 label: 'User Management',
                 icon: Users,
                 items: [
-                    { id: 'biller_app', path: '/users/biller', label: 'Biller App' },
-                    { id: 'biller_group', path: '/users/biller-group', label: 'Biller Group Management' },
-                    { id: 'admin_group', path: '/users/admin-group', label: 'Admin Group Management' },
-                    { id: 'admin_mgmt', path: '/users/admin', label: 'Admin Management' },
+                    { id: 'users_list', path: '/users', label: 'Users' },
                 ]
             },
             {
