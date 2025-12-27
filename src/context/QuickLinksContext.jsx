@@ -20,7 +20,7 @@ export const initialMenuGroups = [
                 items: [
                     { id: 'running_orders', path: '/orders/running', label: 'Running Orders' },
                     { id: 'all_orders', path: '/orders', label: 'All Orders' },
-                    { id: 'online_orders', path: '/orders/online', label: 'Online Orders' },
+                    // { id: 'online_orders', path: '/orders/online', label: 'Online Orders' },
                     { id: 'kot', path: '/orders/kot', label: 'KOT' },
                     { id: 'due_payment', path: '/orders/due-payment', label: 'Due Payment Settlement' },
                     { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss' },
@@ -65,7 +65,7 @@ export const initialMenuGroups = [
                     { id: 'sub_order', path: '/config/sub-order', label: 'Sub Order Type' },
                     { id: 'del_dist', path: '/config/delivery', label: 'Delivery Distance' },
                     { id: 'area_del', path: '/config/area-delivery', label: 'Area/Locality Wise Delivery Charges' },
-                    { id: 'mkt_setting', path: '/config/marketplace', label: 'Marketplace Setting' },
+                    // { id: 'mkt_setting', path: '/config/marketplace', label: 'Marketplace Setting' },
                     { id: 'floor_plan', path: '/config/floor-plan', label: 'Floor Plan' },
                     { id: 'email_temp', path: '/config/email-template', label: 'Email Template Settings' },
                 ]
@@ -83,7 +83,7 @@ export const initialMenuGroups = [
                             { id: 'virt_wallet', path: '/accounting/virtual-wallet', label: 'Virtual Wallet' },
                         ]
                     },
-                    { id: 'online_recon', path: '/accounting/reconciliation', label: 'Online Order Reconciliation' },
+                    // { id: 'online_recon', path: '/accounting/reconciliation', label: 'Online Order Reconciliation' },
                     { id: 'gst_info', path: '/accounting/gst', label: 'GST Information' },
                     { id: 'bank_details', path: '/accounting/bank', label: 'Bank Details' },
                     { id: 'kyc_details', path: '/accounting/kyc', label: 'KYC Details' },
@@ -111,8 +111,8 @@ export const initialMenuGroups = [
                 label: 'User Logs',
                 icon: FileText,
                 items: [
-                    { id: 'log_store', path: '/logs/store', label: 'Online Store Logs' },
-                    { id: 'log_item', path: '/logs/item-on-off', label: 'Online Item On/Off Logs' },
+                    // { id: 'log_store', path: '/logs/store', label: 'Online Store Logs' },
+                    // { id: 'log_item', path: '/logs/item-on-off', label: 'Online Item On/Off Logs' },
                     { id: 'log_auto', path: '/logs/auto-accept', label: 'Auto Accept Change Logs' },
                     { id: 'log_support', path: '/logs/support', label: 'Support Management' },
                     { id: 'log_notif', path: '/logs/notifications', label: 'Notification' },
@@ -122,7 +122,7 @@ export const initialMenuGroups = [
             },
             { id: 'other_apps', path: '/apps/other', label: 'Other APPs', icon: Box },
             { id: 'finance', path: '/finance', label: 'Finance', icon: Landmark },
-            { id: 'marketplace', path: '/marketplace', label: 'Marketplace', icon: Share2 },
+            // { id: 'marketplace', path: '/marketplace', label: 'Marketplace', icon: Share2 },
         ]
     },
     {
@@ -142,12 +142,12 @@ export const initialMenuGroups = [
             { id: 'crm_ebill', path: '/crm/ebill', label: 'Ebill Templates', icon: FileSpreadsheet },
         ]
     },
-    {
-        id: 'group_aggregator',
-        items: [
-            { id: 'aggregator_center', path: '/aggregator-center', label: 'Aggregator Center', icon: Share2, badge: 'New' }
-        ]
-    }
+    // {
+    //     id: 'group_aggregator',
+    //     items: [
+    //         { id: 'aggregator_center', path: '/aggregator-center', label: 'Aggregator Center', icon: Share2, badge: 'New' }
+    //     ]
+    // }
 ];
 
 export function QuickLinksProvider({ children }) {

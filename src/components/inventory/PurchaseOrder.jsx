@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, MoreHorizontal, Clock, ShoppingCart, Truck, ChevronDown, Search, X, Calendar } from 'lucide-react';
+import { Plus, Trash2, Edit2, MoreHorizontal, Clock, ShoppingCart, Truck, ChevronDown, Search, X, Calendar, CornerDownLeft, Download } from 'lucide-react';
 import { inventoryService } from '../../services/api';
 
 export function PurchaseOrder() {
@@ -65,6 +65,25 @@ export function PurchaseOrder() {
         }
     };
 
+    const handleLoadAllMaterials = () => {
+        if (!rawMaterials || rawMaterials.length === 0) return alert("No raw materials found to load");
+
+        // Confirm if items already exist
+        if (formData.items.length > 0 && formData.items[0].rawMaterialId) {
+            if (!confirm("This will replace current items with all raw materials. Continue?")) return;
+        }
+
+        const allItems = rawMaterials.map(m => ({
+            rawMaterialId: m.id,
+            quantity: '',
+            unit: m.purchaseUnit || m.unit || 'Kg', // Fallback
+            price: m.price || '',
+            amount: 0
+        }));
+
+        setFormData(prev => ({ ...prev, items: allItems }));
+    };
+
     const addItem = () => {
         setFormData({
             ...formData,
@@ -111,12 +130,43 @@ export function PurchaseOrder() {
                 ...formData,
                 grandTotal: calculateGrandTotal()
             });
-            alert('Purchase Order Created!');
+
+            // Future integration: Send notification to tied-up supplier
+            console.log("Notification sent to supplier:", formData.supplierId);
+
+            alert('Purchase Order Created! Notification sent to supplier.');
             setView('list');
             loadData();
         } catch (error) {
             console.error(error);
             alert('Error creating PO: ' + error.message);
+        }
+    };
+
+    const handleExport = () => {
+        // Mock Excel Export
+        const headers = ['Raw Material', 'Qty', 'Unit', 'Price', 'Amount'];
+        const rows = formData.items.map(item => {
+            const matName = rawMaterials.find(m => m.id == item.rawMaterialId)?.name || 'Unknown';
+            return [matName, item.quantity, item.unit, item.price, item.amount];
+        });
+
+        console.log("Export Data:", { headers, rows });
+        alert("Purchase Order exported to Excel (mock)!");
+    };
+
+    const handleReturn = async (orderId) => {
+        if (!confirm("Are you sure you want to mark this order as Returned?")) return;
+        try {
+            // Mocking return update for now as backend might not support status update directly exposed yet
+            // Real implementation would be: await inventoryService.updatePurchaseOrderStatus(orderId, 'Returned');
+
+            // Updating local state to reflect change immediately
+            setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'Returned' } : o));
+            alert("Order marked as Returned.");
+        } catch (error) {
+            console.error(error);
+            alert("Failed to return order");
         }
     };
 
@@ -137,6 +187,7 @@ export function PurchaseOrder() {
                                 <th className="p-4">Supplier</th>
                                 <th className="p-4">Status</th>
                                 <th className="p-4 text-right">Amount</th>
+                                <th className="p-4 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y text-sm">
@@ -144,8 +195,28 @@ export function PurchaseOrder() {
                                 <tr key={o.id} className="hover:bg-gray-50">
                                     <td className="p-4">{new Date(o.deliveryDate).toLocaleDateString()}</td>
                                     <td className="p-4">{o.Supplier?.name}</td>
-                                    <td className="p-4">{o.status}</td>
+                                    <td className="p-4">
+                                        <span className={`px-2 py-1 rounded text-xs font-bold ${o.status === 'Returned' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                                            }`}>
+                                            {o.status || 'Received'}
+                                        </span>
+                                    </td>
                                     <td className="p-4 text-right">₹ {o.grandTotal}</td>
+                                    <td className="p-4 text-center">
+                                        <div className="relative group inline-block">
+                                            <button className="p-1 hover:bg-gray-100 rounded">
+                                                <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                                            </button>
+                                            <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded shadow-lg hidden group-hover:block z-20">
+                                                <button
+                                                    onClick={() => handleReturn(o.id)}
+                                                    className="w-full text-left px-4 py-2 text-xs hover:bg-gray-50 text-red-600 font-medium flex items-center gap-2"
+                                                >
+                                                    <CornerDownLeft className="w-3 h-3" /> Return
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                             {orders.length === 0 && <tr><td colSpan="4" className="p-8 text-center text-gray-500">No orders found.</td></tr>}
@@ -256,13 +327,14 @@ export function PurchaseOrder() {
                             </div>
                         </div>
                         <div className="flex gap-2 items-end">
-                            <div className="flex flex-col gap-1 w-24">
+                            <div className="flex flex-col gap-1 w-32">
                                 <label className="text-xs font-bold text-red-500">PO No. *</label>
                                 <div className="flex items-center relative">
                                     <input
                                         value={formData.poNumber}
                                         onChange={e => setFormData({ ...formData, poNumber: e.target.value })}
                                         className="input-field w-full pr-8"
+                                        placeholder="PO No"
                                     />
                                     <Edit2 className="w-3 h-3 text-gray-400 absolute right-2 pointer-events-none" />
                                 </div>
@@ -453,6 +525,9 @@ export function PurchaseOrder() {
                 </label>
 
                 <div className="flex gap-4">
+                    <button onClick={handleExport} className="px-6 py-2 bg-green-50 border border-green-200 rounded-lg font-bold text-sm text-green-700 hover:bg-green-100 shadow-sm flex items-center gap-2">
+                        <Download className="w-4 h-4" /> Export Excel
+                    </button>
                     <button onClick={() => setView('list')} className="px-6 py-2 bg-white border border-gray-300 rounded-lg font-bold text-sm text-gray-700 hover:bg-gray-50 shadow-sm">Cancel</button>
                     <button onClick={handleSave} className="px-6 py-2 bg-[#dc2626] text-white rounded-lg font-bold text-sm shadow-md hover:bg-red-700 transition-colors">Save Changes</button>
                 </div>

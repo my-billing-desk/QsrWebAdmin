@@ -40,7 +40,6 @@ export function InventoryLayout() {
             items: [
                 { label: 'Stock Purchase', path: '/inventory/purchase' },
                 { label: 'Purchase Order', path: '/inventory/purchase-order' },
-                { label: 'Purchase Return', path: '/inventory/purchase-return' },
             ]
         },
         {
@@ -109,8 +108,8 @@ export function InventoryLayout() {
                                     key={item.path}
                                     onClick={() => navigate(item.path)}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl mb-1 transition-all duration-200 group ${isActive(item.path)
-                                            ? 'bg-gradient-to-r from-rose-50 to-white border border-rose-100 dark:from-rose-900/20 dark:to-transparent dark:border-rose-800 shadow-sm text-rose-600 dark:text-rose-400 font-bold'
-                                            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white font-medium'
+                                        ? 'bg-gradient-to-r from-rose-50 to-white border border-rose-100 dark:from-rose-900/20 dark:to-transparent dark:border-rose-800 shadow-sm text-rose-600 dark:text-rose-400 font-bold'
+                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white font-medium'
                                         }`}
                                 >
                                     <item.icon className={`w-5 h-5 mr-3 transition-transform group-hover:scale-110 ${isActive(item.path) ? 'text-rose-500' : 'text-gray-400 group-hover:text-gray-600'}`} />
@@ -146,8 +145,8 @@ export function InventoryLayout() {
                                                 key={item.path}
                                                 onClick={() => navigate(item.path)}
                                                 className={`w-full flex items-center px-4 py-2.5 rounded-lg text-sm transition-all relative ${isActive(item.path)
-                                                        ? 'text-rose-600 dark:text-rose-400 font-bold bg-rose-50/50 dark:bg-rose-900/10'
-                                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                                                    ? 'text-rose-600 dark:text-rose-400 font-bold bg-rose-50/50 dark:bg-rose-900/10'
+                                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50'
                                                     }`}
                                             >
                                                 {isActive(item.path) && (

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Save, AlertTriangle, MessageSquare, Trash2, Plus, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function IntegrationConfiguration({ integrationName, onClose }) {
+    const { user } = useAuth();
     const [config, setConfig] = useState({
         notRegisteredGst: true,
         gstNote: '',
@@ -32,7 +34,7 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
     ];
 
     const [outletId, setOutletId] = useState(
-        integrationName === 'Zomato' ? 'SUNBURST STACK' :
+        integrationName === 'Zomato' ? (user?.tenantName || 'Store Name') :
             integrationName === 'Swiggy' ? 'SWIGGY STORE 1' :
                 `${integrationName} OUTLET`
     );
