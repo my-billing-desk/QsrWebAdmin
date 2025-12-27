@@ -5,8 +5,10 @@ import {
     FileText, Check, Save, Trash2, Plus
 } from 'lucide-react';
 import { aggregatorService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function AggregatorConfig() {
+    const { user } = useAuth();
     const { slug } = useParams();
     const navigate = useNavigate();
     const [view, setView] = useState('overview'); // overview | settings
@@ -122,7 +124,7 @@ export default function AggregatorConfig() {
                                 className="border border-gray-200 rounded-lg p-4 w-64 hover:border-red-500 cursor-pointer transition-colors group relative overflow-hidden"
                             >
                                 <div className="absolute top-0 left-0 bg-green-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-br">Activated</div>
-                                <div className="mt-4 font-bold text-center text-gray-700 group-hover:text-red-600">[SUNBURST STACK]</div>
+                                <div className="mt-4 font-bold text-center text-gray-700 group-hover:text-red-600">[{user?.tenantName || 'Store Name'}]</div>
                             </div>
                         </div>
 

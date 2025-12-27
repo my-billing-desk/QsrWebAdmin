@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Filter, ArrowLeft, Copy, List, Edit, Trash2, Upload, ChevronDown, MoreHorizontal, FileText, ToggleLeft, ToggleRight, Save, GripVertical } from 'lucide-react';
+import { Search, Plus, Filter, ArrowLeft, Copy, List, Edit, Trash2, Upload, ChevronDown, MoreHorizontal, FileText, ToggleLeft, ToggleRight, Save, GripVertical, Map } from 'lucide-react';
+import { AreaPriceUpdateModal } from './AreaPriceUpdateModal';
 import { menuService } from '../../services/api';
 import { AddItem } from '../AddItem';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -78,6 +79,8 @@ export function ItemsView() {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [hideEmpty, setHideEmpty] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
+    const [showAreaPriceModal, setShowAreaPriceModal] = useState(false);
+    const [areaPriceItem, setAreaPriceItem] = useState(null);
 
     // Dnd Sensors (Use activationConstraint to allow clicks)
     const sensors = useSensors(
@@ -292,9 +295,8 @@ export function ItemsView() {
                                     </th>
                                     <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Name *</th>
                                     <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider w-24">Short Code *</th>
-                                    <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider w-24">Price *</th>
                                     <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Description</th>
-                                    <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider w-24 text-center">Available</th>
+                                    <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider w-24">Price *</th>
                                     <th className="p-3 text-xs font-bold text-gray-700 uppercase tracking-wider w-40 text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -319,21 +321,10 @@ export function ItemsView() {
                                                 </div>
                                             </td>
                                             <td className="p-3 text-sm text-gray-600">{item.shortCode || '-'}</td>
-                                            <td className="p-3 text-sm font-bold text-gray-800">₹{item.price}</td>
                                             <td className="p-3 text-sm text-gray-500 truncate max-w-xs">{item.description || '-'}</td>
-                                            <td className="p-3 text-center">
-                                                <div className="w-10 h-5 bg-green-500 rounded-full relative cursor-pointer mx-auto transition-colors">
-                                                    <div className="w-4 h-4 bg-white rounded-full shadow-sm absolute right-0.5 top-0.5 border border-gray-200"></div>
-                                                </div>
-                                            </td>
+                                            <td className="p-3 text-sm font-bold text-gray-800">₹{item.price}</td>
                                             <td className="p-3">
                                                 <div className="flex justify-center items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                    <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500" title="Copy">
-                                                        <Copy className="w-4 h-4" />
-                                                    </button>
-                                                    <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500" title="Manage Variants/Addons">
-                                                        <List className="w-4 h-4" />
-                                                    </button>
                                                     <button
                                                         onClick={() => { setEditingItem(item); setView('add'); }}
                                                         className="p-1.5 hover:bg-gray-100 rounded text-blue-500"
@@ -376,6 +367,29 @@ export function ItemsView() {
                     <span className="font-bold text-xs">AI Agent</span>
                 </button>
             </div>
+
+            {showAreaPriceModal && (
+                <AreaPriceUpdateModal
+                    item={areaPriceItem}
+                    onClose={() => setShowAreaPriceModal(false)}
+                    onSave={async (data) => {
+                        try {
+                            const payload = {
+                                price: data.basePrice,
+                                areaPrices: data.areaPrices,
+                                isAvailable: data.isActive
+                            };
+                            await menuService.updateItem(data.itemId, payload);
+                            loadData(); // Refresh the list
+                            setShowAreaPriceModal(false);
+                            // Ideally show a success toast here
+                        } catch (error) {
+                            console.error("Failed to update area prices", error);
+                            alert("Failed to update area prices");
+                        }
+                    }}
+                />
+            )}
         </div>
     );
 }

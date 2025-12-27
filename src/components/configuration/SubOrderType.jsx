@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Plus, Trash2, Edit } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export function SubOrderType() {
+    const { user } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
 
     // Mock Data based on screenshot
@@ -12,8 +14,8 @@ export function SubOrderType() {
         { id: 4, name: 'Dine in', type: 'Area', orderType: 'Dine In', status: 'Active', created: '27 Feb 2025' },
         { id: 5, name: 'Zomato', type: 'Third Party Integration', orderType: 'Delivery, Take Away', status: 'Active', created: '15 Mar 2025' },
         { id: 6, name: 'Menu QR Code', type: 'Third Party Integration', orderType: 'Delivery, Take Away', status: 'Active', created: '5 Apr 2025' },
-        { id: 7, name: 'SUNBURST STACK - Eksecond', type: 'Third Party Integration', orderType: 'Delivery, Take Away, Dine In', status: 'Active', created: '7 Apr 2025' },
-        { id: 8, name: 'SUNBURST STACK - Uengage (ONDC)', type: 'Third Party Integration', orderType: 'Delivery, Take Away, Dine In', status: 'Inactive', created: '7 Apr 2025' },
+        { id: 7, name: `${user?.tenantName || 'Store Name'} - Eksecond`, type: 'Third Party Integration', orderType: 'Delivery, Take Away, Dine In', status: 'Active', created: '7 Apr 2025' },
+        { id: 8, name: `${user?.tenantName || 'Store Name'} - Uengage (ONDC)`, type: 'Third Party Integration', orderType: 'Delivery, Take Away, Dine In', status: 'Inactive', created: '7 Apr 2025' },
     ]);
 
     return (
@@ -77,8 +79,8 @@ export function SubOrderType() {
                                 <td className="p-4 text-gray-600 dark:text-gray-400">{row.orderType}</td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 rounded text-xs font-semibold ${row.status === 'Active'
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                         }`}>
                                         {row.status}
                                     </span>

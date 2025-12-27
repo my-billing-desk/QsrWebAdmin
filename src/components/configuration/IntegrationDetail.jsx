@@ -3,8 +3,10 @@ import { ChevronLeft, Check, Clock, PlayCircle, Star, ShieldCheck, Zap, Settings
 import IntegrationRequestModal from './IntegrationRequestModal';
 import IntegrationConfiguration from './IntegrationConfiguration';
 import IntegrationStatusModal from './IntegrationStatusModal';
+import { useAuth } from '../../context/AuthContext';
 
 export default function IntegrationDetail({ integration, onBack }) {
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'description'
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [showConfig, setShowConfig] = useState(false);
@@ -165,7 +167,7 @@ export default function IntegrationDetail({ integration, onBack }) {
                                                         <Settings size={14} className="text-gray-400 group-hover:text-red-500" />
                                                     </div>
                                                     <div className="text-sm font-bold text-gray-800 mb-4">
-                                                        {integration.name === 'Zomato' ? '[SUNBURST STACK]' :
+                                                        {integration.name === 'Zomato' ? `[${user?.tenantName || 'Store Name'}]` :
                                                             integration.name === 'Swiggy' ? '[Swiggy Store 1]' :
                                                                 `[${integration.name} Outlet]`}
                                                     </div>

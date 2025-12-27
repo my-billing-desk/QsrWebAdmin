@@ -3,7 +3,7 @@ import { Menu, Store, ChevronDown, Lightbulb, Bell, Link as LinkIcon, Settings, 
 import { useAuth } from '../context/AuthContext';
 
 export function Header({ onToggleSidebar }) {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -25,7 +25,7 @@ export function Header({ onToggleSidebar }) {
             <div className="flex items-center gap-6">
                 {/* Outlet Selector */}
                 <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-white border border-gray-300 rounded-full cursor-pointer hover:border-red-400 transition-colors shadow-sm">
-                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">SUNBURST STACK</span>
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{user?.tenantName || 'Store Name'}</span>
                     {/* <ChevronDown className="w-4 h-4 text-gray-400" /> */}
                 </div>
             </div>

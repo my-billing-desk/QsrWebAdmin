@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, RotateCcw, Filter, Smartphone, Globe, Power, Upload, Download, FileText } from 'lucide-react';
+import { Search, RotateCcw, Filter, Smartphone, Upload, Download, FileText, Calendar } from 'lucide-react';
 import Papa from 'papaparse';
 import { menuService } from '../services/api';
 
-export function MenuChannelDashboard({ initialTab = 'online', initialChannel = 'all' }) {
+export function MenuChannelDashboard() {
     const [items, setItems] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState(initialTab); // 'online' or 'offline'
-    const [activeChannel, setActiveChannel] = useState(initialChannel); // 'all', 'swiggy', 'zomato'
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState({
         category: 'All',
@@ -26,7 +24,7 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
                 menuService.getItems(),
                 menuService.getCategories()
             ]);
-            setItems(itemRes.data);
+            setItems(itemRes.data || []);
             setCategories(['All', ...catRes.data.map(c => c.name)]);
         } catch (error) {
             console.error("Failed to load dashboard data", error);
@@ -64,16 +62,13 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
                         return ['true', '1', 'yes', 'on'].includes(v);
                     };
 
-                    // support various header names just in case
                     const name = row['Name'] || row['Item Name'] || row['name'] || row['Item'];
-
                     if (!name) return null;
 
                     return {
                         name: name,
                         availableOffline: sanitize(row['Available_Offline'] ?? row['Offline'] ?? row['offline']),
-                        availableSwiggy: sanitize(row['Available_Swiggy'] ?? row['Swiggy'] ?? row['swiggy']),
-                        availableZomato: sanitize(row['Available_Zomato'] ?? row['Zomato'] ?? row['zomato'])
+                        // Swiggy/Zomato columns ignored for now
                     };
                 }).filter(u => u !== null);
 
@@ -93,24 +88,16 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
                 }
             }
         });
-        // Reset input
         event.target.value = '';
     };
 
     const downloadTemplate = () => {
-        // Create a sample based on the unified format (CSV_HEADERS)
-        // Since user wants 'same format', we use the same headers but maybe simplified sample logic or just exactly the same.
-        // User said "format is totally different, make it same just availablity will differ"
-        // This likely means they want the FULL FORMAT even for the "Status Import" task, 
-        // to avoid managing two file types.
-
+        // Reduced template focusing on Offline availability mainly, but keeping structure valid
         const sample = [
             `"Classic Burger","","","CB01",,"","","Burgers","Burgers","",150,"","","Pcs","TRUE",0,0,1,0,"TRUE","FALSE","FALSE","TRUE","","","","","","",0,0,0`,
             `"Cheese Pizza","","","CP01",,"","","Pizza","Pizza","",250,"","","Pcs","TRUE",0,0,1,0,"TRUE","TRUE","FALSE","TRUE","","","","","","",0,0,0`
         ].join("\n");
-        // We use the same CSV_HEADERS as full menu
         const csvContent = `\uFEFF${CSV_HEADERS.join(",")}\n${sample}`;
-
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
@@ -122,32 +109,14 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
     };
 
     const filteredItems = items.filter(item => {
-        // Search
         if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-
-        // Category
         if (filters.category !== 'All' && item.Category?.name !== filters.category) return false;
-
-        // Status Filter (Mock logic as "Partial" isn't fully tracked yet, using basic boolean)
         if (filters.status === 'On') {
-            if (activeTab === 'offline' && !item.availableOffline) return false;
-            // For online, it mimics "At least one on" or "All on" depending on requirement. 
-            // Simplified:
-            if (activeTab === 'online') {
-                if (activeChannel === 'all' && (!item.availableSwiggy && !item.availableZomato)) return false;
-                if (activeChannel === 'swiggy' && !item.availableSwiggy) return false;
-                if (activeChannel === 'zomato' && !item.availableZomato) return false;
-            }
+            if (!item.availableOffline) return false;
         }
         if (filters.status === 'Off') {
-            if (activeTab === 'offline' && item.availableOffline) return false;
-            if (activeTab === 'online') {
-                if (activeChannel === 'all' && (item.availableSwiggy || item.availableZomato)) return false;
-                if (activeChannel === 'swiggy' && item.availableSwiggy) return false;
-                if (activeChannel === 'zomato' && item.availableZomato) return false;
-            }
+            if (item.availableOffline) return false;
         }
-
         return true;
     });
 
@@ -193,19 +162,11 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
         try {
             setLoading(true);
             const response = await menuService.exportFullMenu();
-
-            // Prepare data for unparse
-            const dataToUnparse = response.data;
-
             const csvData = Papa.unparse({
                 fields: CSV_HEADERS,
-                data: dataToUnparse
-            }, {
-                quotes: true,
-            });
-
-            const csvContent = `\uFEFF${csvData}`; // Add BOM for Excel compatibility
-
+                data: response.data
+            }, { quotes: true });
+            const csvContent = `\uFEFF${csvData}`;
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
@@ -222,13 +183,11 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
     };
 
     const downloadFullTemplate = () => {
-        // Sample data with handling for commas in fields (wrapped in quotes)
         const sample = [
             `"Chicken Burger","Burger King","Juicy chicken patty","CB01",,"SAP123","HSN001","Fast Food","Burgers","Burgers Online",150,"Spicy","Goods","Pcs","TRUE",10,20,1,10,"FALSE","TRUE","TRUE","FALSE","Size","Food","Large",180,"SAP_LG",15,"Toppings","Multiple",0,3,"Cheese",20,"ADD_01",0,1`,
             `"Chicken Burger","Burger King","Juicy chicken patty","CB01",,"SAP123","HSN001","Fast Food","Burgers","Burgers Online",150,"Spicy","Goods","Pcs","TRUE",10,20,1,10,"FALSE","TRUE","FALSE","TRUE","Size","Food","Regular",150,"SAP_RG",10,"Toppings","Multiple",0,3,"Mushrooms",10,"ADD_02",0,2`
         ].join("\n");
-
-        const csvContent = `\uFEFF${CSV_HEADERS.join(",")}\n${sample}`; // Add BOM for Excel
+        const csvContent = `\uFEFF${CSV_HEADERS.join(",")}\n${sample}`;
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -247,32 +206,13 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
 
     return (
         <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-6 space-y-6">
-            {/* Header / Tabs */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-2 flex gap-4">
-                <button
-                    onClick={() => setActiveTab('online')}
-                    className={`px-8 py-3 rounded-md font-bold text-sm transition-all ${activeTab === 'online'
-                        ? 'bg-orange-50 text-orange-600 border-b-2 border-orange-600'
-                        : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
-                        }`}
-                >
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4" />
-                        <span>Online</span>
-                    </div>
-                </button>
-                <button
-                    onClick={() => setActiveTab('offline')}
-                    className={`px-8 py-3 rounded-md font-bold text-sm transition-all ${activeTab === 'offline'
-                        ? 'bg-orange-50 text-orange-600 border-b-2 border-orange-600'
-                        : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
-                        }`}
-                >
-                    <div className="flex items-center gap-2">
-                        <Smartphone className="w-4 h-4" />
-                        <span>Offline</span>
-                    </div>
-                </button>
+            {/* Header / Tabs - Simplified to just Title */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-100">
+                    <Smartphone className="w-6 h-6 text-primary-500" />
+                    <span>Item Availability Manager</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">Manage item availability for offline store.</p>
             </div>
 
             {/* CSV Actions Bar */}
@@ -332,40 +272,6 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
                 </div>
             </div>
 
-            {/* Sub-Filters / Channels (Only for Online) */}
-            {activeTab === 'online' && (
-                <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                    <button
-                        onClick={() => setActiveChannel('all')}
-                        className={`px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2 ${activeChannel === 'all' ? 'bg-gray-900 text-white border-gray-900 dark:bg-gray-700 dark:border-gray-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
-                            }`}
-                    >
-                        <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
-                            <div className="bg-current rounded-[1px]"></div>
-                            <div className="bg-current rounded-[1px]"></div>
-                            <div className="bg-current rounded-[1px]"></div>
-                            <div className="bg-current rounded-[1px]"></div>
-                        </div>
-                        All
-                    </button>
-                    <button
-                        onClick={() => setActiveChannel('swiggy')}
-                        className={`px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2 ${activeChannel === 'swiggy' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
-                            }`}
-                    >
-                        <span className="font-bold">S</span> Swiggy
-                    </button>
-                    <button
-                        onClick={() => setActiveChannel('zomato')}
-                        className={`px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2 ${activeChannel === 'zomato' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
-                            }`}
-                    >
-                        <span className="font-bold">Z</span> Zomato
-                    </button>
-                    {/* Add more placeholders if needed */}
-                </div>
-            )}
-
             {/* Search and Filters Bar */}
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-4 items-center">
                 <div className="flex-1 w-full relative">
@@ -397,9 +303,6 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
                         <option value="Off">Off</option>
                     </select>
                 </div>
-                <button className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700">
-                    Show
-                </button>
                 <button
                     onClick={() => { setSearchQuery(''); setFilters({ category: 'All', status: 'All' }) }}
                     className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400"
@@ -423,51 +326,20 @@ export function MenuChannelDashboard({ initialTab = 'online', initialChannel = '
                             {items.map(item => (
                                 <div key={item.id} className="p-4 flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <div className="flex items-center gap-4 flex-1">
-                                        <div className={`w-3 h-3 rounded-full ${
-                                            // Mock logic for status dot
-                                            (activeTab === 'offline' ? item.availableOffline : (item.availableSwiggy || item.availableZomato))
-                                                ? 'bg-green-500'
-                                                : 'bg-gray-300'
-                                            }`} />
+                                        <div className={`w-3 h-3 rounded-full ${item.availableOffline ? 'bg-green-500' : 'bg-gray-300'}`} />
                                         <div>
                                             <h4 className="font-medium text-gray-900 dark:text-white">{item.name}</h4>
-                                            <p className="text-xs text-gray-500">₹{item.price}</p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-4">
-                                        {/* Toggles based on active view */}
-                                        {activeTab === 'offline' && (
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm text-gray-500">Offline</span>
-                                                <Toggle
-                                                    isOn={item.availableOffline}
-                                                    onToggle={() => handleToggle(item.id, 'availableOffline', item.availableOffline)}
-                                                />
-                                            </div>
-                                        )}
-
-                                        {activeTab === 'online' && (activeChannel === 'all' || activeChannel === 'swiggy') && (
-                                            <div className="flex items-center gap-2 min-w-[100px] justify-end">
-                                                <span className="text-xs text-gray-400">Swiggy</span>
-                                                <Toggle
-                                                    isOn={item.availableSwiggy}
-                                                    onToggle={() => handleToggle(item.id, 'availableSwiggy', item.availableSwiggy)}
-                                                    color="bg-orange-500"
-                                                />
-                                            </div>
-                                        )}
-
-                                        {activeTab === 'online' && (activeChannel === 'all' || activeChannel === 'zomato') && (
-                                            <div className="flex items-center gap-2 min-w-[100px] justify-end">
-                                                <span className="text-xs text-gray-400">Zomato</span>
-                                                <Toggle
-                                                    isOn={item.availableZomato}
-                                                    onToggle={() => handleToggle(item.id, 'availableZomato', item.availableZomato)}
-                                                    color="bg-red-500"
-                                                />
-                                            </div>
-                                        )}
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-gray-500">Available</span>
+                                            <Toggle
+                                                isOn={item.availableOffline}
+                                                onToggle={() => handleToggle(item.id, 'availableOffline', item.availableOffline)}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ))}
