@@ -21,9 +21,15 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, [token]);
 
-    const login = async (username, password) => {
+    const login = async (username, password, extra = {}) => {
         try {
-            const res = await api.post('/auth/login', { username, password });
+            const res = await api.post('/auth/login', { username, password, ...extra });
+
+            // Handle Ambiguity (300)
+            if (res.status === 300) {
+                return { success: false, error: 'Multiple accounts found', tenants: res.data.tenants };
+            }
+
             const { token, user } = res.data;
 
             localStorage.setItem('token', token);
@@ -35,6 +41,9 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             console.error("Login failed", error);
+            if (error.response?.status === 300) {
+                return { success: false, error: 'Multiple accounts found', tenants: error.response.data.tenants };
+            }
             return { success: false, error: error.response?.data?.error || 'Login failed' };
         }
     };

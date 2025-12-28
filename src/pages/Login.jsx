@@ -6,6 +6,9 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [tenantIdOrSubdomain, setTenantIdOrSubdomain] = useState('');
+    const [isStoreCodeVisible, setIsStoreCodeVisible] = useState(false);
+    const [availableTenants, setAvailableTenants] = useState([]);
     const [error, setError] = useState(null);
     const { login, loginWithToken } = useAuth();
     const [searchParams] = useSearchParams();
@@ -32,11 +35,22 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        const res = await login(username, password);
+
+        const extra = {};
+        if (tenantIdOrSubdomain) extra.subdomain = tenantIdOrSubdomain; // Currently we treat input as subdomain or code
+
+        const res = await login(username, password, extra);
         if (!res.success) {
-            setError(res.error);
+            if (res.requireStoreCode) {
+                setError('Multiple accounts found. Please enter your Restaurant ID above.');
+                // Ideally focus the input here, but since it's always visible, the user can see it.
+            } else {
+                setError(res.error);
+            }
         }
     };
+
+    // No handleTenantSelect needed anymore as we don't get a list
 
     const handleGoogleLogin = () => {
         window.location.href = 'http://localhost:5001/api/auth/google';
@@ -60,6 +74,25 @@ export default function Login() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Standard SaaS Login Fields */}
+
+                    {/* Restaurant ID / Tenant Identifier */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Restaurant ID <span className="text-gray-400 font-normal">(Optional)</span>
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={tenantIdOrSubdomain}
+                                onChange={e => setTenantIdOrSubdomain(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
+                                placeholder="e.g. sunburst"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500">Leave empty if you are the only user with this username.</p>
+                    </div>
+
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
                         <div className="relative">
@@ -109,6 +142,28 @@ export default function Login() {
                         Google
                     </button>
                 </form>
+
+                {availableTenants.length > 0 && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm">
+                            <h3 className="text-lg font-bold mb-4">Select Store</h3>
+                            <p className="text-sm text-gray-500 mb-4">You have accounts in multiple stores. Please select one to continue.</p>
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                                {availableTenants.map(t => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => handleTenantSelect(t.id)}
+                                        className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors flex justify-between items-center"
+                                    >
+                                        <span className="font-medium">{t.name}</span>
+                                        <span className="text-xs text-gray-400">{t.subdomain || 'Main'}</span>
+                                    </button>
+                                ))}
+                            </div>
+                            <button onClick={() => setAvailableTenants([])} className="mt-4 w-full py-2 text-gray-500">Cancel</button>
+                        </div>
+                    </div>
+                )}
 
 
 
