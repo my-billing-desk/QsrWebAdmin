@@ -24,21 +24,35 @@ export function UserManagement() {
     });
 
     const [permissions, setPermissions] = useState([
-        { id: 1, name: 'Item Master', read: true, write: true },
-        { id: 2, name: 'Tax Configuration', read: true, write: true },
-        { id: 3, name: 'Customer Management', read: true, write: true },
-        { id: 4, name: 'KOT Management', read: true, write: true },
-        { id: 5, name: 'Reports', type: 'yes_no', value: false },
-        { id: 6, name: 'Discount Configuration', read: true, write: true },
-        { id: 7, name: 'Point of Sale Configuration Details', read: true, write: true },
-        { id: 8, name: 'After Print Modification', type: 'custom', add: true, modify: false },
-        { id: 9, name: 'Special Note / Addons Management', type: 'yes_no', value: true },
-        { id: 10, name: 'Manual Finalize Order', type: 'yes_no', value: false },
-        { id: 11, name: 'Purchase [Inventory]', read: true, write: true },
-        { id: 12, name: 'Indent Management', type: 'yes_no', value: true },
-        { id: 13, name: 'Stock Management [Inventory]', read: true, write: true },
-        { id: 14, name: 'Internal Transfer/Sales [Inventory]', read: true, write: true },
-        { id: 15, name: 'Area Table Management', read: true, write: true },
+        { id: 1, name: 'Dashboard & Analytics', read: true, write: false },
+        { id: 2, name: 'Item Master (Menu Items)', read: true, write: true },
+        { id: 3, name: 'Category Management', read: true, write: true },
+        { id: 4, name: 'Addon & Variations Management', read: true, write: true },
+        { id: 5, name: 'Tax Configuration', read: true, write: true },
+        { id: 6, name: 'Customer Management', read: true, write: true },
+        { id: 7, name: 'KOT Management', read: true, write: true },
+        { id: 8, name: 'Billing & Settlement', read: true, write: true },
+        { id: 9, name: 'Online Orders (Swiggy/Zomato)', read: true, write: true },
+        { id: 10, name: 'Reports & Exports', type: 'yes_no', value: true },
+        { id: 11, name: 'Discount Configuration', read: true, write: true },
+        { id: 12, name: 'Point of Sale Configuration Details', read: true, write: true },
+        { id: 13, name: 'After Print Modification', type: 'custom', add: true, modify: false },
+        { id: 14, name: 'Raw Materials [Inventory]', read: true, write: true },
+        { id: 15, name: 'Recipe Management [Inventory]', read: true, write: true },
+        { id: 16, name: 'Supplier Management [Inventory]', read: true, write: true },
+        { id: 17, name: 'Purchase [Inventory]', read: true, write: true },
+        { id: 18, name: 'Stock Adjustment / Wastage [Inventory]', read: true, write: true },
+        { id: 19, name: 'Indent Management', read: true, write: true },
+        { id: 20, name: 'Internal Transfer/Sales [Inventory]', read: true, write: true },
+        { id: 21, name: 'Area & Table Management', read: true, write: true },
+        { id: 22, name: 'Expense Management', read: true, write: true },
+        { id: 23, name: 'Loyalty & Rewards Management', read: true, write: true },
+        { id: 24, name: 'Marketplace & Integrations', read: true, write: true },
+        { id: 25, name: 'User & Staff Management', read: true, write: true },
+        { id: 26, name: 'Terminal & Printer Configuration', read: true, write: true },
+        { id: 27, name: 'Day End / Shift Management', type: 'yes_no', value: true },
+        { id: 28, name: 'Special Note Management', type: 'yes_no', value: true },
+        { id: 29, name: 'Manual Finalize Order', type: 'yes_no', value: false },
     ]);
 
     useEffect(() => {
@@ -291,8 +305,36 @@ export function UserManagement() {
 
                 {/* Rights Table */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                         <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Rights <span className="text-red-500">*</span></h3>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPermissions(prev => prev.map(p => ({
+                                    ...p,
+                                    read: p.read !== undefined ? true : p.read,
+                                    write: p.write !== undefined ? true : p.write,
+                                    value: p.value !== undefined ? true : p.value,
+                                    add: p.add !== undefined ? true : p.add,
+                                    modify: p.modify !== undefined ? true : p.modify
+                                })))}
+                                className="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold transition-colors"
+                            >
+                                Select All
+                            </button>
+                            <button
+                                onClick={() => setPermissions(prev => prev.map(p => ({
+                                    ...p,
+                                    read: p.read !== undefined ? false : p.read,
+                                    write: p.write !== undefined ? false : p.write,
+                                    value: p.value !== undefined ? false : p.value,
+                                    add: p.add !== undefined ? false : p.add,
+                                    modify: p.modify !== undefined ? false : p.modify
+                                })))}
+                                className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded font-bold transition-colors"
+                            >
+                                Deselect All
+                            </button>
+                        </div>
                     </div>
 
                     <div className="divide-y divide-gray-100 dark:divide-gray-700">

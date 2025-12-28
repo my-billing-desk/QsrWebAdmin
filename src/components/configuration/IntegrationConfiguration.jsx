@@ -121,12 +121,25 @@ export default function IntegrationConfiguration({ integration, onClose }) {
 
                 {/* API Credentials Section */}
                 <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-blue-500" /> API Integration Credentials
-                    </h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-blue-500" /> API Integration Credentials
+                        </h3>
+                        <a
+                            href={integrationName === 'Swiggy' ? 'https://partner.swiggy.com' : 'https://www.zomato.com/business'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-red-600 font-bold hover:underline flex items-center gap-1"
+                        >
+                            <MessageSquare size={10} /> How to get this?
+                        </a>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1 capitalize">{integrationName} API Key *</label>
+                            <label className="block text-xs font-bold text-gray-600 mb-1 capitalize">
+                                {integrationName} API Key *
+                                <span className="ml-2 font-normal text-gray-400">(Available in {integrationName} Partner Portal)</span>
+                            </label>
                             <input
                                 type="password"
                                 value={config.apiKey}
@@ -136,7 +149,10 @@ export default function IntegrationConfiguration({ integration, onClose }) {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1">Merchant ID / Restaurant ID *</label>
+                            <label className="block text-xs font-bold text-gray-600 mb-1">
+                                Merchant ID / Restaurant ID *
+                                <span className="ml-2 font-normal text-gray-400">(Unique ID for your outlet)</span>
+                            </label>
                             <input
                                 type="text"
                                 value={config.merchantId}
@@ -146,8 +162,36 @@ export default function IntegrationConfiguration({ integration, onClose }) {
                             />
                         </div>
                     </div>
+                    <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                        <h4 className="text-[11px] font-bold text-blue-900 mb-2 border-b border-blue-100 pb-1">Step-by-Step Guide: How to get credentials</h4>
+                        <div className="space-y-3">
+                            {integrationName === 'Swiggy' ? (
+                                <div className="text-[10px] text-blue-800 leading-relaxed font-medium">
+                                    <p className="mb-1">1. Log in to <strong>partner.swiggy.com</strong></p>
+                                    <p className="mb-1">2. Go to <strong>Settings</strong> → <strong>POS Integration</strong></p>
+                                    <p className="mb-1">3. Click on <strong>'Third Party POS'</strong> and select <strong>'mybilldesk'</strong> (or 'Custom')</p>
+                                    <p>4. Your API Key and Restaurant ID will be displayed there.</p>
+                                </div>
+                            ) : (
+                                <div className="text-[10px] text-blue-800 leading-relaxed font-medium">
+                                    <p className="mb-1">1. Log in to <strong>zomato.com/business</strong></p>
+                                    <p className="mb-1">2. Navigate to <strong>Outlet Settings</strong> or <strong>Ad Manager</strong></p>
+                                    <p className="mb-1">3. Look for <strong>POS Integration</strong> or <strong>API Access</strong> section</p>
+                                    <p>4. Request permissions if not enabled, or copy the key if already available.</p>
+                                </div>
+                            )}
+                            <p className="text-[9px] text-blue-600 mt-2 bg-white/50 p-2 rounded border border-blue-50 italic">
+                                💡 <strong>Pro Tip:</strong> If you don't see these options, simply email your Relationship Manager (RM) or support team: <em>"Hey, I want to integrate my outlet with mybilldesk POS. Please share my API Key and Restaurant ID."</em>
+                            </p>
+                        </div>
+                    </div>
                     <div className="mt-4 flex justify-between items-center">
-                        <p className="text-[10px] text-gray-400">Restricted access. Credentials are encrypted and used only for order synchronization.</p>
+                        <div className="flex flex-col">
+                            <p className="text-[10px] text-gray-400 italic">Credentials are encrypted and used only for order synchronization.</p>
+                            <button className="text-[10px] text-red-600 font-bold hover:underline mt-1 text-left">
+                                Still can't find it? Raise a Request →
+                            </button>
+                        </div>
                         <button
                             onClick={handleVerify}
                             disabled={loading}
