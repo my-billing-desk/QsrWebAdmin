@@ -49,10 +49,21 @@ export default function Marketplace() {
         async function loadAggregators() {
             try {
                 const res = await aggregatorService.getAll();
-                const onlineOrders = [
-                    { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Activated', isConnected: true },
-                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Activated', isConnected: true }
+                const backendAggs = res.data.map(agg => ({
+                    ...agg,
+                    category: 'Online Orders',
+                    status: agg.isConnected ? 'Activated' : 'Explore Now',
+                    // Use higher res icons
+                    icon: agg.slug === 'zomato' ? 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg' :
+                        agg.slug === 'swiggy' ? 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' : agg.icon
+                }));
+
+                // If backend is empty (though we just seeded), provide placeholders
+                const onlineOrders = backendAggs.length > 0 ? backendAggs : [
+                    { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Explore Now', isConnected: false },
+                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now', isConnected: false }
                 ];
+
                 const otherIntegrations = [
                     { id: 101, name: 'Shadowfax', category: 'Order Delivery', icon: null, status: 'Explore Now' },
                     { id: 102, name: 'Dunzo', category: 'Order Delivery', icon: null, status: 'Explore Now' },
@@ -65,16 +76,12 @@ export default function Marketplace() {
                 ];
                 setIntegrations([...onlineOrders, ...otherIntegrations]);
             } catch (e) {
-                // Fallback if API fails
-                const onlineOrders = [
-                    { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Activated', isConnected: true },
-                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Activated', isConnected: true }
+                console.error("Failed to load aggregators", e);
+                const fallback = [
+                    { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Explore Now' },
+                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now' }
                 ];
-                const otherIntegrationFallback = [
-                    { id: 101, name: 'Shadowfax', category: 'Order Delivery', icon: null, status: 'Explore Now' },
-                    // ... others
-                ];
-                setIntegrations([...onlineOrders, ...otherIntegrationFallback]);
+                setIntegrations(fallback);
             }
         }
         loadAggregators();

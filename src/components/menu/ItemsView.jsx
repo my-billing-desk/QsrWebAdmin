@@ -77,6 +77,8 @@ export function ItemsView() {
     const [categories, setCategories] = useState([]);
     const [items, setItems] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categorySearchTerm, setCategorySearchTerm] = useState('');
     const [hideEmpty, setHideEmpty] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [showAreaPriceModal, setShowAreaPriceModal] = useState(false);
@@ -172,9 +174,16 @@ export function ItemsView() {
         return <AddItem itemToEdit={editingItem} onBack={() => { setView('list'); setEditingItem(null); loadData(); }} />;
     }
 
-    const filteredItems = items.filter(i =>
-        selectedCategory === 'All' ? true : i.Category?.name === selectedCategory
+    const filteredCategories = categories.filter(c =>
+        c.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
     );
+
+    const filteredItems = items.filter(i => {
+        const matchesCategory = selectedCategory === 'All' ? true : i.Category?.name === selectedCategory;
+        const matchesSearch = i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (i.shortCode && i.shortCode.toLowerCase().includes(searchTerm.toLowerCase()));
+        return matchesCategory && matchesSearch;
+    });
 
     return (
         <div className="flex flex-1 overflow-hidden h-[calc(100vh-140px)] bg-gray-50 dark:bg-gray-900">
@@ -190,6 +199,18 @@ export function ItemsView() {
                         >
                             <div className={`w-3 h-3 bg-white rounded-full shadow-sm transform transition-transform ${hideEmpty ? 'translate-x-4' : ''}`} />
                         </button>
+                    </div>
+                </div>
+                <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <div className="relative mb-2">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={categorySearchTerm}
+                            onChange={(e) => setCategorySearchTerm(e.target.value)}
+                            placeholder="Search categories..."
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-red-500 outline-none dark:bg-gray-800"
+                        />
                     </div>
                 </div>
                 <div className="flex-1 overflow-y-auto pt-2">
@@ -211,10 +232,10 @@ export function ItemsView() {
                         id="categories-dnd"
                     >
                         <SortableContext
-                            items={categories.map(c => `cat-${c.id}`)}
+                            items={filteredCategories.map(c => `cat-${c.id}`)}
                             strategy={verticalListSortingStrategy}
                         >
-                            {categories.map(cat => (
+                            {filteredCategories.map(cat => (
                                 <SortableCategorySidebarItem
                                     key={`cat-${cat.id}`}
                                     id={`cat-${cat.id}`}
@@ -239,8 +260,10 @@ export function ItemsView() {
                         <div className="relative">
                             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
-                                className="pl-9 pr-3 py-1.5 border rounded text-sm w-48 focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                                placeholder="Search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-9 pr-3 py-1.5 border rounded text-sm w-48 focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all dark:bg-gray-800 dark:border-gray-700"
+                                placeholder="Search items..."
                             />
                         </div>
                         <button className="px-3 py-1.5 border rounded text-sm flex items-center gap-1 text-gray-600 hover:bg-gray-50">

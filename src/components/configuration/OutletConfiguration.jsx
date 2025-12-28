@@ -5,7 +5,18 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../../context/AuthContext';
+
 export function OutletConfiguration() {
+    const { user } = useAuth();
+
+    const copyTenantId = () => {
+        if (user?.tenantId) {
+            navigator.clipboard.writeText(user.tenantId.toString());
+            alert('Tenant ID copied to clipboard!');
+        }
+    };
+
     return (
         <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen font-sans">
             <div className="mb-6">
@@ -15,7 +26,15 @@ export function OutletConfiguration() {
                 </h1>
 
                 <div className="flex justify-end gap-2 mt-4 text-xs font-semibold">
-                    <div className="px-3 py-1 bg-white border rounded shadow-sm text-red-600">Restaurant: ID - <span className="text-red-600">368720</span></div>
+                    <div className="px-3 py-1 bg-white border rounded shadow-sm text-gray-700 flex items-center gap-2">
+                        Restaurant: ID - <span className="text-red-600 font-bold">{user?.tenantId || 'N/A'}</span>
+                        <button
+                            onClick={copyTenantId}
+                            className="ml-2 px-2 py-0.5 bg-gray-100 hover:bg-gray-200 rounded border text-[10px] uppercase"
+                        >
+                            Copy
+                        </button>
+                    </div>
                     <div className="px-3 py-1 bg-white border rounded shadow-sm">Desktop Version : <span className="text-red-600">119.0.2</span></div>
                     <button className="px-4 py-1 bg-red-600 text-white rounded flex items-center gap-1">Search <Search className="w-3 h-3" /></button>
                 </div>

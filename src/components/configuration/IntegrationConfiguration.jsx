@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { Save, AlertTriangle, MessageSquare, Trash2, Plus, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, AlertTriangle, MessageSquare, Trash2, Plus, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { aggregatorService } from '../../services/api';
 
-export default function IntegrationConfiguration({ integrationName, onClose }) {
+export default function IntegrationConfiguration({ integration, onClose }) {
+    const integrationName = integration.name;
     const { user } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+
     const [config, setConfig] = useState({
         notRegisteredGst: true,
         gstNote: '',
@@ -13,12 +19,60 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
         orderType: integrationName,
         itemTagsWait: true,
         commission: 10,
-        markFoodReady: false,
+        markFoodReady: integration.autoMarkReadyTime > 0,
+        markReadyTime: integration.autoMarkReadyTime || 5, // Default 5 mins
         packagingApplicableOn: 'order', // item, order, none
         packagingType: 'percentage', // fixed, percentage
         packagingValue: 5,
-        autoAccept: 'on', // on, on_no_print, off
+        autoAccept: integration.autoAccept || false,
+        apiKey: integration.apiKey || '',
+        merchantId: integration.merchantId || '',
+        verificationStatus: integration.verificationStatus || 'none'
     });
+
+    const handleVerify = async () => {
+        if (!config.apiKey || !config.merchantId) {
+            alert("API Key and Merchant ID are required for verification");
+            return;
+        }
+        setLoading(true);
+        try {
+            // First save credentials
+            await aggregatorService.toggle(integration.id, {
+                apiKey: config.apiKey,
+                merchantId: config.merchantId
+            });
+            // Then verify
+            const res = await aggregatorService.verify(integration.id);
+            setConfig(prev => ({ ...prev, verificationStatus: 'verified' }));
+            alert(res.data.message);
+        } catch (e) {
+            alert(e.response?.data?.message || "Verification failed. Check credentials.");
+            setConfig(prev => ({ ...prev, verificationStatus: 'failed' }));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const StatusBadge = ({ status }) => {
+        const styles = {
+            verified: 'bg-green-100 text-green-700 border-green-200',
+            pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+            failed: 'bg-red-100 text-red-700 border-red-200',
+            none: 'bg-gray-100 text-gray-700 border-gray-200'
+        };
+        const labels = {
+            verified: 'Verified & Active',
+            pending: 'Pending Verification',
+            failed: 'Verification Failed',
+            none: 'Not Connected'
+        };
+        return (
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${styles[status]}`}>
+                {labels[status]}
+            </span>
+        );
+    };
 
     const [timeSlots, setTimeSlots] = useState([
         { id: 1, from: '00:00', to: '23:55' }
@@ -47,6 +101,7 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-lg text-gray-800">Outlet Code : InDn54655</span>
+                            <StatusBadge status={config.verificationStatus} />
                         </div>
                         <span className="text-xs text-blue-500">Unique code for each outlet registered on {integrationName}</span>
                     </div>
@@ -63,6 +118,46 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
             </div>
 
             <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+
+                {/* API Credentials Section */}
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-blue-500" /> API Integration Credentials
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1 capitalize">{integrationName} API Key *</label>
+                            <input
+                                type="password"
+                                value={config.apiKey}
+                                onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
+                                className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                placeholder="Enter your vendor API key"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1">Merchant ID / Restaurant ID *</label>
+                            <input
+                                type="text"
+                                value={config.merchantId}
+                                onChange={(e) => setConfig({ ...config, merchantId: e.target.value })}
+                                className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                placeholder="e.g., 18274552"
+                            />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex justify-between items-center">
+                        <p className="text-[10px] text-gray-400">Restricted access. Credentials are encrypted and used only for order synchronization.</p>
+                        <button
+                            onClick={handleVerify}
+                            disabled={loading}
+                            className={`px-4 py-2 rounded text-xs font-bold flex items-center gap-2 transition-all ${config.verificationStatus === 'verified' ? 'bg-green-600 text-white' : 'bg-gray-800 text-white hover:bg-gray-900'}`}
+                        >
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : config.verificationStatus === 'verified' ? <CheckCircle2 size={14} /> : <Zap size={14} />}
+                            {config.verificationStatus === 'verified' ? 'Verified & Active' : 'Verify & Link Now'}
+                        </button>
+                    </div>
+                </div>
 
                 {/* GST Section */}
                 <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -160,6 +255,17 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
                                 />
                                 <span className="text-sm font-semibold text-gray-700">Enable auto mark food ready</span>
                             </label>
+                            {config.markFoodReady && (
+                                <div className="ml-6 mt-2 flex items-center gap-2">
+                                    <span className="text-xs text-gray-500 font-bold">Time (Minutes):</span>
+                                    <input
+                                        type="number"
+                                        value={config.markReadyTime}
+                                        onChange={(e) => setConfig({ ...config, markReadyTime: parseInt(e.target.value) || 0 })}
+                                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm font-bold focus:ring-2 focus:ring-red-500"
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="ml-auto">
                             <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white shadow">
@@ -211,15 +317,20 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
                                 </p>
                             </div>
 
-                            <div className="flex gap-4">
+                            <div className="flex gap-6">
                                 {[
-                                    { label: 'On', val: 'on' },
-                                    { label: 'On but without print', val: 'on_no_print' },
-                                    { label: 'Off', val: 'off' }
+                                    { label: 'Yes', val: true },
+                                    { label: 'No', val: false }
                                 ].map(opt => (
-                                    <label key={opt.val} className="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="autoAccept" checked={config.autoAccept === opt.val} onChange={() => setConfig({ ...config, autoAccept: opt.val })} className="text-red-600 focus:ring-red-500" />
-                                        <span className="text-sm whitespace-nowrap">{opt.label}</span>
+                                    <label key={opt.label} className="flex items-center gap-2 cursor-pointer group">
+                                        <input
+                                            type="radio"
+                                            name="autoAccept"
+                                            checked={config.autoAccept === opt.val}
+                                            onChange={() => setConfig({ ...config, autoAccept: opt.val })}
+                                            className="w-5 h-5 text-red-600 focus:ring-red-500 border-gray-300"
+                                        />
+                                        <span className={`text-sm font-bold ${config.autoAccept === opt.val ? 'text-gray-900' : 'text-gray-500Group-hover:text-gray-700'}`}>{opt.label}</span>
                                     </label>
                                 ))}
                             </div>
@@ -279,11 +390,35 @@ export default function IntegrationConfiguration({ integrationName, onClose }) {
                 <button
                     onClick={onClose}
                     className="px-6 py-2 bg-white border border-gray-300 rounded font-bold text-gray-700 hover:bg-gray-50 shadow-sm"
+                    disabled={saving}
                 >
                     Cancel
                 </button>
-                <button className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 shadow-lg shadow-red-500/30">
-                    Save Changes
+                <button
+                    onClick={async () => {
+                        setSaving(true);
+                        try {
+                            await aggregatorService.toggle(integration.id, {
+                                autoAccept: config.autoAccept,
+                                autoMarkReadyTime: config.markFoodReady ? config.markReadyTime : 0
+                            });
+                            setSaved(true);
+                            setTimeout(() => {
+                                setSaved(false);
+                                window.location.reload(); // Refresh to reflect changes everywhere
+                            }, 1500);
+                        } catch (e) {
+                            alert("Failed to save: " + e.message);
+                        } finally {
+                            setSaving(false);
+                        }
+                    }}
+                    disabled={saving}
+                    className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 shadow-lg shadow-red-500/30 flex items-center gap-2"
+                >
+                    {saving ? <Loader2 size={18} className="animate-spin" /> :
+                        saved ? <CheckCircle2 size={18} /> : null}
+                    {saving ? 'Saving...' : saved ? 'Saved Successfully' : 'Save Changes'}
                 </button>
             </div>
 

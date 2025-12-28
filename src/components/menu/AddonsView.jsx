@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronUp, Save, ArrowLeft, Layers, GripVertical } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Save, ArrowLeft, Layers, GripVertical, Search } from 'lucide-react';
 import { groupService } from '../../services/api';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -60,9 +60,9 @@ function SortableAddonRow({ id, index, addon, handleRowChange, handleRemoveRow }
 }
 
 export function AddonsView() {
-    const [view, setView] = useState('list'); // 'list' or 'add'
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Form State
     const [formData, setFormData] = useState({
@@ -188,6 +188,11 @@ export function AddonsView() {
         }
     };
 
+    const filteredGroups = groups.filter(g =>
+        g.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (g.Addons && g.Addons.some(a => a.name.toLowerCase().includes(searchTerm.toLowerCase())))
+    );
+
     if (view === 'add') {
         return (
             <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
@@ -277,16 +282,27 @@ export function AddonsView() {
 
     return (
         <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-            <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">Addon Groups</h2>
-                <button onClick={() => { setView('add'); setEditingGroupId(null); setFormData({ name: '', description: '', selectionType: 'single', addons: [{ _key: Math.random().toString(36).substr(2, 9), name: '', price: '', type: 'veg' }] }); }} className="px-4 py-2 bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 flex items-center gap-2">
+            <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Addon Groups</h2>
+                    <div className="relative flex-1 md:w-64">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-9 pr-3 py-1.5 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none text-sm"
+                            placeholder="Search groups or addons..."
+                        />
+                    </div>
+                </div>
+                <button onClick={() => { setView('add'); setEditingGroupId(null); setFormData({ name: '', description: '', selectionType: 'single', addons: [{ _key: Math.random().toString(36).substr(2, 9), name: '', price: '', type: 'veg' }] }); }} className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 flex items-center justify-center gap-2">
                     <Plus className="w-4 h-4" /> Create Group
                 </button>
             </div>
 
             <div className="flex-1 overflow-auto p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {groups.map(group => (
+                    {filteredGroups.map(group => (
                         <div key={group.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
                             <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-start bg-gray-50 dark:bg-gray-800/50">
                                 <div>

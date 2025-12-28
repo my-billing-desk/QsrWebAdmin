@@ -10,6 +10,7 @@ export const MenuOnOff = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [catSearchQuery, setCatSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [filterType, setFilterType] = useState('all'); // all, veg, non-veg
 
@@ -131,9 +132,21 @@ export const MenuOnOff = () => {
             {/* LEFT SIDEBAR - CATEGORIES */}
             <div className="w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-sm z-20 hidden md:flex">
                 {/* Header */}
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <span className="font-semibold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-wide">Category</span>
-                    <Filter size={16} className="text-gray-400" />
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-wide">Category</span>
+                        <Filter size={16} className="text-gray-400" />
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
+                        <input
+                            type="text"
+                            placeholder="Find category..."
+                            value={catSearchQuery}
+                            onChange={(e) => setCatSearchQuery(e.target.value)}
+                            className="w-full pl-8 pr-3 py-1.5 text-[10px] rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-1 focus:ring-red-500 outline-none"
+                        />
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
@@ -150,26 +163,28 @@ export const MenuOnOff = () => {
                         </span>
                     </button>
 
-                    {categories.map(cat => {
-                        const count = items.filter(i => i.categoryId === cat.id).length;
-                        if (count === 0 && selectedCategory !== 'all') return null;
+                    {categories
+                        .filter(cat => cat.name.toLowerCase().includes(catSearchQuery.toLowerCase()))
+                        .map(cat => {
+                            const count = items.filter(i => i.categoryId === cat.id).length;
+                            if (count === 0 && selectedCategory !== 'all') return null;
 
-                        return (
-                            <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className={`w-full flex items-center justify-between px-4 py-2 text-xs font-medium border-b border-gray-100 dark:border-gray-700 transition-colors
-                                    ${selectedCategory === cat.id
-                                        ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400 border-l-4 border-l-red-500'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-l-4 border-l-transparent'}`}
-                            >
-                                <span className="truncate pr-2">{cat.name}</span>
-                                <span className="bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded-full shrink-0">
-                                    {count}
-                                </span>
-                            </button>
-                        );
-                    })}
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className={`w-full flex items-center justify-between px-4 py-2 text-xs font-medium border-b border-gray-100 dark:border-gray-700 transition-colors
+                                        ${selectedCategory === cat.id
+                                            ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400 border-l-4 border-l-red-500'
+                                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-l-4 border-l-transparent'}`}
+                                >
+                                    <span className="truncate pr-2">{cat.name}</span>
+                                    <span className="bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded-full shrink-0">
+                                        {count}
+                                    </span>
+                                </button>
+                            );
+                        })}
                 </div>
             </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Search } from 'lucide-react';
 import { menuService } from '../../services/api';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -39,6 +39,7 @@ function SortableCategoryRow({ id, category, handleDelete }) {
 export function CategoriesView() {
     const [categories, setCategories] = useState([]);
     const [newCat, setNewCat] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Dnd Sensors
     const sensors = useSensors(
@@ -91,19 +92,35 @@ export function CategoriesView() {
         }
     };
 
+    const filteredCategories = categories.filter(c =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="p-6 max-w-4xl mx-auto">
-            <div className="flex gap-4 mb-6">
-                <input
-                    value={newCat}
-                    onChange={(e) => setNewCat(e.target.value)}
-                    className="flex-1 p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                    placeholder="New Category Name"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                />
-                <button onClick={handleAdd} className="bg-blue-600 text-white px-4 rounded flex items-center gap-2 hover:bg-blue-700">
-                    <Plus className="w-4 h-4" /> Add
-                </button>
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="flex-1 flex gap-2">
+                    <input
+                        value={newCat}
+                        onChange={(e) => setNewCat(e.target.value)}
+                        className="flex-1 p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                        placeholder="New Category Name"
+                        onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                    />
+                    <button onClick={handleAdd} className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700 whitespace-nowrap">
+                        <Plus className="w-4 h-4" /> Add
+                    </button>
+                </div>
+
+                <div className="relative md:w-64">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none"
+                        placeholder="Search categories..."
+                    />
+                </div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded shadow overflow-hidden">
                 <DndContext
@@ -121,10 +138,10 @@ export function CategoriesView() {
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                             <SortableContext
-                                items={categories.map(c => c.id)}
+                                items={filteredCategories.map(c => c.id)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {categories.map(cat => (
+                                {filteredCategories.map(cat => (
                                     <SortableCategoryRow
                                         key={cat.id}
                                         id={cat.id}

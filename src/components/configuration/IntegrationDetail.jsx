@@ -97,7 +97,7 @@ export default function IntegrationDetail({ integration, onBack }) {
                                         Customize the ordering experience with {integration.name}. One click order on your mybill PoS with menu synchronization. (Only for existing {integration.name} enabled restaurants)
                                     </p>
                                 </div>
-                                {integration.isConnected && (
+                                {integration.isConnected && integration.verificationStatus === 'verified' ? (
                                     <div className="flex flex-col items-end gap-1">
                                         <span className="bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded border border-green-200 flex items-center gap-1">
                                             <Check size={12} /> Activated
@@ -105,6 +105,15 @@ export default function IntegrationDetail({ integration, onBack }) {
                                         <div className="text-[10px] text-gray-500 text-right">
                                             Service is expiring on: <span className="font-bold text-gray-800">6 Apr 2026</span><br />
                                             <span className="text-red-500 font-bold">107 days left</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="bg-yellow-50 text-yellow-700 text-xs font-bold px-3 py-1 rounded border border-yellow-200 flex items-center gap-1">
+                                            <ShieldCheck size={12} /> Not Connected
+                                        </span>
+                                        <div className="text-[10px] text-gray-500 text-right">
+                                            Verification required to sync orders
                                         </div>
                                     </div>
                                 )}

@@ -66,7 +66,8 @@ export const userService = {
 
 export const aggregatorService = {
     getAll: () => api.get('/aggregators'),
-    toggle: (id) => api.post(`/aggregators/${id}/toggle`)
+    toggle: (id, data) => api.post(`/aggregators/${id}/toggle`, data),
+    verify: (id) => api.post(`/aggregators/${id}/verify`)
 };
 
 export const specialNoteService = {

@@ -74,27 +74,8 @@ export default function Login() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Standard SaaS Login Fields */}
-
-                    {/* Restaurant ID / Tenant Identifier */}
                     <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Restaurant ID <span className="text-gray-400 font-normal">(Optional)</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={tenantIdOrSubdomain}
-                                onChange={e => setTenantIdOrSubdomain(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
-                                placeholder="e.g. sunburst"
-                            />
-                        </div>
-                        <p className="text-xs text-gray-500">Leave empty if you are the only user with this username.</p>
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Username or Email</label>
                         <div className="relative">
                             <User className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
@@ -102,7 +83,7 @@ export default function Login() {
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
-                                placeholder="Enter your username"
+                                placeholder="Enter your username or email"
                             />
                         </div>
                     </div>

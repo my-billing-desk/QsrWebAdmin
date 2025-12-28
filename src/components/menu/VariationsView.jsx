@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, ArrowLeft, Layers, Check, Edit3, X } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Layers, Check, Edit3, X, Search } from 'lucide-react';
 import { groupService } from '../../services/api';
 
 export function VariationsView() {
     const [showModal, setShowModal] = useState(false);
     const [groups, setGroups] = useState([]); // Assuming this state exists based on usage
     const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const [editingGroupId, setEditingGroupId] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -62,6 +63,11 @@ export function VariationsView() {
         setFormData({ name: '', onlineDisplayName: '', departmentName: '', isActive: true, variants: [] });
     };
 
+    const filteredGroups = groups.filter(g =>
+        g.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (g.Variants && g.Variants.some(v => v.name.toLowerCase().includes(searchTerm.toLowerCase())))
+    );
+
     const handleSubmit = async () => {
         if (!formData.name) return alert("Group Name is required");
         if (!formData.departmentName) return alert("Department Name is required");
@@ -104,9 +110,15 @@ export function VariationsView() {
             {/* List Content */}
             <div className="flex-1 overflow-auto p-6">
                 <div className="flex gap-4 mb-6">
-                    <input className="flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm" placeholder="Variation Name" />
-                    <input className="flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm" placeholder="Search By" />
-                    <button className="px-6 bg-red-800 text-white rounded-lg font-medium">Search</button>
+                    <div className="relative flex-1">
+                        <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-3 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                            placeholder="Search variation groups or options..."
+                        />
+                    </div>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -121,7 +133,7 @@ export function VariationsView() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {groups.map(group => (
+                            {filteredGroups.map(group => (
                                 <tr key={group.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td className="p-4 text-sm font-medium text-gray-900 dark:text-white">{group.name}</td>
                                     <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{group.onlineDisplayName || '-'}</td>
