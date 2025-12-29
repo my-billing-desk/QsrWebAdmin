@@ -26,7 +26,12 @@ export const AuthProvider = ({ children }) => {
                     if (res.data.success !== false) { // check for success flag if API wrapper returns it, but auth controller returns explicit object
                         // AuthController 'sendLoginResponse' returns { token, user: {...} } or { user: ... } ? 
                         // It returns res.json({ token, user: ... }).
-                        const { user: freshUser, token: freshToken } = res.data;
+                        const { user: freshUser, token: freshToken, daysLeft } = res.data;
+                        if (daysLeft !== undefined) {
+                            freshUser.daysLeft = daysLeft;
+                            // Keep legacy for now if needed, or just use daysLeft
+                            freshUser.trialDaysLeft = daysLeft;
+                        }
 
                         setUser(freshUser);
                         localStorage.setItem('user', JSON.stringify(freshUser));
@@ -58,7 +63,11 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, error: 'Multiple accounts found', tenants: res.data.tenants };
             }
 
-            const { token, user } = res.data;
+            const { token, user, daysLeft } = res.data;
+            if (daysLeft !== undefined) {
+                user.daysLeft = daysLeft;
+                user.trialDaysLeft = daysLeft;
+            }
 
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));

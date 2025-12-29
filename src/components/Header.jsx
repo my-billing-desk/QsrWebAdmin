@@ -32,6 +32,18 @@ export function Header({ onToggleSidebar }) {
 
             {/* Right Section */}
             <div className="flex items-center gap-5">
+                {/* Trial/Status Badge */}
+                {user?.daysLeft !== undefined && user.daysLeft !== null && user?.tenantStatus === 'trial' && (
+                    <div className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-full text-xs font-semibold border border-orange-200 dark:border-orange-800">
+                        {user.daysLeft} Trial Days Left
+                    </div>
+                )}
+                {user?.daysLeft !== undefined && user.daysLeft !== null && user?.tenantStatus === 'active' && (
+                    <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-xs font-semibold border border-green-200 dark:border-green-800">
+                        {user.daysLeft} Days Left
+                    </div>
+                )}
+
                 {/* Icons */}
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
                     <button className="hover:text-red-600 transition-colors" title="Help">
