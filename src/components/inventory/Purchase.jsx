@@ -1,32 +1,34 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, Plus, FileSpreadsheet, FileText, RotateCcw, Eye, Edit, Trash2, X, Calendar, Download } from 'lucide-react';
 
-export function PurchaseReturn() {
+export function Purchase() {
     // Mock Data
-    const [returns] = useState([
-        { id: 1, image: 'url', date: '24 Dec 2024', supplier: 'Electro Mart', ref: 'PT001', status: 'Received', total: '$1000', paid: '$1000', due: '$600', paymentStatus: 'Paid' },
+    const [purchases] = useState([
+        { id: 1, supplier: 'Apex Computers', ref: 'PO-001', date: '24 Dec 2024', status: 'Received', grandTotal: '$5000', paid: '$5000', due: '$0', paymentStatus: 'Paid' },
+        { id: 2, supplier: 'Dazzle Shoes', ref: 'PO-002', date: '20 Dec 2024', status: 'Pending', grandTotal: '$2000', paid: '$0', due: '$2000', paymentStatus: 'Unpaid' },
+        { id: 3, supplier: 'Best Accessories', ref: 'PO-003', date: '15 Dec 2024', status: 'Ordered', grandTotal: '$1500', paid: '$500', due: '$1000', paymentStatus: 'Partial' },
     ]);
 
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
             {/* 1. Header Section */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Purchase Return</h1>
-                    <div className="text-sm text-gray-500">Manage your purchase returns</div>
+                    <h1 className="text-2xl font-bold text-gray-800">Purchase</h1>
+                    <div className="text-sm text-gray-500">Manage your purchases</div>
                 </div>
                 <div className="flex items-center gap-2">
                     <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-red-500 shadow-sm"><FileText className="w-4 h-4" /></button>
                     <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-green-600 shadow-sm"><FileSpreadsheet className="w-4 h-4" /></button>
                     <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><RotateCcw className="w-4 h-4" /></button>
                     <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><ChevronDown className="w-4 h-4" /></button>
-                    <button className="px-4 py-2 bg-orange-500 text-white rounded font-bold shadow-sm hover:bg-orange-600 flex items-center gap-2 ml-2">
-                        <Plus className="w-4 h-4" /> Add Purchase Return
+                    <button className="px-4 py-2 bg-gray-800 text-white rounded font-bold shadow-sm hover:bg-gray-900 flex items-center gap-2 ml-2">
+                        <Download className="w-4 h-4" /> Import Purchase
                     </button>
-                    <button className="px-4 py-2 bg-gray-800 text-white rounded font-bold shadow-sm hover:bg-gray-900 flex items-center gap-2">
-                        Sales Return
+                    <button onClick={() => setIsAddModalOpen(true)} className="px-4 py-2 bg-orange-500 text-white rounded font-bold shadow-sm hover:bg-orange-600 flex items-center gap-2">
+                        <Plus className="w-4 h-4" /> Add Purchase
                     </button>
                 </div>
             </div>
@@ -52,37 +54,33 @@ export function PurchaseReturn() {
                         <thead className="bg-white text-xs font-bold text-gray-800 border-b">
                             <tr>
                                 <th className="p-4 w-10 text-center"><input type="checkbox" className="rounded border-gray-300" /></th>
-                                <th className="p-4">Image</th>
-                                <th className="p-4">Date</th>
-                                <th className="p-4">Supplier</th>
+                                <th className="p-4">Supplier Name</th>
                                 <th className="p-4">Reference</th>
+                                <th className="p-4">Date</th>
                                 <th className="p-4">Status</th>
-                                <th className="p-4">Total ($)</th>
-                                <th className="p-4">Paid ($)</th>
-                                <th className="p-4">Due ($)</th>
+                                <th className="p-4">Grand Total</th>
+                                <th className="p-4">Paid</th>
+                                <th className="p-4">Due</th>
                                 <th className="p-4">Payment Status</th>
                                 <th className="p-4 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm divide-y">
-                            {returns.map((r) => (
-                                <tr key={r.id} className="hover:bg-gray-50">
+                            {purchases.map((p) => (
+                                <tr key={p.id} className="hover:bg-gray-50">
                                     <td className="p-4 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
-                                    <td className="p-4">
-                                        <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center border text-xs text-gray-400">img</div>
-                                    </td>
-                                    <td className="p-4 text-gray-600">{r.date}</td>
-                                    <td className="p-4 text-gray-600">{r.supplier}</td>
-                                    <td className="p-4 text-gray-600">{r.ref}</td>
-                                    <td className="p-4"><span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-bold">{r.status}</span></td>
-                                    <td className="p-4 text-gray-800">{r.total}</td>
-                                    <td className="p-4 text-gray-600">{r.paid}</td>
-                                    <td className="p-4 text-gray-600">{r.due}</td>
-                                    <td className="p-4"><span className="px-2 py-1 rounded text-xs font-bold text-green-600 bg-green-100">{r.paymentStatus}</span></td>
+                                    <td className="p-4 font-bold text-gray-800">{p.supplier}</td>
+                                    <td className="p-4 text-gray-600">{p.ref}</td>
+                                    <td className="p-4 text-gray-600">{p.date}</td>
+                                    <td className="p-4"><span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-bold">{p.status}</span></td>
+                                    <td className="p-4 text-gray-800">{p.grandTotal}</td>
+                                    <td className="p-4 text-green-600">{p.paid}</td>
+                                    <td className="p-4 text-red-500">{p.due}</td>
+                                    <td className="p-4"><span className={`px-2 py-1 rounded text-xs font-bold text-white ${p.paymentStatus === 'Paid' ? 'bg-green-500' : p.paymentStatus === 'Unpaid' ? 'bg-red-500' : 'bg-orange-400'}`}>{p.paymentStatus}</span></td>
                                     <td className="p-4">
                                         <div className="flex justify-center gap-2">
                                             <button className="p-1.5 border rounded hover:bg-gray-50 text-gray-500"><Eye className="w-3 h-3" /></button>
-                                            <button onClick={() => setIsEditModalOpen(true)} className="p-1.5 border rounded hover:bg-gray-50 text-green-600"><Edit className="w-3 h-3" /></button>
+                                            <button className="p-1.5 border rounded hover:bg-gray-50 text-green-600"><Edit className="w-3 h-3" /></button>
                                             <button className="p-1.5 border rounded hover:bg-gray-50 text-red-500"><Trash2 className="w-3 h-3" /></button>
                                         </div>
                                     </td>
@@ -93,13 +91,13 @@ export function PurchaseReturn() {
                 </div>
             </div>
 
-            {/* 3. Edit Return Modal */}
-            {isEditModalOpen && (
+            {/* 3. Add Purchase Modal */}
+            {isAddModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg w-full max-w-5xl shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center p-6 border-b">
-                            <h2 className="text-xl font-bold text-gray-800">Edit Purchase Return</h2>
-                            <button onClick={() => setIsEditModalOpen(false)} className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+                            <h2 className="text-xl font-bold text-gray-800">Add Purchase</h2>
+                            <button onClick={() => setIsAddModalOpen(false)} className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
@@ -111,7 +109,9 @@ export function PurchaseReturn() {
                                     <div className="flex gap-2">
                                         <div className="relative flex-1">
                                             <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
-                                                <option>Electro Mart</option>
+                                                <option>Dazzle Shoes</option>
+                                                <option>Apex Computers</option>
+                                                <option>Best Accessories</option>
                                             </select>
                                             <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
                                         </div>
@@ -120,83 +120,63 @@ export function PurchaseReturn() {
                                 </div>
                                 <div className="space-y-1 relative">
                                     <label className="text-sm font-semibold text-gray-700">Date <span className="text-red-500">*</span></label>
-                                    <input type="text" defaultValue="24 Dec 2024" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                                    <input type="text" placeholder="dd/mm/yyyy" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
                                     <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-9 pointer-events-none" />
                                 </div>
-                                <div className="space-y-1 relative">
-                                    <label className="text-sm font-semibold text-gray-700">Supplier <span className="text-red-500">*</span></label>
-                                    <div className="relative">
-                                        <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
-                                            <option>Electro Mart</option>
-                                        </select>
-                                        <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
-                                    </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-semibold text-gray-700">Reference <span className="text-red-500">*</span></label>
+                                    <input type="text" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
                                 </div>
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-semibold text-gray-700">Product <span className="text-red-500">*</span></label>
-                                <input type="text" placeholder="Search Product" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                                <label className="text-sm font-semibold text-gray-700">Product Name</label>
+                                <input type="text" placeholder="Scan/Search Product by code and select..." className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
                             </div>
 
                             <div className="bg-gray-50 border rounded-lg overflow-hidden">
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-gray-100 text-gray-700 font-bold border-b">
                                         <tr>
-                                            <th className="p-3">Image</th>
-                                            <th className="p-3">Date</th>
-                                            <th className="p-3">Supplier</th>
-                                            <th className="p-3">Reference</th>
-                                            <th className="p-3">Status</th>
-                                            <th className="p-3">Total ($)</th>
-                                            <th className="p-3">Paid ($)</th>
-                                            <th className="p-3">Due ($)</th>
-                                            <th className="p-3">Payment Status</th>
+                                            <th className="p-3">Product</th>
+                                            <th className="p-3">Qty</th>
+                                            <th className="p-3">Purchase Price($)</th>
+                                            <th className="p-3">Discount($)</th>
+                                            <th className="p-3">Tax(%)</th>
+                                            <th className="p-3">Tax Amount($)</th>
+                                            <th className="p-3">Unit Cost($)</th>
+                                            <th className="p-3">Total Cost(%)</th>
+                                            <th className="p-3 w-8"></th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y text-gray-600 bg-white">
                                         <tr>
-                                            <td className="p-3"><div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center border text-xs">img</div></td>
-                                            <td className="p-3">24 Dec 2024</td>
-                                            <td className="p-3">Electro Mart</td>
-                                            <td className="p-3">PT001</td>
-                                            <td className="p-3"><span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold">Received</span></td>
-                                            <td className="p-3">$1000</td>
-                                            <td className="p-3">$1000</td>
-                                            <td className="p-3">$600</td>
-                                            <td className="p-3"><span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold">Paid</span></td>
+                                            <td colSpan="9" className="p-3 text-center py-8 text-gray-400">No products added yet</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div className="flex justify-end pr-6">
-                                <div className="w-1/3 bg-white border rounded p-4 space-y-2">
-                                    <div className="flex justify-between text-sm"><span>Order Tax</span><span>$ 0.00</span></div>
-                                    <div className="flex justify-between text-sm"><span>Discount</span><span>$ 0.00</span></div>
-                                    <div className="flex justify-between text-sm"><span>Shipping</span><span>$ 0.00</span></div>
-                                    <div className="flex justify-between font-bold border-t pt-2"><span>Grand Total</span><span>$ 0.00</span></div>
-                                </div>
-                            </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <div className="space-y-1">
                                     <label className="text-sm font-semibold text-gray-700">Order Tax <span className="text-red-500">*</span></label>
-                                    <input type="text" defaultValue="0" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                                    <input type="text" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-sm font-semibold text-gray-700">Discount <span className="text-red-500">*</span></label>
-                                    <input type="text" defaultValue="0" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                                    <input type="text" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-sm font-semibold text-gray-700">Shipping <span className="text-red-500">*</span></label>
-                                    <input type="text" defaultValue="0" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                                    <input type="text" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
                                 </div>
                                 <div className="space-y-1 relative">
                                     <label className="text-sm font-semibold text-gray-700">Status <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
+                                            <option>Select</option>
                                             <option>Received</option>
+                                            <option>Pending</option>
                                         </select>
                                         <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
                                     </div>
@@ -210,7 +190,7 @@ export function PurchaseReturn() {
                         </div>
 
                         <div className="p-6 border-t flex justify-end gap-4">
-                            <button onClick={() => setIsEditModalOpen(false)} className="px-6 py-2.5 bg-gray-800 text-white rounded font-bold hover:bg-gray-900">Cancel</button>
+                            <button onClick={() => setIsAddModalOpen(false)} className="px-6 py-2.5 bg-gray-800 text-white rounded font-bold hover:bg-gray-900">Cancel</button>
                             <button className="px-6 py-2.5 bg-orange-500 text-white rounded font-bold hover:bg-orange-600 shadow-lg shadow-orange-200">Submit</button>
                         </div>
                     </div>

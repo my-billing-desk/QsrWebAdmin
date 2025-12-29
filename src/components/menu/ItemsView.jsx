@@ -384,12 +384,7 @@ export function ItemsView() {
                 </div>
             </div>
 
-            {/* AI Agent Button (Visual only) */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <button className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2">
-                    <span className="font-bold text-xs">AI Agent</span>
-                </button>
-            </div>
+
 
             {showAreaPriceModal && (
                 <AreaPriceUpdateModal

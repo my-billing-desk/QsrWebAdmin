@@ -1,153 +1,122 @@
-import React, { useState, useEffect } from 'react';
-import { Search, RotateCcw } from 'lucide-react';
-import { orderService, aggregatorService } from '../../services/api';
+import React, { useState } from 'react';
+import { Search, ChevronDown, Grid, LayoutGrid, HelpCircle, Download } from 'lucide-react';
 
 export function OnlineOrders() {
     const [activeTab, setActiveTab] = useState('All');
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [tabs, setTabs] = useState([{ id: 'All', label: 'All' }]);
+    const [showChart, setShowChart] = useState(false);
 
-    useEffect(() => {
-        async function loadAggregators() {
-            try {
-                const res = await aggregatorService.getAll();
-                const connected = res.data.filter(a => a.isConnected);
-                const dynamicTabs = connected.map(a => ({
-                    id: a.name,
-                    label: a.name,
-                    icon: a.icon
-                }));
-                setTabs([{ id: 'All', label: 'All' }, ...dynamicTabs]);
-            } catch (e) { console.error(e); }
-        }
-        loadAggregators();
-    }, []);
+    // Mock Aggregators matching reference
+    const aggregators = [
+        { id: 'All', label: 'All', logo: LayoutGrid, color: 'text-gray-600' },
+        { id: 'Zomato', label: 'Zomato', logo: null, img: 'https://upload.wikimedia.org/wikipedia/commons/7/75/Zomato_logo.png' }, // Placeholder URL or local asset
+        { id: 'Swiggy', label: 'Swiggy', logo: null, img: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' },
+        { id: 'Magicpin', label: 'Magicpin', logo: null, iconText: '📍' },
+        { id: 'Eksecond', label: 'Eksecond', logo: Grid, color: 'text-red-500' },
+        { id: 'Gintaa', label: 'Gintaa Food', logo: Grid, color: 'text-red-500' },
+    ];
 
-    useEffect(() => {
-        const fetchOnlineOrders = async () => {
-            setLoading(true);
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const params = {
-                    startDate: today + ' 00:00:00',
-                    endDate: today + ' 23:59:59',
-                    type: 'delivery',
-                    source: activeTab !== 'All' ? activeTab : undefined
-                };
-
-                const response = await orderService.getAll(params);
-                setOrders(response.data);
-            } catch (error) {
-                console.error("Error fetching online orders:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchOnlineOrders();
-    }, [activeTab]);
+    const [orders, setOrders] = useState([]); // Mock empty for "No Record Found" state first
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-900 font-sans">
-            <div className="p-4 border-b border-gray-200">
-                <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                ? 'bg-red-600 text-white border-red-600'
-                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            {tab.icon ? (
-                                <img src={tab.icon} alt={tab.label} className="h-5 w-auto object-contain bg-white rounded-sm px-1" />
-                            ) : (
-                                <span>{tab.label}</span>
-                            )}
-                        </button>
-                    ))}
-                </div>
+        <div className="flex flex-col h-full bg-white font-sans overflow-hidden">
+            {/* 1. Header Row */}
+            <div className="flex justify-between items-center px-4 py-3 border-b">
+                <h1 className="text-lg font-bold text-gray-800">Online Orders Activity</h1>
+                <button className="flex items-center gap-2 px-3 py-1.5 border rounded text-xs font-medium hover:bg-gray-50 text-gray-700">
+                    <HelpCircle className="w-4 h-4" /> Aggregator Help Center
+                </button>
             </div>
 
-            {/* Chart/Stats Banner - Placeholder */}
-            <div className="bg-blue-50/50 p-6 border-b border-gray-200">
-                <div className=" h-40 flex items-center justify-center text-gray-400">
-                    Chart Placeholder (No data to display)
-                </div>
+            {/* 2. Aggregator Tabs */}
+            <div className="flex items-center gap-6 px-4 py-3 border-b overflow-x-auto">
+                {aggregators.map((agg) => (
+                    <button
+                        key={agg.id}
+                        onClick={() => setActiveTab(agg.id)}
+                        className={`flex items-center gap-2 pb-2 border-b-2 transition-all min-w-max ${activeTab === agg.id ? 'border-red-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    >
+                        {agg.logo ? (
+                            <agg.logo className={`w-8 h-8 ${agg.color}`} />
+                        ) : agg.img ? (
+                            <img src={agg.img} alt={agg.label} className="w-8 h-8 object-contain rounded-full bg-gray-100 p-1" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-lg">{agg.iconText}</div>
+                        )}
+                        <span className="font-bold text-gray-800 text-sm">{agg.label}</span>
+                    </button>
+                ))}
             </div>
 
-            {/* Filters */}
-            <div className="p-4 border-b border-gray-200 bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="flex flex-col gap-1">
-                        <label className="text-xs font-bold text-gray-500">Record Type</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-red-500">
-                            <option>Latest current days records</option>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* 3. Summary Banner (Blue) */}
+                <div className="bg-blue-50 border border-blue-100 rounded-md p-3 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                        <Grid className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <div className="font-bold text-gray-800 text-sm flex items-center gap-2 cursor-pointer" onClick={() => setShowChart(!showChart)}>
+                            Last 5 Days Orders (View Chart) <ChevronDown className={`w-4 h-4 transition-transform ${showChart ? 'rotate-180' : ''}`} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 4. Filter Row */}
+                <div className="flex flex-wrap items-end gap-4 p-4 bg-gray-50/50 rounded-lg border">
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Record Type</label>
+                        <select className="w-48 border rounded px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
+                            <option>Last 2 days records</option>
+                            <option>Last 7 days records</option>
                         </select>
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-xs font-bold text-gray-500">Other Order Status</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-red-500">
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Status</label>
+                        <select className="w-40 border rounded px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-red-500">
                             <option>All</option>
                         </select>
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-xs font-bold text-gray-500">Order No(s)</label>
-                        <input type="text" placeholder="Order id(s) must be comma(,) separated." className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-red-500" />
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Order No.</label>
+                        <input type="text" className="w-40 border rounded px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-red-500" />
                     </div>
-                    <div className="flex items-end gap-2">
-                        <button className="px-6 py-2 bg-red-700 text-white rounded font-medium shadow-sm hover:bg-red-800 transition-colors text-sm h-[38px]">Search</button>
-                        <button className="px-6 py-2 border border-gray-300 rounded font-medium text-gray-600 bg-white hover:bg-gray-50 transition-colors text-sm h-[38px]">Reset</button>
+                    <button className="px-6 py-1.5 bg-red-700 text-white font-bold rounded text-sm hover:bg-red-800 transition-colors">Apply</button>
+                    <button className="px-4 py-1.5 border rounded bg-white text-sm font-medium hover:bg-gray-50">Show All</button>
+                    <div className="ml-auto">
+                        <button className="px-4 py-1.5 border rounded bg-white text-sm font-medium hover:bg-gray-50">Export Custom Report</button>
                     </div>
                 </div>
-            </div>
 
-            {/* Results */}
-            <div className="flex-1 p-8 flex flex-col items-center justify-center text-gray-500 bg-white">
-                {loading ? <p>Loading...</p> :
-                    orders.length > 0 ? (
-                        <div className="w-full overflow-auto self-start">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="p-3">Order No</th>
-                                        <th className="p-3">Source</th>
-                                        <th className="p-3">Amount</th>
-                                        <th className="p-3">Status</th>
-                                        <th className="p-3">Items</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {orders.map(o => (
-                                        <tr key={o.id} className="border-b hover:bg-gray-50">
-                                            <td className="p-3 font-medium">{o.orderNumber}</td>
-                                            <td className="p-3">{o.source || activeTab}</td>
-                                            <td className="p-3">{o.totalAmount}</td>
-                                            <td className="p-3"><span className="px-2 py-1 rounded bg-gray-100 text-xs">{o.status}</span></td>
-                                            <td className="p-3 text-xs">{o.items.map(i => i.itemName).join(', ')}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                {/* 5. Data Table Header */}
+                <div className="border rounded-lg overflow-hidden bg-white min-h-[400px]">
+                    <div className="grid grid-cols-12 bg-blue-50/50 text-xs font-bold text-gray-800 border-b p-3">
+                        <div className="col-span-1">Order No.</div>
+                        <div className="col-span-2">
+                            <div>Outlet Name</div>
+                            <div className="text-blue-500 font-normal">Order From</div>
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center">
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-400">
+                        <div className="col-span-2">
+                            <div>Order Type</div>
+                            <div className="text-blue-500 font-normal">Rider Details</div>
+                        </div>
+                        <div className="col-span-2 font-bold">Customer Details</div>
+                        <div className="col-span-1 text-center">OTP</div>
+                        <div className="col-span-1">Date Time</div>
+                        <div className="col-span-1 bg-green-50 text-center py-1 -my-1 flex items-center justify-center border-x border-green-100">Total</div>
+                        <div className="col-span-1 text-center">Status</div>
+                        <div className="col-span-1 text-right">Actions</div>
+                    </div>
+
+                    {/* Empty State */}
+                    {orders.length === 0 && (
+                        <div className="flex flex-col items-center justify-center p-12 h-64">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
                                 <Search className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900">No Record Found</h3>
-                            <p className="text-gray-400">Great! All your orders have invoices</p>
+                            <h3 className="font-bold text-gray-600 mb-1">No Record Found</h3>
+                            <p className="text-sm text-gray-500">We could not find what you searched for Try searching again</p>
                         </div>
-                    )
-                }
-            </div>
-
-            {/* FAB */}
-            <div className="fixed bottom-6 right-6">
-                <button className="w-12 h-12 bg-red-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-900 transition-colors">
-                    <span className="text-xl">💬</span>
-                </button>
+                    )}
+                </div>
             </div>
         </div>
     );

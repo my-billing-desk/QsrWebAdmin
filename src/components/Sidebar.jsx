@@ -18,48 +18,46 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
     const isExpanded = item.forceExpanded || expandedGroups[item.id];
 
     // Indentation logic
-    // If sidebar is closed, we don't indent deeply or verify design - often collapsed sidebars show submenus on hover/popover.
-    // For now, if collapsed, we hide text.
     const basePadding = 0.75; // rem
     const depthPadding = depth * 1.0; // rem
-    const totalPadding = isSidebarOpen ? basePadding + depthPadding : 0.75; // constant padding if closed
+    const totalPadding = isSidebarOpen ? basePadding + depthPadding : 0.75;
 
-    if (!isSidebarOpen && depth > 0) return null; // Simple approach: Hide subitems if sidebar closed for now or rely on hover popovers (complex).
-    // Better approach for simplest MVP request "hide showing icons": show top level icons only.
+    if (!isSidebarOpen && depth > 0) return null;
 
     return (
         <div className="w-full">
             <button
                 onClick={() => {
-                    if (!isSidebarOpen) return; // or expand sidebar
-                    if (item.forceExpanded) return; // Prevent collapse if forced
+                    if (!isSidebarOpen) return;
+                    if (item.forceExpanded) return;
                     hasSubItems ? toggleGroup(item.id) : onNavigate(item.path);
                 }}
-                className={`w-full flex items-center justify-between py-2 px-3 rounded-lg transition-all duration-200 group relative
+                className={`w-full flex items-center justify-between py-2 transition-all duration-200 group relative
                     ${active && !hasSubItems
-                        ? 'font-semibold active-nav-item'
-                        : 'inactive-nav-item font-medium'
+                        ? 'sidebar-item-active' // Semantic Active Class
+                        : 'sidebar-item' // Semantic Inactive Class
                     }
-                    ${!isSidebarOpen ? 'justify-center' : ''}
+                    ${!isSidebarOpen ? 'justify-center px-2' : ''}
                     ${item.forceExpanded ? 'cursor-default' : 'cursor-pointer'}
                 `}
                 style={{
                     paddingLeft: isSidebarOpen ? `${totalPadding}rem` : '0.75rem',
-                    backgroundColor: active && !hasSubItems ? 'var(--sidebar-active)' : 'transparent',
-                    color: active && !hasSubItems ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)'
+                    paddingRight: isSidebarOpen ? '0.75rem' : '0.75rem'
                 }}
                 title={!isSidebarOpen ? item.label : ''}
             >
                 <div className={`flex items-center gap-3 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
                     {Icon && (
-                        <Icon className="w-5 h-5 shrink-0 transition-colors" style={{ color: active && !hasSubItems ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)' }} />
+                        <Icon className={`w-5 h-5 shrink-0 transition-colors sidebar-icon`} />
                     )}
 
                     {isSidebarOpen && (
                         <>
-                            <span className="truncate text-xs flex-1 text-left tracking-wide">{item.label}</span>
+                            <span className={`truncate text-sm flex-1 text-left tracking-wide ${active ? 'font-semibold' : 'font-medium'}`}>
+                                {item.label}
+                            </span>
                             {item.badge && (
-                                <span className="text-[9px] px-1.5 py-0 rounded bg-indigo-500/20 text-indigo-300 font-bold ml-2">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded badge-primary font-bold ml-2 shadow-sm">
                                     {item.badge}
                                 </span>
                             )}
@@ -67,14 +65,15 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                     )}
                 </div>
                 {hasSubItems && isSidebarOpen && !item.forceExpanded && (
-                    <div className="ml-2 shrink-0">
-                        {isExpanded ? <ChevronDown className="w-3 h-3 text-slate-500" /> : <ChevronRight className="w-3 h-3 text-slate-500" />}
+                    <div className="ml-2 shrink-0 sidebar-icon opacity-70">
+                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                     </div>
                 )}
             </button>
 
             {hasSubItems && isExpanded && isSidebarOpen && (
-                <div className="space-y-0.5 mt-0.5">
+                <div className="space-y-0.5 mt-0.5 relative">
+                    {/* Optional: Add a subtle connector line design if depth > 0, but sticking to clean style for now */}
                     {item.items.map((subItem, idx) => (
                         <SidebarItem
                             key={subItem.id || idx}
@@ -94,17 +93,19 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
 };
 
 export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar }) {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { menuLayout, quickLinks } = useQuickLinks();
+
     const [expandedGroups, setExpandedGroups] = useState({
-        'daily_ops': true, // Default open for convenience
+        'daily_ops': true,
         'configuration': false
     });
 
     const isActive = (path) => {
         if (!path) return false;
-        return location.pathname === path;
+        return location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
     };
 
     const toggleGroup = (groupId) => {
@@ -121,56 +122,43 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
         }
     };
 
-    const { menuLayout, quickLinks } = useQuickLinks();
-
-    // Combined menu for rendering: Main Menu + Quick Links Integration
-    // The user wants a "Quick Links" section. 
-    // Screenshot 1 shows "Quick Links" with "+ Add" button.
-    // Screenshot 2 shows "Quick Links" below "Aggregator Center" (which is likely part of the main menu).
-    // I will append a "Quick Links" group to the rendered list or render it separately.
-
-    // Let's render Quick Links separately after the main groups loop or as a special group.
-    // Since we map over groups, mapping over Quick Links separately is cleaner.
     return (
         <div
-            className={`h-screen flex flex-col z-20 transition-all duration-300 border-r shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}
-            style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border-color)', color: 'var(--sidebar-text)' }}
+            className={`h-screen flex flex-col z-20 transition-all duration-300 bg-sidebar border-r shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}
+            style={{ borderColor: 'var(--border-color)' }}
         >
 
             {/* Header / Logo Area */}
-            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-6' : 'justify-center'} border-b border-slate-800`}>
-                <div className={`flex items-center ${isOpen ? 'gap-4' : 'flex-col gap-4'}`}>
-                    <button
-                        onClick={onToggleSidebar}
-                        className="p-1 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
-                    >
-                        <Menu className="w-6 h-6" />
-                    </button>
-
-                    <div className={`flex items-center gap-3 ${!isOpen && 'hidden'}`}>
-                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-lg shadow-lg shadow-indigo-500/20 flex items-center justify-center text-white font-display font-bold text-lg shrink-0">
-                            <Store className="w-5 h-5" />
-                        </div>
-                        <div className="flex flex-col leading-none">
-                            <span className="text-[10px] font-bold text-slate-500 tracking-wider">ADMIN</span>
-                            <span className="font-display font-bold text-lg text-white tracking-tight">POSS</span>
-                        </div>
+            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-4' : 'justify-center'} border-b`} style={{ borderColor: 'var(--border-color)' }}>
+                <div className={`flex items-center w-full ${isOpen ? 'gap-3' : 'justify-center'}`}>
+                    {/* Logo - retained SmartHR style but adaptable */}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-md`} style={{ backgroundColor: 'var(--color-primary)' }}>
+                        <Store className="w-5 h-5" />
                     </div>
+
+                    {isOpen && (
+                        <div className="flex flex-col overflow-hidden">
+                            <span className="font-bold text-gray-900 text-lg leading-tight truncate" style={{ color: 'var(--text-main)' }}>SmartQSR</span>
+                            <span className="text-[10px] text-muted font-medium uppercase tracking-wider truncate">
+                                {user?.tenantName || 'Admin Panel'}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Scrollable Nav */}
-            <nav className="flex-1 overflow-y-auto p-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-700">
+            <nav className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-hide">
                 {menuLayout.map((group, idx) => (
                     <div key={idx} className="space-y-1">
                         {/* Group Title */}
                         {group.title && isOpen && (
-                            <h3 className="px-3 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-display">
+                            <h3 className="px-5 mb-2 text-[11px] font-bold text-muted uppercase tracking-widest font-sans">
                                 {group.title}
                             </h3>
                         )}
 
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                             {group.items.map((item, iIdx) => (
                                 <SidebarItem
                                     key={item.id || iIdx}
@@ -188,26 +176,27 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                 ))}
 
                 {/* Quick Links Section */}
-                <div className="space-y-1 pt-4 border-t border-slate-800">
+                <div className="space-y-1 pt-4 border-t mx-4" style={{ borderColor: 'var(--border-color)' }}>
                     {isOpen && (
-                        <div className="flex items-center justify-between px-3 mb-2">
-                            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-display">
+                        <div className="flex items-center justify-between px-1 mb-2">
+                            <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest font-sans">
                                 Quick Links
                             </h3>
                             <button
                                 onClick={() => handleNavigation('/quick-links')}
-                                className="flex items-center gap-1 text-[10px] font-bold text-primary-400 hover:text-primary-300 transition-colors"
+                                className="flex items-center gap-1 text-[10px] font-bold hover:text-orange-600 transition-colors"
+                                style={{ color: 'var(--color-primary)' }}
                             >
                                 <Plus className="w-3 h-3" /> Add
                             </button>
                         </div>
                     )}
 
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                         {quickLinks.map((link, idx) => (
                             <SidebarItem
                                 key={`ql_${link.id}`}
-                                item={{ ...link, icon: Zap }}
+                                item={{ ...link, icon: Zap }} // Using Zap icon for all quick links as per snippet logic preference or fallback
                                 depth={0}
                                 isActive={isActive}
                                 onNavigate={handleNavigation}
@@ -221,14 +210,24 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
             </nav>
 
             {/* Footer Actions */}
-            <div className="p-3 border-t border-slate-800 bg-slate-900/50">
-                <button
-                    onClick={logout}
-                    className="w-full flex items-center p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all group"
-                >
-                    <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                    {isOpen && <span className="ml-3 font-medium text-sm">Logout</span>}
-                </button>
+            <div className="p-4 border-t bg-main-app" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-main)' }}>
+                <div className={`flex items-center gap-3 ${!isOpen && 'justify-center'}`}>
+                    <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-muted shrink-0 border" style={{ borderColor: 'var(--border-color)' }}>
+                        <UserCircle className="w-6 h-6" />
+                    </div>
+                    {isOpen && (
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold truncate" style={{ color: 'var(--text-main)' }}>{user?.name || 'User'}</p>
+                            <button
+                                onClick={logout}
+                                className="text-xs font-medium flex items-center gap-1 mt-0.5 hover:underline"
+                                style={{ color: 'var(--status-error)' }}
+                            >
+                                <LogOut className="w-3 h-3" /> Logout
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -79,7 +79,7 @@ export function AddItem({ onBack, itemToEdit }) {
         isAvailable: true, // Online Expose
         image: null,
         imagePreview: null,
-        showImage: true,
+        showImage: false,
         variants: [], // { _key, name, price }
         addonGroupIds: [], // Currently single select in UI but backend supports array
         itemVariationGroups: [] // New field for Variation Groups selection
@@ -118,7 +118,7 @@ export function AddItem({ onBack, itemToEdit }) {
                 isAvailable: itemToEdit.isAvailable,
                 image: null, // New file upload is null
                 imagePreview: itemToEdit.image ? `http://localhost:5001${itemToEdit.image}` : null, // Prepend backend URL if relative
-                showImage: itemToEdit.showImage !== undefined ? itemToEdit.showImage : true,
+                showImage: itemToEdit.showImage === true || itemToEdit.showImage === 1,
                 variants: itemToEdit.Variants ? itemToEdit.Variants.map(v => ({
                     _key: Math.random().toString(36).substr(2, 9),
                     name: v.name,
@@ -573,12 +573,7 @@ export function AddItem({ onBack, itemToEdit }) {
                             </div>
                         </div>
 
-                        {/* Hidden: AI Agent Button (from reference) */}
-                        <div className="fixed bottom-6 right-6 z-50">
-                            <button className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2">
-                                <span className="font-bold text-xs">AI Agent</span>
-                            </button>
-                        </div>
+
 
                         {/* New Category Modal */}
                         {showNewCategoryInput && (

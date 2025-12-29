@@ -59,14 +59,26 @@ import { FloorPlan } from './components/configuration/FloorPlan';
 import { EmailTemplateSettings } from './components/configuration/EmailTemplateSettings';
 import { DayEndSummary } from './components/reports/DayEndSummary';
 import { OutletConfiguration } from './components/configuration/OutletConfiguration';
-import { ThemeConfiguration } from './components/configuration/ThemeConfiguration';
 import { ProfitLoss } from './components/reports/ProfitLoss';
 import { ConfigureProfitLoss } from './components/reports/ConfigureProfitLoss';
 import { MenuOnOff } from './components/menu/MenuOnOff';
 import { SpecialNote } from './components/menu/SpecialNote';
 import { MarketplaceSetting } from './components/configuration/MarketplaceSetting';
+import { ThemeConfiguration } from './components/configuration/ThemeConfiguration';
+import { SubscriptionPlans } from './components/configuration/SubscriptionPlans';
+import { ActivityTimeline } from './components/user-logs/ActivityTimeline';
+import { ReportNotifications } from './components/reports/ReportNotifications';
+import { ButtonsPage } from './components/base-ui/ButtonsPage';
+import { Coupons } from './components/promo/Coupons';
+import { GiftCards } from './components/promo/GiftCards';
+import { DiscountPlan } from './components/promo/DiscountPlan';
+import { Discount } from './components/promo/Discount';
+import { Expenses } from './components/financial/Expenses';
+import { ExpenseCategory } from './components/financial/ExpenseCategory';
+import { Purchase } from './components/inventory/Purchase';
+import { StockHistory } from './components/reports/StockHistory';
 import { Toaster } from 'react-hot-toast';
-import { GeminiSupport } from './components/GeminiSupport';
+
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -88,7 +100,7 @@ function MainLayout() {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 font-sans overflow-hidden">
+    <div className="flex h-screen bg-main-app font-sans overflow-hidden">
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -101,7 +113,7 @@ function MainLayout() {
           <Outlet />
         </main>
       </div>
-      <GeminiSupport />
+
     </div>
   );
 }
@@ -140,20 +152,45 @@ function AppRoutes() {
         <Route path="/menu/special-note" element={<SpecialNote />} />
 
         {/* Reports */}
+
         <Route path="/reports/day-end" element={<DayEndSummary />} />
         <Route path="/reports/other" element={<PlaceholderPage title="Other Reports" />} />
-        <Route path="/reports/notifications" element={<PlaceholderPage title="Report Notification" />} />
         <Route path="/reports/delivery" element={<PlaceholderPage title="Delivery Management" />} />
+
+        {/* Base UI */}
+        <Route path="/base-ui/alerts" element={<ReportNotifications />} />
+        <Route path="/base-ui/buttons" element={<ButtonsPage />} />
+
+        {/* Promo */}
+        <Route path="/promo/coupons" element={<Coupons />} />
+        <Route path="/promo/gift-cards" element={<GiftCards />} />
+        <Route path="/promo/discount-plan" element={<DiscountPlan />} />
+        <Route path="/promo/discount" element={<Discount />} />
+
+        {/* Financial */}
+        <Route path="/financial/expenses" element={<Expenses />} />
+        <Route path="/financial/expense-category" element={<ExpenseCategory />} />
+
+        {/* Inventory - Purchase */}
+        <Route path="/inventory/purchase" element={<Purchase />} />
+        <Route path="/inventory/purchase-return" element={<PurchaseReturn />} />
+
+        {/* Reports */}
+        <Route path="/reports/stock-history" element={<StockHistory />} />
+        <Route path="/reports/profit-loss" element={<ProfitLoss />} />
 
         {/* Config */}
         <Route path="/config/outlet" element={<OutletConfiguration />} />
+        <Route path="/config/theme" element={<ThemeConfiguration />} />
         <Route path="/config/sub-order" element={<SubOrderType />} />
         <Route path="/config/delivery" element={<DeliveryDistance />} />
         <Route path="/config/area-delivery" element={<AreaDeliveryCharges />} />
         <Route path="/config/marketplace" element={<MarketplaceSetting />} />
         <Route path="/config/floor-plan" element={<FloorPlan />} />
         <Route path="/config/email-template" element={<EmailTemplateSettings />} />
-        <Route path="/config/theme" element={<ThemeConfiguration />} />
+        <Route path="/config/subscription" element={<SubscriptionPlans />} />
+        <Route path="/logs/timeline" element={<ActivityTimeline />} />
+
 
         {/* Accounting */}
         <Route path="/accounting/payments" element={<PlaceholderPage title="Payment Information" />} />
@@ -204,7 +241,7 @@ function AppRoutes() {
         <Route path="/crm/ebill" element={<PlaceholderPage title="Ebill Templates" />} />
 
         {/* Fallback for "Under Development" pages caught by sidebar links */}
-        <Route path="*" element={<div className="flex items-center justify-center h-full text-gray-400 flex-col gap-4"><div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-2xl">🚧</div><p>Module Under Development</p></div>} />
+        <Route path="*" element={<div className="flex items-center justify-center h-full text-muted flex-col gap-4"><div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center text-2xl border" style={{ borderColor: 'var(--border-color)' }}>🚧</div><p>Module Under Development</p></div>} />
       </Route>
 
       {/* Inventory Routes - Separate Layout */}

@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
     LayoutDashboard, Layers, UtensilsCrossed, FileText, Archive, Truck, Bell, Settings,
     Calculator, Users, Box, Landmark, Share2, BarChart3, MessageSquare, Zap, UserCircle,
-    CreditCard, FileSpreadsheet
+    CreditCard, FileSpreadsheet, Ticket,
+    Gift, Percent, Wallet, ShoppingCart, RotateCcw, BarChart2 // Added missing icons
 } from 'lucide-react';
 
 const QuickLinksContext = createContext();
@@ -20,7 +21,7 @@ export const initialMenuGroups = [
                 items: [
                     { id: 'running_orders', path: '/orders/running', label: 'Running Orders' },
                     { id: 'all_orders', path: '/orders', label: 'All Orders' },
-                    // { id: 'online_orders', path: '/orders/online', label: 'Online Orders' },
+                    { id: 'online_orders', path: '/orders/online', label: 'Online Orders' },
                     { id: 'kot', path: '/orders/kot', label: 'KOT' },
                     { id: 'due_payment', path: '/orders/due-payment', label: 'Due Payment Settlement' },
                     { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss' },
@@ -43,13 +44,43 @@ export const initialMenuGroups = [
         ]
     },
     {
-        id: 'group_reports',
         title: 'Reports',
         items: [
             { id: 'day_end', path: '/reports/day-end', label: 'Day End Summary', icon: FileText },
             { id: 'other_reports', path: '/reports/other', label: 'Other Reports', icon: FileText },
-            { id: 'report_notif', path: '/reports/notifications', label: 'Report Notification', icon: Bell },
+            { id: 'report_notif', path: '/base-ui/alerts', label: 'Alerts', icon: Bell }, // Updated path/label
+            { id: 'ui_buttons', path: '/base-ui/buttons', label: 'Buttons', icon: Box }, // New Buttons Link
             { id: 'del_mgmt', path: '/reports/delivery', label: 'Delivery Management', icon: Truck },
+        ]
+    },
+    {
+        title: 'Promo', // Creating a new group for Promo/Coupons if typical
+        items: [
+            { id: 'coupons', path: '/promo/coupons', label: 'Coupons', icon: Ticket },
+            { id: 'gift_cards', path: '/promo/gift-cards', label: 'Gift Cards', icon: Gift },
+            { id: 'discount_plan', path: '/promo/discount-plan', label: 'Discount Plan', icon: Percent },
+            { id: 'discount', path: '/promo/discount', label: 'Discount', icon: Percent },
+        ]
+    },
+    {
+        title: 'Financials',
+        items: [
+            { id: 'expenses', path: '/financial/expenses', label: 'Expenses', icon: Wallet },
+            { id: 'expense_category', path: '/financial/expense-category', label: 'Expense Category', icon: Layers },
+        ]
+    },
+    {
+        title: 'Purchases',
+        items: [
+            { id: 'purchase', path: '/inventory/purchase', label: 'Purchase', icon: ShoppingCart },
+            { id: 'purchase_return', path: '/inventory/purchase-return', label: 'Purchase Return', icon: RotateCcw },
+        ]
+    },
+    {
+        title: 'Reports',
+        items: [
+            { id: 'stock_history', path: '/reports/stock-history', label: 'Stock History', icon: BarChart2 },
+            { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit / Loss', icon: FileText },
         ]
     },
     {
@@ -68,6 +99,7 @@ export const initialMenuGroups = [
                     // { id: 'mkt_setting', path: '/config/marketplace', label: 'Marketplace Setting' },
                     { id: 'floor_plan', path: '/config/floor-plan', label: 'Floor Plan' },
                     { id: 'email_temp', path: '/config/email-template', label: 'Email Template Settings' },
+                    { id: 'subscription_plan', path: '/config/subscription', label: 'Subscription Plans' },
                 ]
             },
             {
@@ -115,6 +147,7 @@ export const initialMenuGroups = [
                     { id: 'log_notif', path: '/logs/notifications', label: 'Notification' },
                     { id: 'log_trigger', path: '/logs/menu-trigger', label: 'Menu Trigger Logs' },
                     { id: 'log_closing', path: '/logs/closing-hour', label: 'Closing Hour Logs' },
+                    { id: 'log_timeline', path: '/logs/timeline', label: 'Activity Timeline' },
                 ]
             },
             { id: 'other_apps', path: '/apps/other', label: 'Other APPs', icon: Box },

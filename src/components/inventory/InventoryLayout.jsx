@@ -4,7 +4,7 @@ import {
     LayoutDashboard, ShoppingCart, Archive, FileText, ChevronRight, ChevronDown,
     Settings, BarChart3, Users, Factory, ArrowLeft
 } from 'lucide-react';
-import { GeminiSupport } from '../GeminiSupport';
+
 
 export function InventoryLayout() {
     const navigate = useNavigate();
@@ -170,7 +170,7 @@ export function InventoryLayout() {
                 <Outlet />
             </div>
 
-            <GeminiSupport />
+
         </div>
     );
 }
