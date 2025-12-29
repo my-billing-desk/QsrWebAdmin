@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, AlertCircle, Clock, FileText, Printer, Monitor, Utensils, Mail, ShoppingBag } from 'lucide-react';
+import { Save, AlertCircle, Clock, FileText, Printer, Monitor, Utensils, Mail, ShoppingBag, Palette } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { ThemeSettings } from './ThemeSettings';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -40,7 +41,8 @@ export function Settings() {
         customer_displays_enabled: 'false',
         dining_options_enabled: 'false',
         low_stock_notifications_enabled: 'false',
-        negative_stock_alerts_enabled: 'false'
+        negative_stock_alerts_enabled: 'false',
+        theme_config: null
     });
 
     useEffect(() => {
@@ -336,6 +338,12 @@ export function Settings() {
                     </label>
                 </div>
             </div>
+
+            {/* Theme Settings Section */}
+            <ThemeSettings
+                theme={settings.theme_config ? JSON.parse(settings.theme_config) : {}}
+                onChange={(newTheme) => handleChange('theme_config', JSON.stringify(newTheme))}
+            />
 
             <div className="flex items-start gap-3 p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-100 text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0" />

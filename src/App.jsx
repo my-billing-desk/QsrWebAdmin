@@ -14,6 +14,7 @@ import AggregatorCenter from './components/AggregatorCenter';
 import Marketplace from './components/Marketplace';
 import ConsumerMenu from './components/ConsumerMenu';
 import AggregatorConfig from './components/AggregatorConfig';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Inventory Imports (moved from misplaced section)
 // Inventory Imports
@@ -244,13 +245,15 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <QuickLinksProvider>
-          <Toaster position="top-right" />
-          <Routes>
-            <Route path="/scan-order" element={<ConsumerMenu />} />
-            <Route path="/*" element={<AppRoutes />} />
-          </Routes>
-        </QuickLinksProvider>
+        <ThemeProvider>
+          <QuickLinksProvider>
+            <Toaster position="top-right" />
+            <Routes>
+              <Route path="/scan-order" element={<ConsumerMenu />} />
+              <Route path="/*" element={<AppRoutes />} />
+            </Routes>
+          </QuickLinksProvider>
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

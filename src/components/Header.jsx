@@ -20,7 +20,10 @@ export function Header({ onToggleSidebar }) {
     }, [dropdownRef]);
 
     return (
-        <header className="h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 shrink-0 z-30">
+        <header
+            className="h-12 border-b flex items-center justify-between px-4 shrink-0 z-30"
+            style={{ backgroundColor: 'var(--header-bg)', borderColor: 'var(--border-color)', color: 'var(--header-text)' }}
+        >
             {/* Left Section */}
             <div className="flex items-center gap-6">
                 {/* Outlet Selector */}

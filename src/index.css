@@ -4,20 +4,66 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    /* Admin Theme Defaults */
+    --bg-main: #f8fafc;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #1e293b;
+    --sidebar-active: #f1f5f9;
+    --sidebar-active-text: #0f172a;
+    --header-bg: #ffffff;
+    --header-text: #1e293b;
+    --card-bg: #ffffff;
+    --primary-btn-bg: #10b981;
+    --primary-btn-text: #ffffff;
+    --secondary-btn-bg: #f1f5f9;
+    --secondary-btn-text: #475569;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --input-bg: #ffffff;
+
+    /* POS Theme Defaults */
+    --pos-bg: #f1f5f9;
+    --pos-header: #ffffff;
+    --pos-sidebar: #ffffff;
+    --pos-cat-btn: #ffffff;
+    --pos-cat-active: #10b981;
+    --pos-cat-active-text: #ffffff;
+    --pos-item-card: #ffffff;
+    --pos-checkout-btn: #10b981;
+    --pos-confirm-btn: #10b981;
+    --pos-cancel-btn: #ef4444;
+}
+
+@layer base {
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+    }
+}
+
 @layer components {
 
     /* Modern Input Styles - "Soft & Modern" */
     .input-field {
-        @apply w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary-500 focus:bg-white dark:focus:bg-slate-900 rounded-xl text-slate-700 dark:text-slate-200 outline-none transition-all duration-200 placeholder-slate-400 text-sm font-medium shadow-sm hover:bg-white dark:hover:bg-slate-900;
+        background-color: var(--input-bg);
+        border-color: var(--border-color);
+        @apply w-full px-4 py-2.5 border-2 focus:border-primary-500 rounded-xl outline-none transition-all duration-200 placeholder-slate-400 text-sm font-medium shadow-sm hover:bg-white;
     }
 
     /* Modern Button Styles */
     .btn-primary {
-        @apply px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 active:scale-95 transform transition-all duration-200 flex items-center gap-2 justify-center text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed;
+        background-color: var(--primary-btn-bg);
+        color: var(--primary-btn-text);
+        @apply px-5 py-2.5 font-bold rounded-xl shadow-lg shadow-primary-500/30 hover:opacity-90 active:scale-95 transform transition-all duration-200 flex items-center gap-2 justify-center text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed;
     }
 
     .btn-secondary {
-        @apply px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 shadow-sm active:scale-95 transition-all duration-200 flex items-center gap-2 justify-center text-xs uppercase tracking-wider;
+        background-color: var(--secondary-btn-bg);
+        color: var(--secondary-btn-text);
+        border-color: var(--border-color);
+        @apply px-5 py-2.5 border font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all duration-200 flex items-center gap-2 justify-center text-xs uppercase tracking-wider;
     }
 
     .btn-danger {
@@ -30,20 +76,26 @@
 
     /* Modern Card Styles - "Floaty & Soft" */
     .card {
-        @apply bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none p-5;
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        @apply rounded-2xl border shadow-xl shadow-slate-200/40 p-5;
     }
 
     /* Modern Table Styles */
     .table-container {
-        @apply rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm;
+        border-color: var(--border-color);
+        @apply rounded-2xl border overflow-hidden shadow-sm;
     }
 
     .table-modern {
-        @apply w-full text-left text-sm text-slate-600 dark:text-slate-300;
+        @apply w-full text-left text-sm;
+        color: var(--text-main);
     }
 
     .table-modern thead {
-        @apply bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400;
+        background-color: var(--bg-main);
+        @apply text-xs uppercase tracking-wider font-bold;
+        color: var(--text-muted);
     }
 
     .table-modern th {

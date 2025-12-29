@@ -37,18 +37,22 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                 }}
                 className={`w-full flex items-center justify-between py-2 px-3 rounded-lg transition-all duration-200 group relative
                     ${active && !hasSubItems
-                        ? 'bg-primary-600 text-white shadow-lg shadow-indigo-500/20 font-semibold' // Active State: Deep Indigo
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' // Inactive: Ghost Slate
+                        ? 'font-semibold active-nav-item'
+                        : 'inactive-nav-item font-medium'
                     }
                     ${!isSidebarOpen ? 'justify-center' : ''}
                     ${item.forceExpanded ? 'cursor-default' : 'cursor-pointer'}
                 `}
-                style={{ paddingLeft: isSidebarOpen ? `${totalPadding}rem` : '0.75rem' }}
+                style={{
+                    paddingLeft: isSidebarOpen ? `${totalPadding}rem` : '0.75rem',
+                    backgroundColor: active && !hasSubItems ? 'var(--sidebar-active)' : 'transparent',
+                    color: active && !hasSubItems ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)'
+                }}
                 title={!isSidebarOpen ? item.label : ''}
             >
                 <div className={`flex items-center gap-3 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
                     {Icon && (
-                        <Icon className={`w-5 h-5 shrink-0 transition-colors ${active && !hasSubItems ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
+                        <Icon className="w-5 h-5 shrink-0 transition-colors" style={{ color: active && !hasSubItems ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)' }} />
                     )}
 
                     {isSidebarOpen && (
@@ -128,7 +132,10 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
     // Let's render Quick Links separately after the main groups loop or as a special group.
     // Since we map over groups, mapping over Quick Links separately is cleaner.
     return (
-        <div className={`h-screen flex flex-col z-20 transition-all duration-300 bg-slate-900 border-r border-slate-800 shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}>
+        <div
+            className={`h-screen flex flex-col z-20 transition-all duration-300 border-r shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}
+            style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border-color)', color: 'var(--sidebar-text)' }}
+        >
 
             {/* Header / Logo Area */}
             <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-6' : 'justify-center'} border-b border-slate-800`}>
