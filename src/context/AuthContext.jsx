@@ -9,16 +9,44 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (token) {
-            // Restore session
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
+        const initAuth = async () => {
+            if (token) {
+                // Set default header immediately
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                // Restore session from local storage first for UI speed
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                }
+
+                try {
+                    // Fetch fresh profile from backend
+                    const res = await api.get('/auth/me');
+                    if (res.data.success !== false) { // check for success flag if API wrapper returns it, but auth controller returns explicit object
+                        // AuthController 'sendLoginResponse' returns { token, user: {...} } or { user: ... } ? 
+                        // It returns res.json({ token, user: ... }).
+                        const { user: freshUser, token: freshToken } = res.data;
+
+                        setUser(freshUser);
+                        localStorage.setItem('user', JSON.stringify(freshUser));
+                        if (freshToken) {
+                            // Update token if rotated (optional, but good practice)
+                            localStorage.setItem('token', freshToken);
+                            setToken(freshToken);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to refresh session:", error);
+                    if (error.response?.status === 401) {
+                        logout();
+                    }
+                }
             }
-            // Set default header
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        }
-        setLoading(false);
+            setLoading(false);
+        };
+
+        initAuth();
     }, [token]);
 
     const login = async (username, password, extra = {}) => {

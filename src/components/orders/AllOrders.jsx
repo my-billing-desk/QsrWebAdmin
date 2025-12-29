@@ -218,15 +218,15 @@ export function AllOrders() {
                 {!selectedOrder && (
                     <div className="absolute inset-0 overflow-auto p-4">
                         <table className="w-full text-sm text-left border-collapse">
-                            <thead className="bg-blue-50 text-gray-700 font-bold border-y border-gray-200 sticky top-0 z-10">
+                            <thead className="bg-blue-50 text-gray-700 font-bold border-y border-gray-200">
                                 <tr>
-                                    <th className="p-3">Source</th>
-                                    <th className="p-3">Order No</th>
-                                    <th className="p-3">Date</th>
-                                    <th className="p-3">Customer</th>
-                                    <th className="p-3 text-right">Amount</th>
-                                    <th className="p-3">Status</th>
-                                    <th className="p-3 text-center">Action</th>
+                                    <th className="p-3 sticky top-0 z-10 bg-blue-50">Source</th>
+                                    <th className="p-3 sticky top-0 z-10 bg-blue-50">Order No</th>
+                                    <th className="p-3 sticky top-0 z-10 bg-blue-50">Date</th>
+                                    <th className="p-3 sticky top-0 z-10 bg-blue-50">Customer</th>
+                                    <th className="p-3 text-right sticky top-0 z-10 bg-blue-50">Amount</th>
+                                    <th className="p-3 sticky top-0 z-10 bg-blue-50">Status</th>
+                                    <th className="p-3 text-center sticky top-0 z-10 bg-blue-50">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
