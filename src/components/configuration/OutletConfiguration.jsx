@@ -1,14 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Store, MapPin, Clock, CreditCard, FileText, Layout,
-    Monitor, Printer, Users, Settings, Smartphone, Truck, MessageSquare, ChevronRight, Search
+    Monitor, Printer, Users, Settings, Smartphone, Truck, MessageSquare, ChevronRight, Search, Activity, Wifi, WifiOff, Palette
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext';
+import { posDeviceService } from '../../services/api';
 
 export function OutletConfiguration() {
     const { user } = useAuth();
+    const [deviceStats, setDeviceStats] = useState(null);
+    const [devices, setDevices] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchDeviceInfo();
+    }, []);
+
+    const fetchDeviceInfo = async () => {
+        try {
+            const [statsRes, devicesRes] = await Promise.all([
+                posDeviceService.getStats(),
+                posDeviceService.getAll()
+            ]);
+            setDeviceStats(statsRes.data);
+            setDevices(devicesRes.data.devices || []);
+        } catch (error) {
+            console.error('Error fetching device info:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const copyTenantId = () => {
         if (user?.tenantId) {
@@ -39,6 +62,101 @@ export function OutletConfiguration() {
                     <button className="px-4 py-1 bg-red-600 text-white rounded flex items-center gap-1">Search <Search className="w-3 h-3" /></button>
                 </div>
             </div>
+
+            {/* POS Device Statistics */}
+            <Section title="Active POS Systems">
+                <div className="col-span-full mb-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <Monitor className="w-6 h-6 text-purple-600" />
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Installed POS Devices</h3>
+                            </div>
+                            <button
+                                onClick={fetchDeviceInfo}
+                                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg flex items-center gap-2"
+                            >
+                                <Activity className="w-4 h-4" />
+                                Refresh
+                            </button>
+                        </div>
+
+                        {loading ? (
+                            <div className="text-center py-8 text-gray-500">Loading device information...</div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+                                        <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{deviceStats?.total || 0}</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Total Devices</div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{deviceStats?.active || 0}</div>
+                                            <Wifi className="w-5 h-5 text-green-600" />
+                                        </div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Active (Online)</div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">{deviceStats?.inactive || 0}</div>
+                                            <WifiOff className="w-5 h-5 text-gray-600" />
+                                        </div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Offline</div>
+                                    </div>
+                                </div>
+
+                                {/* Device List */}
+                                {devices.length > 0 ? (
+                                    <div className="space-y-3">
+                                        <h4 className="text-sm font-bold text-gray-700 dark:text-gray-200">Device Information</h4>
+                                        {devices.map((device, index) => (
+                                            <div
+                                                key={device.id}
+                                                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-3 h-3 rounded-full ${device.isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                                                    <div>
+                                                        <div className="font-bold text-gray-800 dark:text-gray-100">{device.deviceName}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {device.platform || 'Unknown'} • {device.deviceType || 'Desktop'} • v{device.appVersion || 'N/A'}
+                                                        </div>
+                                                        <div className="text-xs text-gray-400 mt-1">
+                                                            Last active: {device.lastActiveAt ? new Date(device.lastActiveAt).toLocaleString() : 'Never'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${device.isOnline
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                        : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                                                        }`}>
+                                                        {device.isOnline ? 'Online' : 'Offline'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        No POS devices registered yet. Install and activate a POS system to see it here.
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
+            </Section>
+
+            <Section title="Appearance & Branding">
+                <ConfigCard
+                    icon={Palette}
+                    title="Theme Configuration"
+                    desc="Choose your brand color theme. This color will be applied across all connected apps — POS, Kitchen Display, and Mobile."
+                    to="/config/theme"
+                />
+            </Section>
 
             <Section title="Outlet Information">
                 <ConfigCard icon={FileText} title="Outlet Details" desc="Configure email id, address, Logo of an Outlet." to="/config/outlet-details" />

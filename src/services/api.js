@@ -145,6 +145,19 @@ export const settingsService = {
     getAll: () => api.get('/settings'),
     update: (data) => api.post('/settings', data),
 };
+export const posDeviceService = {
+    getAll: () => api.get('/pos-devices'),
+    getStats: () => api.get('/pos-devices/stats'),
+    register: (data) => api.post('/pos-devices/register', data),
+    updateHeartbeat: (data) => api.post('/pos-devices/heartbeat', data),
+    deactivate: (id) => api.put(`/pos-devices/${id}/deactivate`),
+};
+
 export const settingService = settingsService;
+
+export const outletService = {
+    getConfig: () => api.get('/config/outlet'),
+    updateConfig: (data) => api.post('/config/outlet', data),
+};
 
 export default api;

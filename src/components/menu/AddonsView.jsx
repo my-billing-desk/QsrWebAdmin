@@ -62,6 +62,7 @@ function SortableAddonRow({ id, index, addon, handleRowChange, handleRemoveRow }
 export function AddonsView() {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [view, setView] = useState('list');
     const [searchTerm, setSearchTerm] = useState('');
 
     // Form State

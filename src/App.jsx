@@ -58,6 +58,7 @@ import { FloorPlan } from './components/configuration/FloorPlan';
 import { EmailTemplateSettings } from './components/configuration/EmailTemplateSettings';
 import { DayEndSummary } from './components/reports/DayEndSummary';
 import { OutletConfiguration } from './components/configuration/OutletConfiguration';
+import { ThemeConfiguration } from './components/configuration/ThemeConfiguration';
 import { ProfitLoss } from './components/reports/ProfitLoss';
 import { ConfigureProfitLoss } from './components/reports/ConfigureProfitLoss';
 import { MenuOnOff } from './components/menu/MenuOnOff';
@@ -151,6 +152,7 @@ function AppRoutes() {
         <Route path="/config/marketplace" element={<MarketplaceSetting />} />
         <Route path="/config/floor-plan" element={<FloorPlan />} />
         <Route path="/config/email-template" element={<EmailTemplateSettings />} />
+        <Route path="/config/theme" element={<ThemeConfiguration />} />
 
         {/* Accounting */}
         <Route path="/accounting/payments" element={<PlaceholderPage title="Payment Information" />} />
