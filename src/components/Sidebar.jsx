@@ -219,7 +219,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold truncate" style={{ color: 'var(--text-main)' }}>{user?.name || 'User'}</p>
                             <button
-                                onClick={logout}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); logout(); }}
                                 className="text-xs font-medium flex items-center gap-1 mt-0.5 hover:underline"
                                 style={{ color: 'var(--status-error)' }}
                             >

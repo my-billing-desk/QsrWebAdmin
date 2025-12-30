@@ -152,7 +152,7 @@ export const initialMenuGroups = [
             },
             { id: 'other_apps', path: '/apps/other', label: 'Other APPs', icon: Box },
             { id: 'finance', path: '/finance', label: 'Finance', icon: Landmark },
-            // { id: 'marketplace', path: '/marketplace', label: 'Marketplace', icon: Share2 },
+            { id: 'marketplace', path: '/marketplace', label: 'Marketplace', icon: Share2 },
         ]
     },
     {

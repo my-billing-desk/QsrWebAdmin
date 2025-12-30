@@ -61,7 +61,8 @@ export default function Marketplace() {
                 // If backend is empty (though we just seeded), provide placeholders
                 const onlineOrders = backendAggs.length > 0 ? backendAggs : [
                     { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Explore Now', isConnected: false },
-                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now', isConnected: false }
+                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now', isConnected: false },
+                    { id: 'ondc', name: 'ONDC', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg', status: 'Explore Now', isConnected: false }
                 ];
 
                 const otherIntegrations = [
@@ -79,7 +80,8 @@ export default function Marketplace() {
                 console.error("Failed to load aggregators", e);
                 const fallback = [
                     { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Explore Now' },
-                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now' }
+                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now' },
+                    { id: 'ondc', name: 'ONDC', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg', status: 'Explore Now' }
                 ];
                 setIntegrations(fallback);
             }

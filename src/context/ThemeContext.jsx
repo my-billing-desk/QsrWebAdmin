@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
+    const { token } = useAuth();
     const [theme, setTheme] = useState({
         themeColor: '#10b981',
         themeName: 'Emerald',
@@ -13,7 +15,7 @@ export function ThemeProvider({ children }) {
     useEffect(() => {
         const fetchTheme = async () => {
             try {
-                const token = localStorage.getItem('token');
+                // Token is already sanitized by AuthContext
                 if (!token) return;
 
                 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
@@ -48,7 +50,7 @@ export function ThemeProvider({ children }) {
         };
 
         fetchTheme();
-    }, []);
+    }, [token]);
 
     const applyTheme = (themeData) => {
         const root = document.documentElement;

@@ -7,7 +7,8 @@ export function InventoryDashboard() {
         totalItems: 0,
         lowStockCount: 0,
         totalStockValue: 0,
-        totalWastage: 0
+        totalWastage: 0,
+        marginGap: 0
     });
 
     useEffect(() => {
@@ -42,7 +43,7 @@ export function InventoryDashboard() {
                         <Zap className="w-4 h-4 text-amber-400" />
                         AI Insights
                     </button>
-                    <button className="w-12 h-12 flex items-center justify-center bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full shadow-xl hover:rotate-180 transition-transform duration-700">
+                    <button onClick={loadStats} className="w-12 h-12 flex items-center justify-center bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full shadow-xl hover:rotate-180 transition-transform duration-700">
                         <RefreshCw className="w-5 h-5" />
                     </button>
                 </div>
@@ -60,12 +61,15 @@ export function InventoryDashboard() {
                         <div className="flex justify-between items-start">
                             <div>
                                 <span className="inline-block px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] font-black uppercase tracking-widest mb-4">CRITICAL ALERT</span>
-                                <h2 className="text-5xl font-black leading-tight mb-2 tracking-tight">Margin Gap<br />Detected</h2>
-                                <p className="text-gray-400 max-w-sm text-lg font-medium leading-relaxed">Your actual margin is <span className="text-white font-bold">0%</span> vs industry standard <span className="text-emerald-400 font-bold">45%</span>.</p>
+                                <h2 className="text-5xl font-black leading-tight mb-2 tracking-tight">Margin Analysis<br />Dashboard</h2>
+                                <p className="text-gray-400 max-w-sm text-lg font-medium leading-relaxed">
+                                    Your estimated margin gap is <span className="text-white font-bold">{stats.marginGap}%</span>.
+                                    {stats.marginGap > 10 ? ' High variance detected.' : ' Operating within standard.'}
+                                </p>
                             </div>
                             <div className="text-right">
-                                <h3 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 tracking-tighter">0%</h3>
-                                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Current Margin</p>
+                                <h3 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 tracking-tighter">{stats.marginGap}%</h3>
+                                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Variance</p>
                             </div>
                         </div>
 
@@ -85,13 +89,13 @@ export function InventoryDashboard() {
                             <DollarSign className="w-7 h-7" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">Stock Value</h3>
-                        <p className="text-sm text-gray-500 font-medium">Total assets currently on hand.</p>
+                        <p className="text-sm text-gray-500 font-medium">Total assets on hand.</p>
                     </div>
                     <div>
-                        <h2 className="text-5xl font-black text-emerald-500 tracking-tight my-4">₹{stats.totalStockValue.toLocaleString()}</h2>
+                        <h2 className="text-5xl font-black text-emerald-500 tracking-tight my-4">₹{stats.totalStockValue?.toLocaleString() || 0}</h2>
                         <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl w-max">
                             <ArrowUpRight className="w-4 h-4 stroke-[3]" />
-                            <span className="text-xs font-bold">+12% vs last week</span>
+                            <span className="text-xs font-bold">Current</span>
                         </div>
                     </div>
                 </div>
@@ -128,8 +132,8 @@ export function InventoryDashboard() {
                 {/* 5. WASTAGE (Square: 2x1) */}
                 <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gray-50 dark:bg-gray-800/40 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-[2.5rem] p-8 flex items-center justify-between group hover:bg-white dark:hover:bg-gray-800 transition-all">
                     <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Wastage</p>
-                        <h3 className="text-3xl font-black text-gray-900 dark:text-white">₹{stats.totalWastage}</h3>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Wastage</p>
+                        <h3 className="text-3xl font-black text-gray-900 dark:text-white">₹{stats.totalWastage?.toLocaleString() || 0}</h3>
                     </div>
                     <div className="w-16 h-16 rounded-2xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <TrendingDown className="w-6 h-6 text-gray-500" />
@@ -145,10 +149,12 @@ export function InventoryDashboard() {
                             </div>
                             <div>
                                 <h4 className="font-bold text-white dark:text-gray-900">AI Recommendation</h4>
-                                <p className="text-xs text-gray-400 dark:text-gray-500">Based on recent sales patterns</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">Based on consumption patterns</p>
                             </div>
                         </div>
-                        <p className="hidden md:block text-sm text-gray-300 dark:text-gray-600 font-medium">"Consider restocking <strong>Mozzarella Cheese</strong> before Friday peak."</p>
+                        <p className="hidden md:block text-sm text-gray-300 dark:text-gray-600 font-medium">
+                            {stats.lowStockCount > 0 ? `Consider restocking ${stats.lowStockCount} critical items.` : "Inventory levels are healthy."}
+                        </p>
                         <button className="px-5 py-2 bg-white/10 dark:bg-gray-100 rounded-xl text-xs font-bold text-white dark:text-gray-800 hover:bg-white/20 transition-colors">
                             View Details
                         </button>

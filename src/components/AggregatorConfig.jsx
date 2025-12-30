@@ -229,6 +229,8 @@ export default function AggregatorConfig() {
                                     onChange={e => setFormData({ ...formData, orderType: e.target.value })}
                                 >
                                     <option>Zomato</option>
+                                    <option>Swiggy</option>
+                                    <option>ONDC</option>
                                     <option>Delivery</option>
                                     <option>Takeaway</option>
                                 </select>
