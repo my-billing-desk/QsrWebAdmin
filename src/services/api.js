@@ -81,8 +81,8 @@ export const specialNoteService = {
 export const dashboardService = {
     getStats: (params) => api.get('/dashboard/stats', { params }),
     getCharts: (params) => api.get('/dashboard/charts', { params }),
-    getRecentOrders: () => api.get('/dashboard/recent-orders'),
-    getTopItems: () => api.get('/dashboard/top-items'),
+    getRecentOrders: (params) => api.get('/dashboard/recent-orders', { params }),
+    getTopItems: (params) => api.get('/dashboard/top-items', { params }),
     clearData: () => api.post('/dashboard/clear-data'),
 };
 

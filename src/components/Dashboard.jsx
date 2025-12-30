@@ -22,18 +22,74 @@ export function Dashboard() {
     const [topItems, setTopItems] = useState([]);
     const [lowStockItems, setLowStockItems] = useState([]);
 
+    // Date Filtering State
+    const [dateFilter, setDateFilter] = useState('Today');
+    const [customRange, setCustomRange] = useState({
+        start: new Date().toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+    });
+
+    const calculateDateRange = (filter) => {
+        const now = new Date();
+        const start = new Date(now);
+        const end = new Date(now);
+
+        // Helper to format YYYY-MM-DD (local time approximation)
+        // Note: toISOString() uses UTC. If user is in +5:30, and it's 1AM, UTC is previous day.
+        // Better to use manual formatting or handle timezone offset.
+        // Simple fix: offset date before ISO string?
+        const fmt = (d) => {
+            const offset = d.getTimezoneOffset() * 60000;
+            const localISODate = new Date(d.getTime() - offset);
+            return localISODate.toISOString().split('T')[0];
+        };
+
+        switch (filter) {
+            case 'Today':
+                // start/end are now
+                break;
+            case 'Yesterday':
+                start.setDate(now.getDate() - 1);
+                end.setDate(now.getDate() - 1);
+                break;
+            case 'This Week':
+                // Assuming Week starts on Monday
+                const day = now.getDay() || 7; // Get current day number, converting Sun (0) to 7
+                start.setDate(now.getDate() - (day - 1));
+                break;
+            case 'This Month':
+                start.setDate(1);
+                break;
+            case 'Custom':
+                return { startDate: customRange.start, endDate: customRange.end };
+            default:
+                break;
+        }
+
+        return {
+            startDate: fmt(start),
+            endDate: fmt(end)
+        };
+    };
+
     useEffect(() => {
         loadData();
-    }, []);
+    }, [dateFilter, customRange]);
 
     const loadData = async () => {
         try {
+            const { startDate, endDate } = calculateDateRange(dateFilter);
+            const params = { startDate, endDate };
+
+            // Only fetch if we have valid dates (mainly for custom)
+            if (!startDate || !endDate) return;
+
             const [statsRes, chartsRes, recentRes, topRes, matRes] = await Promise.all([
-                dashboardService.getStats(),
-                dashboardService.getCharts(),
-                dashboardService.getRecentOrders(),
-                dashboardService.getTopItems(),
-                inventoryService.getRawMaterials()
+                dashboardService.getStats(params),
+                dashboardService.getCharts(params),
+                dashboardService.getRecentOrders(params), // Updated to accept params
+                dashboardService.getTopItems(params),      // Updated to accept params
+                inventoryService.getRawMaterials()         // Inventory usually current state, rarely filtered by date for alerts
             ]);
 
             setStats(statsRes.data);
@@ -68,9 +124,60 @@ export function Dashboard() {
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-y-auto w-full">
 
+            {/* Header & Controls */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+                    <p className="text-sm text-gray-500">Overview of your business performance</p>
+                </div>
+
+                <div className="flex items-center gap-3 bg-white p-2 rounded-lg shadow-sm border border-gray-200">
+                    <div className="relative">
+                        <select
+                            value={dateFilter}
+                            onChange={(e) => setDateFilter(e.target.value)}
+                            className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer hover:bg-gray-100 transition-colors"
+                        >
+                            <option>Today</option>
+                            <option>Yesterday</option>
+                            <option>This Week</option>
+                            <option>This Month</option>
+                            <option>Custom</option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+                    </div>
+
+                    {dateFilter === 'Custom' && (
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="date"
+                                value={customRange.start}
+                                onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
+                                className="border border-gray-200 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            <span className="text-gray-400">-</span>
+                            <input
+                                type="date"
+                                value={customRange.end}
+                                onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
+                                className="border border-gray-200 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+                    )}
+
+                    <button
+                        onClick={loadData}
+                        className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
+                        title="Refresh Data"
+                    >
+                        <RefreshCcw className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Sales */}
-                <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-orange-200">
+                <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-orange-200 transition-transform hover:scale-[1.02]">
                     <div>
                         <div className="text-orange-100 text-sm font-medium mb-1">Total Sales</div>
                         <div className="text-2xl font-bold mb-1">₹{stats.totalIncome.toLocaleString()}</div>
@@ -81,7 +188,7 @@ export function Dashboard() {
                     </div>
                 </div>
                 {/* Online Orders - Sum of delivery/online */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-blue-200">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-blue-200 transition-transform hover:scale-[1.02]">
                     <div>
                         <div className="text-blue-100 text-sm font-medium mb-1">Online Orders</div>
                         <div className="text-2xl font-bold mb-1">₹{stats.deliveryTotal?.toLocaleString() || 0}</div>
@@ -92,7 +199,7 @@ export function Dashboard() {
                     </div>
                 </div>
                 {/* Takeaway */}
-                <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-teal-200">
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-teal-200 transition-transform hover:scale-[1.02]">
                     <div>
                         <div className="text-teal-100 text-sm font-medium mb-1">Takeaway</div>
                         <div className="text-2xl font-bold mb-1">₹{stats.takeAwayTotal?.toLocaleString() || 0}</div>
@@ -103,7 +210,7 @@ export function Dashboard() {
                     </div>
                 </div>
                 {/* Dine-In */}
-                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-purple-200">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-purple-200 transition-transform hover:scale-[1.02]">
                     <div>
                         <div className="text-purple-100 text-sm font-medium mb-1">Dine-In</div>
                         <div className="text-2xl font-bold mb-1">₹{stats.dineInTotal?.toLocaleString() || 0}</div>
@@ -205,8 +312,8 @@ export function Dashboard() {
                                         <td className="py-3 font-semibold text-gray-800 text-sm">₹{parseFloat(order.totalAmount).toLocaleString()}</td>
                                         <td className="py-3">
                                             <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'completed' ? 'bg-green-100 text-green-600' :
-                                                    order.status === 'cancelled' ? 'bg-red-100 text-red-600' :
-                                                        'bg-yellow-100 text-yellow-600'
+                                                order.status === 'cancelled' ? 'bg-red-100 text-red-600' :
+                                                    'bg-yellow-100 text-yellow-600'
                                                 }`}>
                                                 {order.status}
                                             </span>
