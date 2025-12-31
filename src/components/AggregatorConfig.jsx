@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { aggregatorService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function AggregatorConfig() {
     const { user } = useAuth();
@@ -63,7 +64,7 @@ export default function AggregatorConfig() {
 
     const handleSave = () => {
         // Save logic here (mock)
-        alert("Configuration Saved!");
+        toast.success("Configuration Saved!");
         setView('overview');
     };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, X, Plus, Trash2, Check, ChevronDown, GripVertical } from 'lucide-react';
 import { menuService, groupService } from '../services/api';
+import toast from 'react-hot-toast';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -193,7 +194,7 @@ export function AddItem({ onBack, itemToEdit }) {
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.categoryId || !formData.price) {
-            alert('Please fill Name, Category and Price');
+            toast.error('Please fill Name, Category and Price');
             return;
         }
 
@@ -239,7 +240,7 @@ export function AddItem({ onBack, itemToEdit }) {
             onBack();
         } catch (error) {
             setLoading(false);
-            alert('Failed to save item: ' + error.message);
+            toast.error('Failed to save item: ' + error.message);
         }
     };
 
@@ -251,8 +252,9 @@ export function AddItem({ onBack, itemToEdit }) {
             setCategories(catRes.data);
             setFormData(prev => ({ ...prev, categoryId: res.data.id }));
             setShowNewCategoryInput(false);
+            toast.success("Category created successfully");
         } catch (err) {
-            alert("Failed to create category");
+            toast.error("Failed to create category");
         }
     };
 
@@ -490,7 +492,7 @@ export function AddItem({ onBack, itemToEdit }) {
                                                         });
                                                         setFormData(prev => ({ ...prev, variants: newVariants }));
                                                     } else {
-                                                        alert("No master variants found in this group.");
+                                                        toast.error("No master variants found in this group.");
                                                     }
                                                 }}
                                                 className="text-xs flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors"

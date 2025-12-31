@@ -27,7 +27,6 @@ const MASTER_PERMISSIONS = [
     // POS Operations
     { id: 30, section: 'POS', name: 'Access POS App', type: 'yes_no', value: true },
     { id: 140, section: 'POS', name: 'Create Order / Billing', read: true, write: true },
-    { id: 7, section: 'POS', name: 'KOT Management', read: true, write: true },
     { id: 141, section: 'POS', name: 'Void/Delete Item', type: 'yes_no', value: false },
     { id: 142, section: 'POS', name: 'Void/Cancel Full Bill', type: 'yes_no', value: false },
     { id: 143, section: 'POS', name: 'Apply Custom Discount', type: 'yes_no', value: false },
@@ -46,6 +45,7 @@ export function RoleManagement() {
     const [view, setView] = useState('list'); // 'list' or 'form'
     const [editingRole, setEditingRole] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -74,7 +74,12 @@ export function RoleManagement() {
     };
 
     const handleSave = async () => {
+        if (!formData.name.trim()) {
+            toast.error("Please enter a role name");
+            return;
+        }
         try {
+            setSaving(true);
             const payload = {
                 ...formData,
                 permissions: permissions
@@ -90,7 +95,10 @@ export function RoleManagement() {
             setView('list');
             setEditingRole(null);
         } catch (error) {
+            console.error("Failed to save role", error);
             toast.error(error.response?.data?.error || "Failed to save role");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -101,9 +109,14 @@ export function RoleManagement() {
             description: role.description || ''
         });
         if (role.permissions) {
+            // Resilience: Handle { all: true } or other object formats
+            const savedPermsArray = Array.isArray(role.permissions)
+                ? role.permissions
+                : []; // Fallback to empty if it's an object like { all: true }
+
             // Merge saved permissions with MASTER list to ensure new modules are included
             const merged = MASTER_PERMISSIONS.map(masterPerm => {
-                const savedPerm = role.permissions.find(p => p.id === masterPerm.id);
+                const savedPerm = savedPermsArray.find(p => p.id === masterPerm.id);
                 return savedPerm ? { ...masterPerm, ...savedPerm } : masterPerm;
             });
             setPermissions(merged);
@@ -219,9 +232,10 @@ export function RoleManagement() {
                 </div>
                 <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50"
                 >
-                    <Save className="w-4 h-4" /> Save Role
+                    <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Role'}
                 </button>
             </div>
 
@@ -332,17 +346,22 @@ export function RoleManagement() {
 
 function Checkbox({ label, checked, onChange }) {
     return (
-        <label
-            className="flex items-center gap-2 cursor-pointer select-none"
+        <button
+            type="button"
+            className="flex items-center gap-2 cursor-pointer select-none group focus:outline-none"
             onClick={(e) => {
-                e.preventDefault();
+                e.stopPropagation();
                 onChange();
             }}
         >
-            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${checked ? 'bg-green-500 border-green-500' : 'border-gray-300 bg-white dark:bg-gray-700'}`}>
-                {checked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${checked
+                ? 'bg-green-500 border-green-500 scale-105 shadow-sm'
+                : 'border-gray-300 bg-white dark:bg-gray-700 group-hover:border-green-400'}`}>
+                {checked && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
             </div>
-            <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">{label}</span>
-        </label>
+            <span className={`text-xs font-semibold transition-colors ${checked ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700'}`}>
+                {label}
+            </span>
+        </button>
     );
 }

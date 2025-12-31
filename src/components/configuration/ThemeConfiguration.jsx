@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Check, Palette } from 'lucide-react';
 import { outletService } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const THEME_PALETTES = [
     {
@@ -116,10 +117,10 @@ export function ThemeConfiguration() {
             };
             await outletService.updateConfig(payload);
             applyTheme(theme);
-            alert('Theme updated successfully!');
+            toast.success('Theme updated successfully!');
         } catch (error) {
             console.error('Error saving theme:', error);
-            alert('Failed to update theme');
+            toast.error('Failed to update theme');
         } finally {
             setSaving(false);
         }

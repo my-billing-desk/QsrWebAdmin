@@ -17,7 +17,6 @@ export const initialMenuGroups = [
                 id: 'daily_ops',
                 label: 'Daily Operations',
                 icon: Layers,
-                forceExpanded: true,
                 items: [
                     { id: 'running_orders', path: '/orders/running', label: 'Running Orders' },
                     { id: 'all_orders', path: '/orders', label: 'All Orders' },
@@ -44,6 +43,7 @@ export const initialMenuGroups = [
         ]
     },
     {
+        id: 'group_reports_daily',
         title: 'Reports',
         items: [
             { id: 'day_end', path: '/reports/day-end', label: 'Day End Summary', icon: FileText },
@@ -53,6 +53,7 @@ export const initialMenuGroups = [
         ]
     },
     {
+        id: 'group_promo',
         title: 'Promo', // Creating a new group for Promo/Coupons if typical
         items: [
             { id: 'coupons', path: '/promo/coupons', label: 'Coupons', icon: Ticket },
@@ -62,6 +63,7 @@ export const initialMenuGroups = [
         ]
     },
     {
+        id: 'group_financials',
         title: 'Financials',
         items: [
             { id: 'expenses', path: '/financial/expenses', label: 'Expenses', icon: Wallet },
@@ -69,6 +71,7 @@ export const initialMenuGroups = [
         ]
     },
     {
+        id: 'group_purchases',
         title: 'Purchases',
         items: [
             { id: 'purchase', path: '/inventory/purchase', label: 'Purchase', icon: ShoppingCart },
@@ -76,6 +79,7 @@ export const initialMenuGroups = [
         ]
     },
     {
+        id: 'group_reports_stock',
         title: 'Reports',
         items: [
             { id: 'stock_history', path: '/reports/stock-history', label: 'Stock History', icon: BarChart2 },

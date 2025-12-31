@@ -4,6 +4,7 @@ import {
     Monitor, Printer, Users, Settings, Smartphone, Truck, MessageSquare, ChevronRight, Search, Activity, Wifi, WifiOff, Palette
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import { useAuth } from '../../context/AuthContext';
 import { posDeviceService } from '../../services/api';
@@ -36,7 +37,7 @@ export function OutletConfiguration() {
     const copyTenantId = () => {
         if (user?.tenantId) {
             navigator.clipboard.writeText(user.tenantId.toString());
-            alert('Tenant ID copied to clipboard!');
+            toast.success('Restaurant ID copied to clipboard!');
         }
     };
 

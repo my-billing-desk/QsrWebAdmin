@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     LayoutDashboard, Receipt, UtensilsCrossed, Settings, LogOut,
     Users, FileText, Clock, ShoppingCart, BarChart3, BookOpen, UserCircle, Archive,
@@ -18,9 +18,9 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
     const isExpanded = item.forceExpanded || expandedGroups[item.id];
 
     // Indentation logic
-    const basePadding = 0.75; // rem
-    const depthPadding = depth * 1.0; // rem
-    const totalPadding = isSidebarOpen ? basePadding + depthPadding : 0.75;
+    const basePadding = 1.0; // rem
+    const depthPadding = depth * 0.75; // rem
+    const totalPadding = isSidebarOpen ? (depth > 0 ? basePadding : basePadding) : 0.75;
 
     if (!isSidebarOpen && depth > 0) return null;
 
@@ -72,8 +72,7 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
             </button>
 
             {hasSubItems && isExpanded && isSidebarOpen && (
-                <div className="space-y-0.5 mt-0.5 relative">
-                    {/* Optional: Add a subtle connector line design if depth > 0, but sticking to clean style for now */}
+                <div className="space-y-0.5 mt-1 relative ml-4 border-l-2 border-gray-100 dark:border-gray-800 transition-all">
                     {item.items.map((subItem, idx) => (
                         <SidebarItem
                             key={subItem.id || idx}
@@ -98,10 +97,82 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
     const location = useLocation();
     const { menuLayout, quickLinks } = useQuickLinks();
 
-    const [expandedGroups, setExpandedGroups] = useState({
-        'daily_ops': true,
-        'configuration': false
+    const [expandedGroups, setExpandedGroups] = useState({});
+    const [expandedMainGroups, setExpandedMainGroups] = useState({
+        'group_dashboard': true,
+        'group_management': true,
+        'group_menu': true,
+        'group_inventory': true,
+        'group_crm': true,
+        'group_reports_daily': true,
+        'group_reports_stock': true,
+        'group_promo': true,
+        'group_financials': true,
+        'group_purchases': true
     });
+
+    // Auto-expand group containing active path
+    useEffect(() => {
+        const findAndExpand = (items, parentId = null) => {
+            for (const item of items) {
+                if (item.path && isActive(item.path)) {
+                    if (parentId) return { parentId, isMain: false };
+                    return { isMain: true };
+                }
+                if (item.items) {
+                    const found = findAndExpand(item.items, item.id);
+                    if (found) {
+                        return { ...found, subId: item.id };
+                    }
+                }
+            }
+            return null;
+        };
+
+        const expandSubIds = [];
+        const expandMainIds = [];
+
+        // Special case: Always keep daily_ops expanded on dashboard
+        if (location.pathname === '/') {
+            expandSubIds.push('daily_ops');
+            expandMainIds.push('group_dashboard');
+        }
+
+        menuLayout.forEach(group => {
+            const found = findAndExpand(group.items);
+            if (found) {
+                if (group.id) expandMainIds.push(group.id);
+                if (found.parentId) expandSubIds.push(found.parentId);
+                if (found.subId) expandSubIds.push(found.subId);
+            }
+        });
+
+        if (expandSubIds.length > 0) {
+            setExpandedGroups(prev => {
+                const next = { ...prev };
+                expandSubIds.forEach(id => {
+                    if (!next[id]) next[id] = true;
+                });
+                return next;
+            });
+        }
+        if (expandMainIds.length > 0) {
+            setExpandedMainGroups(prev => {
+                const next = { ...prev };
+                expandMainIds.forEach(id => {
+                    if (!next[id]) next[id] = true;
+                });
+                return next;
+            });
+        }
+    }, [location.pathname, menuLayout]);
+
+    const toggleMainGroup = (groupId) => {
+        setExpandedMainGroups(prev => ({
+            ...prev,
+            [groupId]: !prev[groupId]
+        }));
+    };
 
     const isActive = (path) => {
         if (!path) return false;
@@ -188,18 +259,28 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                         return true;
                     });
 
-                    if (filteredItems.length === 0) return null;
+                    const isMainExpanded = !group.id || expandedMainGroups[group.id];
 
                     return (
                         <div key={idx} className="space-y-1">
                             {/* Group Title */}
                             {group.title && isOpen && (
-                                <h3 className="px-5 mb-2 text-[11px] font-bold text-muted uppercase tracking-widest font-sans">
-                                    {group.title}
-                                </h3>
+                                <div
+                                    onClick={() => group.id && toggleMainGroup(group.id)}
+                                    className={`px-5 py-2 mb-1 flex items-center justify-between group cursor-pointer hover:bg-gray-50/50 transition-colors ${!isMainExpanded ? 'opacity-80' : ''}`}
+                                >
+                                    <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest font-sans group-hover:text-gray-900 transition-colors">
+                                        {group.title}
+                                    </h3>
+                                    {group.id && (
+                                        <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
+                                            {isMainExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                        </div>
+                                    )}
+                                </div>
                             )}
 
-                            <div className="space-y-0.5">
+                            <div className={`space-y-0.5 transition-all duration-300 overflow-hidden ${(!isOpen || !isMainExpanded) && group.id ? 'max-h-0' : 'max-h-[2000px]'}`}>
                                 {filteredItems.map((item, iIdx) => (
                                     <SidebarItem
                                         key={item.id || iIdx}
