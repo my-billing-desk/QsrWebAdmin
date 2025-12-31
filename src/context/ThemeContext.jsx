@@ -55,7 +55,18 @@ export function ThemeProvider({ children }) {
     const applyTheme = (themeData) => {
         const root = document.documentElement;
 
-        // Support granular pro settings
+        // Reset any existing override variables to prevent leakage between themes
+        const variablesToReset = [
+            '--bg-main', '--bg-surface', '--bg-sidebar', '--bg-header',
+            '--text-main', '--text-muted', '--text-light',
+            '--color-primary', '--color-primary-hover', '--color-secondary',
+            '--status-success', '--status-warning', '--status-error', '--status-info',
+            '--border-color', '--sidebar-active', '--sidebar-active-text', '--sidebar-text',
+            '--pos-btn-pay', '--pos-btn-hold', '--pos-btn-save', '--pos-btn-cancel'
+        ];
+        variablesToReset.forEach(v => root.style.removeProperty(v));
+
+        // 1. Support granular pro settings (Preferred)
         if (themeData.settings) {
             Object.entries(themeData.settings).forEach(([key, value]) => {
                 root.style.setProperty(key, value);
@@ -63,68 +74,29 @@ export function ThemeProvider({ children }) {
             return;
         }
 
-        // Fallback for color arrays (old format)
-        if (Array.isArray(themeData)) {
-            root.style.setProperty('--color-primary', themeData[0]);
-            root.style.setProperty('--bg-sidebar', themeData[1]);
-            root.style.setProperty('--bg-main', themeData[2]);
+        // 2. Support fixed theme IDs (Legacy Compatibility if needed, but settings is preferred)
+        if (themeData.id === 'emerald_slate') {
+            const defaults = {
+                '--bg-main': '#F8FAFC', '--bg-surface': '#FFFFFF', '--bg-sidebar': '#0F172A',
+                '--bg-header': '#FFFFFF', '--text-main': '#1E293B', '--text-muted': '#64748B',
+                '--color-primary': '#10B981', '--color-primary-hover': '#059669', '--color-secondary': '#64748B',
+                '--status-success': '#22C55E', '--status-warning': '#F59E0B', '--status-error': '#EF4444',
+                '--sidebar-active': 'rgba(16, 185, 129, 0.1)', '--sidebar-active-text': '#10B981',
+                '--sidebar-text': '#94A3B8', '--border-color': '#E2E8F0'
+            };
+            Object.entries(defaults).forEach(([k, v]) => root.style.setProperty(k, v));
             return;
         }
 
-        const colors = themeData.palette || themeData.colors; // Changed from themeData.colors to themeData.palette
+        // 3. Fallback for simple color arrays or palette objects
+        const colors = themeData.palette || themeData.colors || themeData;
 
-        if (themeData.id === 'emerald_slate') {
-            root.style.setProperty('--bg-main', '#F8FAFC');
-            root.style.setProperty('--bg-surface', '#FFFFFF');
-            root.style.setProperty('--bg-sidebar', '#0F172A');
-            root.style.setProperty('--bg-header', '#FFFFFF');
-            root.style.setProperty('--text-main', '#1E293B');
-            root.style.setProperty('--text-muted', '#64748B');
-            root.style.setProperty('--color-primary', '#10B981');
-            root.style.setProperty('--color-primary-hover', '#059669');
-            root.style.setProperty('--color-secondary', '#64748B');
-            root.style.setProperty('--status-success', '#22C55E');
-            root.style.setProperty('--status-warning', '#F59E0B');
-            root.style.setProperty('--status-error', '#EF4444');
-            root.style.setProperty('--sidebar-active', 'rgba(16, 185, 129, 0.1)');
-            root.style.setProperty('--sidebar-active-text', '#10B981');
-            root.style.setProperty('--sidebar-text', '#94A3B8');
-            root.style.setProperty('--border-color', '#E2E8F0');
-        } else if (themeData.id === 'midnight_emerald') {
-            root.style.setProperty('--bg-main', '#0F172A');
-            root.style.setProperty('--bg-surface', '#1E293B');
-            root.style.setProperty('--bg-sidebar', '#020617');
-            root.style.setProperty('--bg-header', '#0F172A');
-            root.style.setProperty('--text-main', '#F8FAFC');
-            root.style.setProperty('--text-muted', '#94A3B8');
-            root.style.setProperty('--color-primary', '#34D399');
-            root.style.setProperty('--color-primary-hover', '#10B981');
-            root.style.setProperty('--color-secondary', '#64748B');
-            root.style.setProperty('--status-success', '#22C55E');
-            root.style.setProperty('--status-warning', '#F59E0B');
-            root.style.setProperty('--status-error', '#EF4444');
-            root.style.setProperty('--sidebar-active', 'rgba(52, 211, 153, 0.1)');
-            root.style.setProperty('--sidebar-active-text', '#34D399');
-            root.style.setProperty('--sidebar-text', '#94A3B8');
-            root.style.setProperty('--border-color', '#334155');
-        } else if (colors) {
-            // Fallback for custom palettes or older formats
-            root.style.setProperty('--color-primary', colors[0]);
-            root.style.setProperty('--bg-sidebar', colors[1]);
-            root.style.setProperty('--bg-main', colors[2]);
-            root.style.setProperty('--text-main', colors[1]); // This might need adjustment based on desired text color
+        if (Array.isArray(colors)) {
+            root.style.setProperty('--color-primary', colors[0] || '#10b981');
+            root.style.setProperty('--bg-sidebar', colors[1] || '#FFFFFF');
+            root.style.setProperty('--bg-main', colors[2] || '#F3F4F6');
             root.style.setProperty('--color-primary-hover', colors[0]);
-            root.style.setProperty('--bg-surface', '#FFFFFF'); // Default for custom
             root.style.setProperty('--sidebar-active-text', colors[0]);
-
-            // Clear old variables if they exist
-            root.style.removeProperty('--brand-color');
-            root.style.removeProperty('--brand-secondary');
-            root.style.removeProperty('--bg-accent');
-            root.style.removeProperty('--text-accent');
-            root.style.removeProperty('--border-accent');
-            root.style.removeProperty('--pos-cat-active');
-            root.style.removeProperty('--active-bg');
         }
     };
 

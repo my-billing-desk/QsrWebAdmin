@@ -289,38 +289,60 @@ export function Dashboard() {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="text-xs text-gray-400 uppercase font-semibold border-b border-gray-100">
+                            <thead className="text-xs text-gray-400 uppercase font-semibold border-b border-gray-100 dark:border-gray-700">
                                 <tr>
-                                    <th className="pb-3 pl-2">Client</th>
+                                    <th className="pb-3 pl-2">Source & Type</th>
                                     <th className="pb-3">Order No.</th>
                                     <th className="pb-3">Amount</th>
                                     <th className="pb-3">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {recentOrders.map((order, idx) => (
-                                    <tr key={idx} className="group hover:bg-gray-50 transition-colors">
-                                        <td className="py-3 pl-2">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">
-                                                    {order.customerName?.charAt(0) || 'G'}
+                            <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
+                                {recentOrders.map((order, idx) => {
+                                    const source = (order.source || 'POS').toLowerCase();
+                                    const type = (order.type || 'Takeaway').toLowerCase();
+
+                                    return (
+                                        <tr key={order.id || idx} className="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <td className="py-3 pl-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shadow-sm ${source.includes('swiggy') ? 'bg-orange-100 text-orange-600' :
+                                                            source.includes('zomato') ? 'bg-red-100 text-red-600' :
+                                                                source.includes('online') ? 'bg-blue-100 text-blue-600' :
+                                                                    'bg-gray-100 text-gray-500'
+                                                        }`}>
+                                                        {source.includes('swiggy') ? 'SWI' :
+                                                            source.includes('zomato') ? 'ZOM' :
+                                                                source.includes('online') ? 'ONL' : 'POS'}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-gray-800 dark:text-gray-200 text-sm capitalize">{order.customerName || 'Guest'}</div>
+                                                        <div className="text-[10px] uppercase tracking-tighter text-gray-400 font-bold">{type}</div>
+                                                    </div>
                                                 </div>
-                                                <span className="font-medium text-gray-700 text-sm">{order.customerName || 'Guest'}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-3 text-sm text-gray-500">{order.orderNumber}</td>
-                                        <td className="py-3 font-semibold text-gray-800 text-sm">₹{parseFloat(order.totalAmount).toLocaleString()}</td>
-                                        <td className="py-3">
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'completed' ? 'bg-green-100 text-green-600' :
-                                                order.status === 'cancelled' ? 'bg-red-100 text-red-600' :
-                                                    'bg-yellow-100 text-yellow-600'
-                                                }`}>
-                                                {order.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {recentOrders.length === 0 && <tr><td colSpan="4" className="text-center py-4 text-gray-500 text-sm">No recent orders</td></tr>}
+                                            </td>
+                                            <td className="py-3">
+                                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{order.orderNumber}</div>
+                                                <div className="text-[10px] text-gray-400 font-medium">
+                                                    {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </td>
+                                            <td className="py-3">
+                                                <div className="font-black text-gray-900 dark:text-gray-100 text-sm">₹{parseFloat(order.totalAmount).toLocaleString()}</div>
+                                            </td>
+                                            <td className="py-3">
+                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-600' :
+                                                        order.status === 'cancelled' ? 'bg-red-100 text-red-600' :
+                                                            order.status === 'preparing' || order.status === 'placed' ? 'bg-yellow-100 text-yellow-600' :
+                                                                'bg-gray-100 text-gray-600'
+                                                    }`}>
+                                                    {order.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                {recentOrders.length === 0 && <tr><td colSpan="4" className="text-center py-8 text-gray-400 text-sm font-medium italic">No recent transactions found</td></tr>}
                             </tbody>
                         </table>
                     </div>

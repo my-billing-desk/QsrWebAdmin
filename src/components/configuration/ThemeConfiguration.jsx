@@ -74,14 +74,285 @@ const THEME_PALETTES = [
             '--chart-5': '#EC4899',
         }
     },
-    { id: 'sunset_maroon', name: 'Sunset Maroon', colors: ['#4a0404', '#722f37', '#c04040', '#d27d59', '#f4d7b1'] },
-    { id: 'berry_teal', name: 'Berry Teal', colors: ['#9d2a6a', '#e61d4b', '#ff6d31', '#ffce4a', '#2a9a9b'] },
-    { id: 'modern_slate', name: 'Modern Slate', colors: ['#3d5a80', '#98c1d9', '#e0fbfc', '#ee6c4d', '#293241'] },
-    { id: 'ocean_coral', name: 'Ocean Coral', colors: ['#003049', '#118ab2', '#b8f2e6', '#ff6b6b', '#d00000'] }
+    {
+        id: 'nordic_frost',
+        name: 'Nordic Frost (Light)',
+        colors: ['#6366F1', '#1E293B', '#F1F5F9', '#475569', '#FFFFFF'],
+        isPro: true,
+        type: 'light',
+        settings: {
+            '--bg-main': '#F1F5F9',
+            '--bg-surface': '#FFFFFF',
+            '--bg-sidebar': '#FFFFFF',
+            '--bg-header': '#FFFFFF',
+            '--text-main': '#0F172A',
+            '--text-muted': '#64748B',
+            '--color-primary': '#6366F1', // Indigo
+            '--color-primary-hover': '#4F46E5',
+            '--color-secondary': '#94A3B8',
+            '--status-success': '#10B981',
+            '--status-warning': '#F59E0B',
+            '--status-error': '#E11D48',
+            '--status-info': '#0EA5E9',
+            '--border-color': '#E2E8F0',
+            '--sidebar-active': '#EEF2FF',
+            '--sidebar-active-text': '#6366F1',
+            '--sidebar-text': '#64748B',
+            '--pos-btn-pay': '#6366F1',
+            '--pos-btn-hold': '#F59E0B',
+            '--pos-btn-save': '#1E293B',
+            '--pos-btn-cancel': '#E11D48',
+            '--chart-1': '#6366F1',
+            '--chart-2': '#0EA5E9',
+            '--chart-3': '#F43F5E',
+            '--chart-4': '#FB923C',
+            '--chart-5': '#8B5CF6',
+        }
+    }, {
+        id: 'obsidian_gold',
+        name: 'Obsidian Gold (Dark)',
+        colors: ['#F59E0B', '#0A0A0A', '#171717', '#A3A3A3', '#262626'],
+        isPro: true,
+        type: 'dark',
+        settings: {
+            '--bg-main': '#0A0A0A',
+            '--bg-surface': '#171717',
+            '--bg-sidebar': '#000000',
+            '--bg-header': '#171717',
+            '--text-main': '#F5F5F5',
+            '--text-muted': '#A3A3A3',
+            '--color-primary': '#D97706', // Amber Gold
+            '--color-primary-hover': '#B45309',
+            '--color-secondary': '#404040',
+            '--status-success': '#10B981',
+            '--status-warning': '#F59E0B',
+            '--status-error': '#DC2626',
+            '--status-info': '#3B82F6',
+            '--border-color': '#262626',
+            '--sidebar-active': 'rgba(217, 119, 6, 0.15)',
+            '--sidebar-active-text': '#F59E0B',
+            '--sidebar-text': '#737373',
+            '--pos-btn-pay': '#D97706',
+            '--pos-btn-hold': '#404040',
+            '--pos-btn-save': '#525252',
+            '--pos-btn-cancel': '#7F1D1D',
+            '--chart-1': '#D97706',
+            '--chart-2': '#D4D4D4',
+            '--chart-3': '#A1A1AA',
+            '--chart-4': '#71717A',
+            '--chart-5': '#404040',
+        }
+    }, {
+        id: 'rosewood_cream',
+        name: 'Rosewood & Cream',
+        colors: ['#9F1239', '#FFFBEB', '#FDE68A', '#4C0519', '#FFFFFF'],
+        isPro: true,
+        type: 'light',
+        settings: {
+            '--bg-main': '#FFFBF0',
+            '--bg-surface': '#FFFFFF',
+            '--bg-sidebar': '#4C0519', // Deep Rosewood
+            '--bg-header': '#FFFFFF',
+            '--text-main': '#451A03',
+            '--text-muted': '#78350F',
+            '--color-primary': '#E11D48',
+            '--color-primary-hover': '#BE123C',
+            '--color-secondary': '#D97706',
+            '--status-success': '#059669',
+            '--status-warning': '#D97706',
+            '--status-error': '#9F1239',
+            '--status-info': '#2563EB',
+            '--border-color': '#FEF3C7',
+            '--sidebar-active': 'rgba(255, 255, 255, 0.1)',
+            '--sidebar-active-text': '#FDE68A',
+            '--sidebar-text': '#FDA4AF',
+            '--pos-btn-pay': '#E11D48',
+            '--pos-btn-hold': '#B45309',
+            '--pos-btn-save': '#78350F',
+            '--pos-btn-cancel': '#9F1239',
+            '--chart-1': '#BE123C',
+            '--chart-2': '#F59E0B',
+            '--chart-3': '#10B981',
+            '--chart-4': '#4C0519',
+            '--chart-5': '#F472B6',
+        }
+    }, {
+        id: 'cyber_violet',
+        name: 'Cyber Violet',
+        colors: ['#8B5CF6', '#1E1B4B', '#312E81', '#C084FC', '#111827'],
+        isPro: true,
+        type: 'dark',
+        settings: {
+            '--bg-main': '#0F172A',
+            '--bg-surface': '#1E293B',
+            '--bg-sidebar': '#1E1B4B',
+            '--bg-header': '#0F172A',
+            '--text-main': '#F8FAFC',
+            '--text-muted': '#94A3B8',
+            '--color-primary': '#A855F7',
+            '--color-primary-hover': '#9333EA',
+            '--color-secondary': '#475569',
+            '--status-success': '#22C55E',
+            '--status-warning': '#F59E0B',
+            '--status-error': '#F43F5E',
+            '--status-info': '#38BDF8',
+            '--border-color': '#334155',
+            '--sidebar-active': 'rgba(168, 85, 247, 0.2)',
+            '--sidebar-active-text': '#C084FC',
+            '--sidebar-text': '#94A3B8',
+            '--pos-btn-pay': '#8B5CF6',
+            '--pos-btn-hold': '#F59E0B',
+            '--pos-btn-save': '#334155',
+            '--pos-btn-cancel': '#E11D48',
+            '--chart-1': '#A855F7',
+            '--chart-2': '#EC4899',
+            '--chart-3': '#3B82F6',
+            '--chart-4': '#10B981',
+            '--chart-5': '#F59E0B',
+        }
+    },
+    {
+        id: 'slate_terracotta',
+        name: 'Slate & Terracotta',
+        colors: ['#E27D60', '#2D3748', '#F7FAFC', '#718096', '#FFFFFF'],
+        isPro: true,
+        type: 'light',
+        settings: {
+            '--bg-main': '#F8F9FA',
+            '--bg-surface': '#FFFFFF',
+            '--bg-sidebar': '#1A202C',
+            '--bg-header': '#FFFFFF',
+            '--text-main': '#2D3748',
+            '--text-muted': '#718096',
+            '--color-primary': '#E27D60', // Terracotta
+            '--color-primary-hover': '#C0563E',
+            '--color-secondary': '#4A5568',
+            '--status-success': '#52AD8C',
+            '--status-warning': '#E9C46A',
+            '--status-error': '#E76F51',
+            '--status-info': '#264653',
+            '--border-color': '#EDF2F7',
+            '--sidebar-active': 'rgba(226, 125, 96, 0.15)',
+            '--sidebar-active-text': '#E27D60',
+            '--sidebar-text': '#A0AEC0',
+            '--pos-btn-pay': '#E27D60',
+            '--pos-btn-hold': '#E9C46A',
+            '--pos-btn-save': '#2D3748',
+            '--pos-btn-cancel': '#E76F51',
+            '--chart-1': '#E27D60',
+            '--chart-2': '#264653',
+            '--chart-3': '#E9C46A',
+            '--chart-4': '#F4A261',
+            '--chart-5': '#2A9D8F',
+        }
+    }, {
+        id: 'deep_sea_mint',
+        name: 'Deep Sea & Mint',
+        colors: ['#00F5D4', '#001219', '#00212E', '#94A3B8', '#FFFFFF'],
+        isPro: true,
+        type: 'dark',
+        settings: {
+            '--bg-main': '#001219',
+            '--bg-surface': '#00212E',
+            '--bg-sidebar': '#001219',
+            '--bg-header': '#00212E',
+            '--text-main': '#F8FAFC',
+            '--text-muted': '#94A3B8',
+            '--color-primary': '#00F5D4', // Mint Cyan
+            '--color-primary-hover': '#00D1B2',
+            '--color-secondary': '#0A9396',
+            '--status-success': '#94D2BD',
+            '--status-warning': '#EE9B00',
+            '--status-error': '#AE2012',
+            '--status-info': '#005F73',
+            '--border-color': '#005F73',
+            '--sidebar-active': 'rgba(0, 245, 212, 0.1)',
+            '--sidebar-active-text': '#00F5D4',
+            '--sidebar-text': '#94A3B8',
+            '--pos-btn-pay': '#00F5D4',
+            '--pos-btn-hold': '#EE9B00',
+            '--pos-btn-save': '#0A9396',
+            '--pos-btn-cancel': '#AE2012',
+            '--chart-1': '#00F5D4',
+            '--chart-2': '#94D2BD',
+            '--chart-3': '#0A9396',
+            '--chart-4': '#E9D8A6',
+            '--chart-5': '#CA6702',
+        }
+    }, {
+        id: 'desert_sand',
+        name: 'Desert Sand (Light)',
+        colors: ['#4338CA', '#FAF7F2', '#EFE9E1', '#78350F', '#FFFFFF'],
+        isPro: false,
+        type: 'light',
+        settings: {
+            '--bg-main': '#FAF7F2',
+            '--bg-surface': '#FFFFFF',
+            '--bg-sidebar': '#F3EEE7',
+            '--bg-header': '#FFFFFF',
+            '--text-main': '#43403E',
+            '--text-muted': '#8D8781',
+            '--color-primary': '#312E81', // Deep Indigo
+            '--color-primary-hover': '#1E1B4B',
+            '--color-secondary': '#D4CDC3',
+            '--status-success': '#16A34A',
+            '--status-warning': '#D97706',
+            '--status-error': '#DC2626',
+            '--status-info': '#2563EB',
+            '--border-color': '#EFE9E1',
+            '--sidebar-active': '#FFFFFF',
+            '--sidebar-active-text': '#312E81',
+            '--sidebar-text': '#8D8781',
+            '--pos-btn-pay': '#312E81',
+            '--pos-btn-hold': '#D97706',
+            '--pos-btn-save': '#A39C94',
+            '--pos-btn-cancel': '#B91C1C',
+            '--chart-1': '#312E81',
+            '--chart-2': '#8D8781',
+            '--chart-3': '#C2410C',
+            '--chart-4': '#065F46',
+            '--chart-5': '#6B21A8',
+        }
+    }, {
+        id: 'midnight_carbon',
+        name: 'Midnight Carbon (Dark)',
+        colors: ['#3B82F6', '#000000', '#111111', '#EDEDED', '#1A1A1A'],
+        isPro: true,
+        type: 'dark',
+        settings: {
+            '--bg-main': '#000000',
+            '--bg-surface': '#111111',
+            '--bg-sidebar': '#000000',
+            '--bg-header': '#111111',
+            '--text-main': '#EDEDED',
+            '--text-muted': '#71717A',
+            '--color-primary': '#3B82F6', // Electric Blue
+            '--color-primary-hover': '#2563EB',
+            '--color-secondary': '#27272A',
+            '--status-success': '#22C55E',
+            '--status-warning': '#EAB308',
+            '--status-error': '#EF4444',
+            '--status-info': '#3B82F6',
+            '--border-color': '#27272A',
+            '--sidebar-active': 'rgba(59, 130, 246, 0.2)',
+            '--sidebar-active-text': '#60A5FA',
+            '--sidebar-text': '#71717A',
+            '--pos-btn-pay': '#3B82F6',
+            '--pos-btn-hold': '#3F3F46',
+            '--pos-btn-save': '#27272A',
+            '--pos-btn-cancel': '#7F1D1D',
+            '--chart-1': '#3B82F6',
+            '--chart-2': '#FFFFFF',
+            '--chart-3': '#52525B',
+            '--chart-4': '#A1A1AA',
+            '--chart-5': '#1D4ED8',
+        }
+    },
 ];
 
 export function ThemeConfiguration() {
     const [selectedThemeId, setSelectedThemeId] = useState('emerald_slate');
+    const [customSettings, setCustomSettings] = useState(null);
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -95,7 +366,15 @@ export function ThemeConfiguration() {
             const res = await outletService.getConfig();
             const data = res.data;
             setConfig(data);
-            if (data.themeName) {
+            if (data.themePalette) {
+                const palette = JSON.parse(data.themePalette);
+                if (palette.id === 'custom_theme') {
+                    setSelectedThemeId('custom_theme');
+                    setCustomSettings(palette.settings);
+                } else {
+                    setSelectedThemeId(palette.id);
+                }
+            } else if (data.themeName) {
                 const matched = THEME_PALETTES.find(p => p.name === data.themeName);
                 if (matched) setSelectedThemeId(matched.id);
             }
@@ -109,10 +388,19 @@ export function ThemeConfiguration() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const theme = THEME_PALETTES.find(p => p.id === selectedThemeId);
+            let theme;
+            if (selectedThemeId === 'custom_theme') {
+                theme = {
+                    ...THEME_PALETTES.find(p => p.id === 'custom_theme'),
+                    settings: customSettings || THEME_PALETTES.find(p => p.id === 'custom_theme').settings
+                };
+            } else {
+                theme = THEME_PALETTES.find(p => p.id === selectedThemeId);
+            }
+
             const payload = {
                 themeName: theme.name,
-                themeColor: theme.colors[0],
+                themeColor: theme.settings['--color-primary'] || theme.colors[0],
                 themePalette: JSON.stringify(theme)
             };
             await outletService.updateConfig(payload);
@@ -256,17 +544,46 @@ export function ThemeConfiguration() {
                             </div>
                         </div>
 
-                        {/* Color Palette Details */}
+                        {/* Color Palette Details or Custom Editor */}
                         <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Role-Based Palette</p>
-                            <div className="grid grid-cols-1 gap-2">
-                                {Object.entries(currentPalette.settings || {}).slice(0, 15).map(([key, val], i) => (
-                                    <div key={i} className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+                                {selectedThemeId === 'custom_theme' ? 'Manual Property Customization' : 'Role-Based Palette'}
+                            </p>
+                            <div className="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
+                                {Object.entries(selectedThemeId === 'custom_theme' ? (customSettings || currentPalette.settings) : (currentPalette.settings || {})).map(([key, val], i) => (
+                                    <div key={i} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border border-transparent hover:border-gray-100">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg shadow-inner" style={{ backgroundColor: val }} />
+                                            {selectedThemeId === 'custom_theme' ? (
+                                                <input
+                                                    type="color"
+                                                    value={val}
+                                                    onChange={(e) => {
+                                                        const newSettings = { ...(customSettings || currentPalette.settings), [key]: e.target.value };
+                                                        setCustomSettings(newSettings);
+                                                        // Live preview
+                                                        document.documentElement.style.setProperty(key, e.target.value);
+                                                    }}
+                                                    className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-lg shadow-inner" style={{ backgroundColor: val }} />
+                                            )}
                                             <span className="text-xs font-mono text-gray-500 dark:text-gray-400 lowercase">{key.replace('--', '')}</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase">{val}</span>
+                                        {selectedThemeId === 'custom_theme' ? (
+                                            <input
+                                                type="text"
+                                                value={val}
+                                                onChange={(e) => {
+                                                    const newSettings = { ...(customSettings || currentPalette.settings), [key]: e.target.value };
+                                                    setCustomSettings(newSettings);
+                                                    document.documentElement.style.setProperty(key, e.target.value);
+                                                }}
+                                                className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded w-20 outline-none focus:ring-1 focus:ring-emerald-500"
+                                            />
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase">{val}</span>
+                                        )}
                                     </div>
                                 ))}
                             </div>

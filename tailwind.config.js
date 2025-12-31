@@ -12,40 +12,28 @@ export default {
                 display: ['Outfit', 'sans-serif'],
             },
             colors: {
-                // Primary Brand Colors (Vibrant Indigo - Total Departure from Red)
+                // Mapping semantic names to CSS Variables
                 primary: {
-                    50: '#eef2ff',
-                    100: '#e0e7ff',
-                    200: '#c7d2fe',
-                    300: '#a5b4fc',
-                    400: '#818cf8',
-                    500: '#6366f1', // Indigo 500
-                    600: '#4f46e5', // Indigo 600 (Main Brand)
-                    700: '#4338ca',
-                    800: '#3730a3',
-                    900: '#312e81',
-                    950: '#1e1b4b',
+                    DEFAULT: 'var(--color-primary)',
+                    hover: 'var(--color-primary-hover)',
+                    shade: 'var(--color-primary-shade, var(--color-primary))',
                 },
-                // Secondary/Accent (Emerald green for success/contrast)
-                secondary: {
-                    50: '#ecfdf5',
-                    100: '#d1fae5',
-                    500: '#10b981',
-                    600: '#059669',
+                secondary: 'var(--color-secondary)',
+                main: 'var(--bg-main)',
+                surface: 'var(--bg-surface)',
+                sidebar: {
+                    DEFAULT: 'var(--bg-sidebar)',
+                    active: 'var(--sidebar-active)',
+                    'active-text': 'var(--sidebar-active-text)',
+                    text: 'var(--sidebar-text)',
                 },
-                // Neutral Slate (Modern, clean, slight blueish tint)
-                gray: {
-                    50: '#f8fafc',
-                    100: '#f1f5f9',
-                    200: '#e2e8f0',
-                    300: '#cbd5e1',
-                    400: '#94a3b8',
-                    500: '#64748b',
-                    600: '#475569',
-                    700: '#334155',
-                    800: '#1e293b',
-                    900: '#0f172a',
-                    950: '#020617',
+                header: 'var(--bg-header)',
+                border: 'var(--border-color)',
+                status: {
+                    success: 'var(--status-success)',
+                    warning: 'var(--status-warning)',
+                    error: 'var(--status-error)',
+                    info: 'var(--status-info)',
                 }
             },
             boxShadow: {

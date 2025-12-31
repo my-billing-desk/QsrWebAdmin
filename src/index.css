@@ -6,28 +6,18 @@
 
 @layer base {
     :root {
-        /* ===== ADMIN PANEL COLOR SYSTEM ===== */
-        /* Reference: SmartHR Style - Clean White/Gray/Orange Accent */
-
         /* === GLOBAL THEME VARIABLES === */
         --bg-main: #F3F4F6;
-        /* Light gray background for main content area */
         --bg-surface: #FFFFFF;
         --bg-sidebar: #FFFFFF;
-        /* White sidebar */
         --bg-header: #FFFFFF;
 
         --text-main: #1F2937;
-        /* Gray-800 */
         --text-muted: #6B7280;
-        /* Gray-500 */
         --text-light: #9CA3AF;
-        /* Gray-400 */
 
         --color-primary: #F97316;
-        /* Orange-500 (Matches "Hot" badge and accents) */
         --color-primary-hover: #EA580C;
-        /* Orange-600 */
         --color-secondary: #64748B;
 
         --status-success: #10B981;
@@ -36,7 +26,6 @@
         --status-info: #3B82F6;
 
         --border-color: #F3F4F6;
-        /* Very light border */
 
         /* Data Visualization */
         --chart-1: #F97316;
@@ -54,10 +43,8 @@
 
         /* Sidebar specific */
         --sidebar-active: #FEF3F2;
-        /* Very light orange/red tint */
         --sidebar-active-text: #F97316;
         --sidebar-text: #4B5563;
-        /* Gray-600 */
         --sidebar-hover-bg: #F9FAFB;
 
         /* Typography */
