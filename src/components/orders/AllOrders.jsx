@@ -214,7 +214,6 @@ export function AllOrders() {
                                     <td className="p-3 font-semibold text-gray-800">{order.orderNumber}</td>
                                     <td className="p-3">
                                         <div className="font-bold">{order.type === 'dine-in' ? 'Dine In' : 'Take Away'}</div>
-                                        <div className="italic text-gray-500 text-[10px]">({order.type === 'dine-in' ? 'Dine In' : 'Take Away'})</div>
                                     </td>
                                     <td className="p-3 text-gray-600">{order.customerName || '-'}</td>
                                     <td className="p-3 text-gray-600">{order.assignTo || '-'}</td>

@@ -62,6 +62,16 @@ export const configService = {
 export const userService = {
     getUsers: () => api.get('/auth/users'),
     register: (data) => api.post('/auth/register', data),
+    updateUser: (id, data) => api.put(`/auth/users/${id}`, data),
+    deleteUser: (id) => api.delete(`/auth/users/${id}`), // Wait, route is /auth/users/:id but baseURL has /api. 
+    // Check actual path. authRoutes is mounted on /api/auth.
+};
+
+export const roleService = {
+    getAll: () => api.get('/roles'),
+    create: (data) => api.post('/roles', data),
+    update: (id, data) => api.put(`/roles/${id}`, data),
+    delete: (id) => api.delete(`/roles/${id}`),
 };
 
 export const aggregatorService = {
@@ -158,6 +168,13 @@ export const settingService = settingsService;
 export const outletService = {
     getConfig: () => api.get('/config/outlet'),
     updateConfig: (data) => api.post('/config/outlet', data),
+};
+
+export const customerService = {
+    getAll: (params) => api.get('/customers', { params }),
+    lookup: (phone) => api.get(`/customers/lookup/${phone}`),
+    create: (data) => api.post('/customers', data),
+    getStats: () => api.get('/customers/stats'),
 };
 
 export default api;

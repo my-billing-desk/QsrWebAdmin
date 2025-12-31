@@ -48,8 +48,7 @@ export const initialMenuGroups = [
         items: [
             { id: 'day_end', path: '/reports/day-end', label: 'Day End Summary', icon: FileText },
             { id: 'other_reports', path: '/reports/other', label: 'Other Reports', icon: FileText },
-            { id: 'report_notif', path: '/base-ui/alerts', label: 'Alerts', icon: Bell }, // Updated path/label
-            { id: 'ui_buttons', path: '/base-ui/buttons', label: 'Buttons', icon: Box }, // New Buttons Link
+
             { id: 'del_mgmt', path: '/reports/delivery', label: 'Delivery Management', icon: Truck },
         ]
     },
@@ -133,6 +132,7 @@ export const initialMenuGroups = [
                 icon: Users,
                 items: [
                     { id: 'users_list', path: '/users', label: 'Users' },
+                    { id: 'roles_config', path: '/roles', label: 'System Roles' },
                 ]
             },
             {

@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { MenuManagement } from './components/MenuManagement';
 import { UserManagement } from './components/UserManagement';
+import { RoleManagement } from './components/RoleManagement';
 import { AllOrders } from './components/orders/AllOrders';
 import { KOT } from './components/orders/KOT';
 import { Settings } from './components/Settings';
@@ -67,8 +68,7 @@ import { MarketplaceSetting } from './components/configuration/MarketplaceSettin
 import { ThemeConfiguration } from './components/configuration/ThemeConfiguration';
 import { SubscriptionPlans } from './components/configuration/SubscriptionPlans';
 import { ActivityTimeline } from './components/user-logs/ActivityTimeline';
-import { ReportNotifications } from './components/reports/ReportNotifications';
-import { ButtonsPage } from './components/base-ui/ButtonsPage';
+
 import { Coupons } from './components/promo/Coupons';
 import { GiftCards } from './components/promo/GiftCards';
 import { DiscountPlan } from './components/promo/DiscountPlan';
@@ -140,6 +140,7 @@ function AppRoutes() {
         <Route path="/orders/due-payment" element={<PlaceholderPage title="Due Payment Settlement" />} />
         <Route path="/orders/running" element={<RunningOrders />} />
         <Route path="/users" element={<UserManagement />} />
+        <Route path="/roles" element={<RoleManagement />} />
         <Route path="/settings" element={<Settings />} />
 
         {/* New Modules */}
@@ -157,9 +158,7 @@ function AppRoutes() {
         <Route path="/reports/other" element={<PlaceholderPage title="Other Reports" />} />
         <Route path="/reports/delivery" element={<PlaceholderPage title="Delivery Management" />} />
 
-        {/* Base UI */}
-        <Route path="/base-ui/alerts" element={<ReportNotifications />} />
-        <Route path="/base-ui/buttons" element={<ButtonsPage />} />
+
 
         {/* Promo */}
         <Route path="/promo/coupons" element={<Coupons />} />

@@ -149,31 +149,73 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
 
             {/* Scrollable Nav */}
             <nav className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-hide">
-                {menuLayout.map((group, idx) => (
-                    <div key={idx} className="space-y-1">
-                        {/* Group Title */}
-                        {group.title && isOpen && (
-                            <h3 className="px-5 mb-2 text-[11px] font-bold text-muted uppercase tracking-widest font-sans">
-                                {group.title}
-                            </h3>
-                        )}
+                {menuLayout.map((group, idx) => {
+                    // Filter items based on user role
+                    const permissionMap = {
+                        user_mgmt: 25,
+                        roles_config: 25,
+                        subscription_plan: 12,
+                        menu_discounts: 2,
+                        special_note: 28,
+                        inventory_main: 14,
+                        coupons: 11,
+                        gift_cards: 11,
+                        discount_plan: 11,
+                        discount: 11,
+                        crm_mkt: 1,
+                        crm_cust: 6
+                    };
 
-                        <div className="space-y-0.5">
-                            {group.items.map((item, iIdx) => (
-                                <SidebarItem
-                                    key={item.id || iIdx}
-                                    item={item}
-                                    depth={0}
-                                    isActive={isActive}
-                                    onNavigate={handleNavigation}
-                                    expandedGroups={expandedGroups}
-                                    toggleGroup={toggleGroup}
-                                    isSidebarOpen={isOpen}
-                                />
-                            ))}
+                    const hasPermission = (itemId) => {
+                        if (!user) return false;
+                        if (user.role === 'super_admin') return true;
+
+                        const permId = permissionMap[itemId];
+                        if (!permId) return true; // Default allow if not restricted
+
+                        return user.permissions?.some(p => p.id === permId && (p.read || p.write || p.value));
+                    };
+
+                    const filteredItems = group.items.filter(item => {
+                        if (!hasPermission(item.id)) return false;
+
+                        // Recursive check for sub-items
+                        if (item.items) {
+                            item.items = item.items.filter(sub => hasPermission(sub.id));
+                            return item.items.length > 0;
+                        }
+
+                        return true;
+                    });
+
+                    if (filteredItems.length === 0) return null;
+
+                    return (
+                        <div key={idx} className="space-y-1">
+                            {/* Group Title */}
+                            {group.title && isOpen && (
+                                <h3 className="px-5 mb-2 text-[11px] font-bold text-muted uppercase tracking-widest font-sans">
+                                    {group.title}
+                                </h3>
+                            )}
+
+                            <div className="space-y-0.5">
+                                {filteredItems.map((item, iIdx) => (
+                                    <SidebarItem
+                                        key={item.id || iIdx}
+                                        item={item}
+                                        depth={0}
+                                        isActive={isActive}
+                                        onNavigate={handleNavigation}
+                                        expandedGroups={expandedGroups}
+                                        toggleGroup={toggleGroup}
+                                        isSidebarOpen={isOpen}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {/* Quick Links Section */}
                 <div className="space-y-1 pt-4 border-t mx-4" style={{ borderColor: 'var(--border-color)' }}>
