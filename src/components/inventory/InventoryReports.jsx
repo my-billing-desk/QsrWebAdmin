@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Download, FileText, ChevronRight } from 'lucide-react';
 import { inventoryService } from '../../services/api';
+import { getTodayLocal } from '../../utils/dateUtils';
 
 export function InventoryReports() {
     const [activeReport, setActiveReport] = useState('All');
     const [reportData, setReportData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [filters, setFilters] = useState({
+        fromDate: getTodayLocal(),
+        toDate: getTodayLocal(),
+        rawMaterial: '',
+        category: 'All'
+    });
 
     // List of reports based on user screenshots
     const reports = [
         { id: 'current-stock', name: 'Current Stock Report', category: 'Stock' },
-        { id: 'stock-summary', name: 'Stock Summary Report', category: 'Stock' },
-        { id: 'order-consumption', name: 'Orderwise Consumption Report', category: 'Consumption' }, // New: Matches "Orderwise Consumption" screenshot
         { id: 'consumption-summary', name: 'Consumption Summary', category: 'Consumption' },
+        { id: 'order-consumption', name: 'Orderwise Consumption Report', category: 'Consumption' },
+        { id: 'daily-consumption', name: 'Daily Consumption Report', category: 'Consumption' },
         { id: 'material-purchase', name: 'Material Purchase Report', category: 'Purchase' },
         { id: 'opening-closing', name: 'Opening - Closing Stock Report', category: 'Stock' },
         { id: 'recipe-costing', name: 'Recipe Costing Report', category: 'Costing' },
@@ -24,6 +31,7 @@ export function InventoryReports() {
         { id: 'purchase-sales-return', name: 'Purchase-Sales Return Report', category: 'Return' },
         { id: 'sales-transfer-variance', name: 'Sales And Transfer Variance Report', category: 'Sales' },
         { id: 'po-received', name: 'Purchase Order Received Report', category: 'Purchase' },
+        { id: 'stock-history', name: 'Stock History Report', category: 'Stock' },
     ];
 
     const fetchReport = async (reportId) => {
@@ -52,11 +60,14 @@ export function InventoryReports() {
                     console.error("Failed to fetch current stock", e);
                     setReportData([]);
                 }
-            } else if (reportId === 'stock-summary') {
-                const res = await inventoryService.getStockSummaryReport();
-                setReportData(res.data);
             } else if (reportId === 'consumption-summary') {
-                const res = await inventoryService.getConsumptionSummaryReport();
+                const res = await inventoryService.getStockSummaryReport({ fromDate: filters.fromDate, toDate: filters.toDate });
+                setReportData(res.data);
+            } else if (reportId === 'daily-consumption') {
+                const res = await inventoryService.getConsumptionSummaryReport({ fromDate: filters.fromDate, toDate: filters.toDate });
+                setReportData(res.data);
+            } else if (reportId === 'stock-history') {
+                const res = await inventoryService.getStockHistory({ fromDate: filters.fromDate, toDate: filters.toDate });
                 setReportData(res.data);
             } else if (reportId === 'opening-closing') {
                 const res = await inventoryService.getClosingStockReport();
@@ -88,6 +99,12 @@ export function InventoryReports() {
         }
     };
 
+    useEffect(() => {
+        if (activeReport !== 'All') {
+            fetchReport(activeReport);
+        }
+    }, [activeReport]);
+
     const handleSearch = () => {
         if (activeReport) {
             fetchReport(activeReport);
@@ -107,7 +124,7 @@ export function InventoryReports() {
                     <select className="p-2 border border-gray-300 rounded text-sm bg-white outline-none focus:border-red-500"><option>All</option></select>
                 </div>
 
-                {reportId === 'stock-summary' && (
+                {reportId === 'consumption-summary' && (
                     <div className="flex flex-col gap-1 min-w-[150px]">
                         <label className="text-xs font-bold text-gray-600">Unit Type</label>
                         <select className="p-2 border border-gray-300 rounded text-sm bg-white outline-none focus:border-red-500"><option>Purchase Unit</option></select>
@@ -116,11 +133,11 @@ export function InventoryReports() {
 
                 <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-gray-600">From Date</label>
-                    <input type="date" className="p-2 border border-gray-300 rounded text-sm bg-white" defaultValue={new Date().toISOString().split('T')[0]} />
+                    <input type="date" className="p-2 border border-gray-300 rounded text-sm bg-white" value={filters.fromDate} onChange={e => setFilters(f => ({ ...f, fromDate: e.target.value }))} />
                 </div>
                 <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-gray-600">To Date</label>
-                    <input type="date" className="p-2 border border-gray-300 rounded text-sm bg-white" defaultValue={new Date().toISOString().split('T')[0]} />
+                    <input type="date" className="p-2 border border-gray-300 rounded text-sm bg-white" value={filters.toDate} onChange={e => setFilters(f => ({ ...f, toDate: e.target.value }))} />
                 </div>
 
                 <button onClick={handleSearch} className="px-6 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700 mb-0.5 text-sm">Search</button>
@@ -130,6 +147,48 @@ export function InventoryReports() {
     };
 
     const renderTable = () => {
+        // --- STOCK HISTORY REPORT ---
+        if (activeReport === 'stock-history') {
+            return (
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-gray-50 text-gray-700 font-bold border-b border-gray-200">
+                            <tr>
+                                <th className="p-3">Date & Time</th>
+                                <th className="p-3">Item Name</th>
+                                <th className="p-3">Type</th>
+                                <th className="p-3 text-right">Change</th>
+                                <th className="p-3 text-right">Stock After</th>
+                                <th className="p-3">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {reportData.map((row, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50/50">
+                                    <td className="p-3">{new Date(row.createdAt).toLocaleString()}</td>
+                                    <td className="p-3 font-medium">{row.RawMaterial?.name}</td>
+                                    <td className="p-3">
+                                        <span className={`px-2 py-1 rounded text-xs font-medium uppercase ${row.type === 'purchase' ? 'bg-green-100 text-green-700' :
+                                                row.type === 'order' ? 'bg-blue-100 text-blue-700' :
+                                                    row.type === 'waste' ? 'bg-red-100 text-red-700' :
+                                                        'bg-gray-100 text-gray-700'
+                                            }`}>
+                                            {row.type}
+                                        </span>
+                                    </td>
+                                    <td className={`p-3 text-right font-bold ${parseFloat(row.quantityChange) > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {parseFloat(row.quantityChange) > 0 ? '+' : ''}{parseFloat(row.quantityChange).toFixed(3)}
+                                    </td>
+                                    <td className="p-3 text-right font-medium">{parseFloat(row.currentStock).toFixed(3)}</td>
+                                    <td className="p-3 text-gray-600 italic text-xs">{row.notes}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
         if (loading) return <div className="text-center p-12 text-gray-500">Loading Report...</div>;
         if (error) return <div className="text-center p-12 text-red-500">{error}</div>;
 
@@ -278,8 +337,8 @@ export function InventoryReports() {
             );
         }
 
-        // --- STOCK SUMMARY REPORT (Daily Report) ---
-        if (activeReport === 'stock-summary') {
+        // --- CONSUMPTION SUMMARY REPORT ---
+        if (activeReport === 'consumption-summary') {
             return (
                 <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
                     <table className="w-full text-xs text-left whitespace-nowrap">
@@ -306,18 +365,18 @@ export function InventoryReports() {
                                     <td className="p-3 sticky left-0 bg-white font-medium text-gray-800 border-r border-gray-50">
                                         {row.name} <span className="text-gray-400 font-normal">[{row.unit}]</span>
                                     </td>
-                                    <td className="p-3 text-right text-gray-600">{row.opening.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{row.purchase.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{row.excess.toFixed(3)}</td>
-                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{row.total_in.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-green-600 font-medium">{row.consumed.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-red-500">{row.wastage.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-orange-500">{row.loss.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{row.transfer.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{row.shortage.toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{row.conversion.toFixed(3)}</td>
-                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{row.total_out.toFixed(3)}</td>
-                                    <td className="p-3 text-right font-bold text-gray-900">{row.closing.toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(row.opening || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(row.purchase || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(row.excess || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{(row.totalInput || row.total_in || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-green-600 font-medium">{(row.consumed || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-red-500">{(row.wastage || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-orange-500">{(row.loss || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(row.transfer || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(row.shortage || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(row.conversion || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{(row.totalOutput || row.total_out || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right font-bold text-gray-900">{(row.closingStock || row.closing || 0).toFixed(3)}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -326,8 +385,8 @@ export function InventoryReports() {
             );
         }
 
-        // --- CONSUMPTION SUMMARY REPORT ---
-        if (activeReport === 'consumption-summary') {
+        // --- DAILY CONSUMPTION REPORT ---
+        if (activeReport === 'daily-consumption') {
             return (
                 <div className="space-y-4">
                     {/* Legend */}

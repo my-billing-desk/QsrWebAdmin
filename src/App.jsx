@@ -270,7 +270,7 @@ function AppRoutes() {
         <Route path="stock/opening" element={<OpeningStock />} />
         <Route path="indent" element={<Indent />} />
         <Route path="reports" element={<InventoryReports />} />
-        <Route path="reports/stock-summary" element={<StockSummary />} />
+        <Route path="consumption-summary" element={<StockSummary />} />
         <Route path="settings" element={<InventorySettings />} />
       </Route>
     </Routes>

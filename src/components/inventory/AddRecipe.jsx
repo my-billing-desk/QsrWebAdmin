@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, ArrowLeft, Save, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import { inventoryService, menuService } from '../../services/api';
 import { useNavigate, useParams } from 'react-router-dom';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import toast from 'react-hot-toast';
 
 export default function AddRecipe() {
     const navigate = useNavigate();
-    const { id } = useParams(); // Start with Item ID if editing
+    const { id } = useParams(); // Item ID
     const [layoutLoading, setLayoutLoading] = useState(true);
 
     // Data Sources
@@ -16,6 +15,8 @@ export default function AddRecipe() {
 
     // Form State
     const [selectedItemId, setSelectedItemId] = useState(id || '');
+    const [variants, setVariants] = useState([]);
+    const [selectedVariantId, setSelectedVariantId] = useState('');
     const [ingredients, setIngredients] = useState([]);
     const [autoConsumption, setAutoConsumption] = useState(true);
 
@@ -25,49 +26,60 @@ export default function AddRecipe() {
 
     useEffect(() => {
         if (selectedItemId) {
-            fetchRecipeForItem(selectedItemId);
+            const item = menuItems.find(i => i.id === parseInt(selectedItemId));
+            if (item && item.Variants && item.Variants.length > 0) {
+                setVariants(item.Variants);
+                // Don't auto-reset selectedVariantId if it was already set (e.g. from initial load)
+            } else {
+                setVariants([]);
+                setSelectedVariantId('');
+            }
+            fetchRecipeForItem(selectedItemId, selectedVariantId);
         } else {
             setIngredients([]);
+            setVariants([]);
+            setSelectedVariantId('');
         }
-    }, [selectedItemId]);
+    }, [selectedItemId, selectedVariantId, menuItems]);
 
     const loadInitialData = async () => {
         try {
             const [itemsRes, materialsRes] = await Promise.all([
-                axios.get(`${API_URL}/menu/items`),
-                axios.get(`${API_URL}/inventory/materials`)
+                menuService.getItems(),
+                inventoryService.getRawMaterials()
             ]);
             setMenuItems(itemsRes.data);
             setRawMaterials(materialsRes.data);
         } catch (error) {
             console.error("Failed to load data", error);
+            toast.error("Failed to load menu items or materials");
         } finally {
             setLayoutLoading(false);
         }
     };
 
-    const fetchRecipeForItem = async (itemId) => {
+    const fetchRecipeForItem = async (itemId, variantId) => {
         try {
-            // Get recipe for this item
-            const res = await axios.get(`${API_URL}/inventory/recipe?itemId=${itemId}`); // Assuming this endpoint handles finding by item
+            const params = { itemId };
+            if (variantId) params.variantId = variantId;
+
+            const res = await inventoryService.getRecipe(params);
             if (res.data) {
-                // Transform to form format
-                const loadedIngredients = res.data.RecipeIngredients.map(ri => ({
-                    id: ri.id, // Keep ID for potential updates
+                const loadedIngredients = (res.data.RecipeIngredients || []).map(ri => ({
+                    id: ri.id,
                     rawMaterialId: ri.rawMaterialId,
                     quantity: ri.quantity,
                     unit: ri.unit,
-                    // Helper for UI display
                     rawMaterialName: ri.RawMaterial?.name || 'Unknown'
                 }));
-                setIngredients(loadedIngredients);
+                setIngredients(loadedIngredients.length > 0 ? loadedIngredients : [{ rawMaterialId: '', quantity: '', unit: '' }]);
                 setAutoConsumption(res.data.autoConsumption ?? true);
             } else {
-                setIngredients([]);
+                setIngredients([{ rawMaterialId: '', quantity: '', unit: '' }]);
             }
         } catch (error) {
-            // 404 is fine, means no recipe yet
-            setIngredients([]);
+            // If not found, show blank ingredient
+            setIngredients([{ rawMaterialId: '', quantity: '', unit: '' }]);
         }
     };
 
@@ -79,11 +91,10 @@ export default function AddRecipe() {
         const newIngredients = [...ingredients];
         newIngredients[index][field] = value;
 
-        // Auto-set unit if raw material selected
         if (field === 'rawMaterialId') {
             const material = rawMaterials.find(m => m.id === parseInt(value));
             if (material) {
-                newIngredients[index].unit = material.consumptionUnit;
+                newIngredients[index].unit = material.consumptionUnit || material.unit;
                 newIngredients[index].rawMaterialName = material.name;
             }
         }
@@ -95,26 +106,28 @@ export default function AddRecipe() {
     };
 
     const handleSave = async () => {
-        if (!selectedItemId) return alert("Please select a menu item");
-        if (ingredients.length === 0) return alert("Please add at least one ingredient");
+        if (!selectedItemId) return toast.error("Please select a menu item");
+        const validIngredients = ingredients.filter(ing => ing.rawMaterialId && ing.quantity);
+        if (validIngredients.length === 0) return toast.error("Please add at least one complete ingredient");
 
         try {
             const payload = {
-                itemId: selectedItemId,
-                ingredients: ingredients.map(ing => ({
-                    rawMaterialId: ing.rawMaterialId,
+                itemId: parseInt(selectedItemId),
+                variantId: selectedVariantId ? parseInt(selectedVariantId) : null,
+                ingredients: validIngredients.map(ing => ({
+                    rawMaterialId: parseInt(ing.rawMaterialId),
                     quantity: parseFloat(ing.quantity),
                     unit: ing.unit
                 })),
                 autoConsumption
             };
 
-            await axios.post(`${API_URL}/inventory/recipes`, payload);
-            alert("Recipe saved successfully!");
+            await inventoryService.saveRecipe(payload);
+            toast.success("Recipe saved successfully!");
             navigate('/inventory/recipes');
         } catch (error) {
             console.error("Failed to save recipe", error);
-            alert("Error saving recipe");
+            toast.error("Error saving recipe");
         }
     };
 
@@ -144,18 +157,39 @@ export default function AddRecipe() {
             <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full space-y-8">
 
                 {/* Selection */}
-                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <label className="font-bold text-gray-700 whitespace-nowrap">Select Menu</label>
-                    <select
-                        value={selectedItemId}
-                        onChange={e => setSelectedItemId(e.target.value)}
-                        className="w-full max-w-md px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500"
-                    >
-                        <option value="">-- Choose Item --</option>
-                        {menuItems.map(item => (
-                            <option key={item.id} value={item.id}>{item.name}</option>
-                        ))}
-                    </select>
+                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
+                    <div className="flex items-center gap-4 flex-1 w-full">
+                        <label className="font-bold text-gray-700 whitespace-nowrap">Select Menu</label>
+                        <select
+                            value={selectedItemId}
+                            onChange={e => {
+                                setSelectedItemId(e.target.value);
+                                setSelectedVariantId('');
+                            }}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500"
+                        >
+                            <option value="">-- Choose Item --</option>
+                            {menuItems.map(item => (
+                                <option key={item.id} value={item.id}>{item.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {variants.length > 0 && (
+                        <div className="flex items-center gap-4 flex-1 w-full">
+                            <label className="font-bold text-gray-700 whitespace-nowrap">Select Variant</label>
+                            <select
+                                value={selectedVariantId}
+                                onChange={e => setSelectedVariantId(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-red-500"
+                            >
+                                <option value="">-- Default / All --</option>
+                                {variants.map(v => (
+                                    <option key={v.id} value={v.id}>{v.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                 </div>
 
                 {/* Recipe Area */}
@@ -164,7 +198,10 @@ export default function AddRecipe() {
                         {/* Header */}
                         <div className="p-6 border-b border-gray-100 bg-red-50/30 flex justify-between items-center">
                             <div>
-                                <h2 className="font-bold text-gray-800">Recipe For {selectedItem?.name}</h2>
+                                <h2 className="font-bold text-gray-800">
+                                    Recipe For {selectedItem?.name}
+                                    {selectedVariantId && ` (${variants.find(v => v.id === parseInt(selectedVariantId))?.name})`}
+                                </h2>
                                 {ingredients.length === 0 && (
                                     <p className="text-sm text-red-500 mt-1">No recipe data is available for this item.</p>
                                 )}

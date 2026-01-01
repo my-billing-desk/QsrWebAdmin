@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, ChevronDown, Download, Grid, Filter, RefreshCcw, FileText, CheckSquare, Printer, Eye, Edit, Trash2 } from 'lucide-react';
 import { orderService } from '../../services/api';
+import { getDateTimeLocalInput } from '../../utils/dateUtils';
 
 export function AllOrders() {
     const [activeTab, setActiveTab] = useState('Order'); // 'Order' | 'Advance Order'
@@ -9,8 +10,8 @@ export function AllOrders() {
     const [loading, setLoading] = useState(true);
 
     const [filters, setFilters] = useState({
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0],
+        startDate: getDateTimeLocalInput(),
+        endDate: getDateTimeLocalInput(),
         orderId: '',
         customerName: '',
         customerPhone: '',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Calendar, Filter, Download } from 'lucide-react';
 import { orderService } from '../../services/api';
 import { KanbanBoard } from '../ui/KanbanBoard';
+import { formatDateLocal } from '../../utils/dateUtils';
 
 export function RunningOrders() {
     const [orders, setOrders] = useState([]);
@@ -32,8 +33,8 @@ export function RunningOrders() {
             yesterday.setDate(yesterday.getDate() - 1);
 
             const params = {
-                startDate: yesterday.toISOString().split('T')[0] + ' 00:00:00',
-                endDate: today.toISOString().split('T')[0] + ' 23:59:59'
+                startDate: formatDateLocal(yesterday) + ' 00:00:00',
+                endDate: formatDateLocal(today) + ' 23:59:59'
             };
             const response = await orderService.getAll(params);
 

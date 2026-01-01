@@ -16,7 +16,10 @@ export function ThemeProvider({ children }) {
         const fetchTheme = async () => {
             try {
                 // Token is already sanitized by AuthContext
-                if (!token) return;
+                if (!token) {
+                    console.log('[ADMIN THEME] No token, using default theme');
+                    return;
+                }
 
                 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
                 const res = await axios.get(`${API_URL}/config/outlet`, {
@@ -43,6 +46,7 @@ export function ThemeProvider({ children }) {
                     };
                     setTheme(newTheme);
                     applyTheme(newTheme.palette);
+                    console.log('[ADMIN THEME] Applied tenant theme:', data.themeName);
                 }
             } catch (error) {
                 console.error('Error fetching theme:', error);

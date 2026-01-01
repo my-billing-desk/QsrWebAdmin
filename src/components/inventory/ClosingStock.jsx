@@ -3,6 +3,7 @@ import { Search, Save, FileText, Calendar } from 'lucide-react';
 import { inventoryService, menuService } from '../../services/api';
 import toast from 'react-hot-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getTodayLocal } from '../../utils/dateUtils';
 
 export function ClosingStock() {
     const [materials, setMaterials] = useState([]);
@@ -12,7 +13,7 @@ export function ClosingStock() {
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(getTodayLocal());
     const [updateFrequency, setUpdateFrequency] = useState('Daily');
 
     // Pagination
@@ -146,8 +147,8 @@ export function ClosingStock() {
                                 key={item.name}
                                 onClick={() => navigate(item.path)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive
-                                        ? 'bg-red-50 text-red-700'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                    ? 'bg-red-50 text-red-700'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                                     }`}
                             >
                                 <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-red-500' : 'bg-gray-300'}`}></span>
@@ -232,7 +233,7 @@ export function ClosingStock() {
                             Load
                         </button>
                         <button
-                            onClick={() => { setSearchTerm(''); setSelectedCategory('All'); }}
+                            onClick={() => { setSearchTerm(''); setSelectedCategory('All'); setSelectedDate(getTodayLocal()); }}
                             className="flex-1 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium text-xs"
                         >
                             Clear

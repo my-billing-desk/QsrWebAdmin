@@ -366,20 +366,49 @@ export function ThemeConfiguration() {
             const res = await outletService.getConfig();
             const data = res.data;
             setConfig(data);
+
             if (data.themePalette) {
-                const palette = JSON.parse(data.themePalette);
-                if (palette.id === 'custom_theme') {
-                    setSelectedThemeId('custom_theme');
-                    setCustomSettings(palette.settings);
-                } else {
-                    setSelectedThemeId(palette.id);
+                try {
+                    const palette = JSON.parse(data.themePalette);
+                    console.log('[THEME CONFIG] Loaded theme from DB:', palette);
+
+                    // Apply the theme immediately
+                    applyTheme(palette);
+
+                    if (palette.id === 'custom_theme') {
+                        setSelectedThemeId('custom_theme');
+                        setCustomSettings(palette.settings || {});
+                    } else if (palette.id) {
+                        // Check if this theme ID exists in our palettes
+                        const matchedTheme = THEME_PALETTES.find(p => p.id === palette.id);
+                        if (matchedTheme) {
+                            setSelectedThemeId(palette.id);
+                        } else {
+                            // Unknown theme, default to first theme
+                            setSelectedThemeId(THEME_PALETTES[0].id);
+                            console.warn('[THEME CONFIG] Unknown theme ID, using default');
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('[THEME CONFIG] Failed to parse theme palette:', parseError);
+                    setSelectedThemeId(THEME_PALETTES[0].id);
                 }
             } else if (data.themeName) {
+                // Fallback: try matching by name
                 const matched = THEME_PALETTES.find(p => p.name === data.themeName);
-                if (matched) setSelectedThemeId(matched.id);
+                if (matched) {
+                    setSelectedThemeId(matched.id);
+                    applyTheme(matched);
+                } else {
+                    setSelectedThemeId(THEME_PALETTES[0].id);
+                }
+            } else {
+                // No theme set, use default
+                setSelectedThemeId(THEME_PALETTES[0].id);
             }
         } catch (error) {
-            console.error('Error fetching theme:', error);
+            console.error('Error fetching theme config:', error);
+            setSelectedThemeId(THEME_PALETTES[0].id);
         } finally {
             setLoading(false);
         }

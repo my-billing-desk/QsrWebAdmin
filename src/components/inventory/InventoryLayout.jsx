@@ -54,7 +54,7 @@ export function InventoryLayout() {
             group: 'Consumption',
             icon: BarChart3,
             items: [
-                // { label: 'Sales', path: '/inventory/consumption/sales' },
+                { label: 'Consumption Summary', path: '/inventory/consumption-summary' },
                 { label: 'Transfer', path: '/inventory/transfer' },
                 { label: 'Wastage', path: '/inventory/wastage' },
             ]
@@ -71,7 +71,6 @@ export function InventoryLayout() {
             icon: FileText,
             items: [
                 { label: 'Inventory Reports', path: '/inventory/reports' },
-                { label: 'Stock Summary', path: '/inventory/reports/stock-summary' },
             ]
         },
         {

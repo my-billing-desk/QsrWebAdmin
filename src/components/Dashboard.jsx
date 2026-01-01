@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import { dashboardService, inventoryService } from '../services/api';
+import { getTodayLocal, formatDateLocal } from '../utils/dateUtils';
 
 export function Dashboard() {
     const [stats, setStats] = useState({
@@ -25,8 +26,8 @@ export function Dashboard() {
     // Date Filtering State
     const [dateFilter, setDateFilter] = useState('Today');
     const [customRange, setCustomRange] = useState({
-        start: new Date().toISOString().split('T')[0],
-        end: new Date().toISOString().split('T')[0]
+        start: getTodayLocal(),
+        end: getTodayLocal()
     });
 
     const calculateDateRange = (filter) => {
@@ -38,11 +39,7 @@ export function Dashboard() {
         // Note: toISOString() uses UTC. If user is in +5:30, and it's 1AM, UTC is previous day.
         // Better to use manual formatting or handle timezone offset.
         // Simple fix: offset date before ISO string?
-        const fmt = (d) => {
-            const offset = d.getTimezoneOffset() * 60000;
-            const localISODate = new Date(d.getTime() - offset);
-            return localISODate.toISOString().split('T')[0];
-        };
+        const fmt = (d) => formatDateLocal(d);
 
         switch (filter) {
             case 'Today':
@@ -307,9 +304,9 @@ export function Dashboard() {
                                             <td className="py-3 pl-2">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shadow-sm ${source.includes('swiggy') ? 'bg-orange-100 text-orange-600' :
-                                                            source.includes('zomato') ? 'bg-red-100 text-red-600' :
-                                                                source.includes('online') ? 'bg-blue-100 text-blue-600' :
-                                                                    'bg-gray-100 text-gray-500'
+                                                        source.includes('zomato') ? 'bg-red-100 text-red-600' :
+                                                            source.includes('online') ? 'bg-blue-100 text-blue-600' :
+                                                                'bg-gray-100 text-gray-500'
                                                         }`}>
                                                         {source.includes('swiggy') ? 'SWI' :
                                                             source.includes('zomato') ? 'ZOM' :
@@ -332,9 +329,9 @@ export function Dashboard() {
                                             </td>
                                             <td className="py-3">
                                                 <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-600' :
-                                                        order.status === 'cancelled' ? 'bg-red-100 text-red-600' :
-                                                            order.status === 'preparing' || order.status === 'placed' ? 'bg-yellow-100 text-yellow-600' :
-                                                                'bg-gray-100 text-gray-600'
+                                                    order.status === 'cancelled' ? 'bg-red-100 text-red-600' :
+                                                        order.status === 'preparing' || order.status === 'placed' ? 'bg-yellow-100 text-yellow-600' :
+                                                            'bg-gray-100 text-gray-600'
                                                     }`}>
                                                     {order.status}
                                                 </span>

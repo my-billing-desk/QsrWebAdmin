@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, MoreHorizontal, Clock, ShoppingCart, Truck, ChevronDown, Search, X, Calendar, CornerDownLeft, Download, List } from 'lucide-react';
 import { inventoryService } from '../../services/api';
+import { getTodayLocal } from '../../utils/dateUtils';
 
 export function PurchaseOrder() {
     const [view, setView] = useState('list');
@@ -447,7 +448,7 @@ export function PurchaseOrder() {
 function initialFormState() {
     return {
         supplierId: '',
-        deliveryDate: new Date().toISOString().split('T')[0],
+        deliveryDate: getTodayLocal(),
         deliveryTime: '12:00',
         poNumber: '1',
         orderTax: 0,

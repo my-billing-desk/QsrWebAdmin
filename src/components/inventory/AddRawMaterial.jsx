@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Info, ArrowLeft, Save, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import { inventoryService } from '../../services/api';
 import { useNavigate, useParams } from 'react-router-dom';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import toast from 'react-hot-toast';
 
 export default function AddRawMaterial() {
     const navigate = useNavigate();
@@ -20,7 +19,7 @@ export default function AddRawMaterial() {
     const fetchMaterial = async (materialId) => {
         setLoading(true);
         try {
-            const res = await axios.get(`${API_URL}/inventory/materials`);
+            const res = await inventoryService.getRawMaterials();
             // Assuming get returns all, we find one. Or implementing getOne endpoint. 
             // The list endpoint returns all, let's just find it for now or assume filtering works?
             // Actually usually we'd have a getById. Let's try finding it from list if getById fails or just use list for now to be safe.
@@ -32,6 +31,7 @@ export default function AddRawMaterial() {
             if (material) setFormData(material);
         } catch (error) {
             console.error("Failed to load material", error);
+            toast.error("Failed to load material");
         } finally {
             setLoading(false);
         }
@@ -46,15 +46,16 @@ export default function AddRawMaterial() {
             });
 
             if (payload.id) {
-                await axios.put(`${API_URL}/inventory/materials/${payload.id}`, payload);
+                await inventoryService.updateRawMaterial(payload.id, payload);
+                toast.success("Raw Material Updated Successfully!");
             } else {
-                await axios.post(`${API_URL}/inventory/materials`, payload);
+                await inventoryService.createRawMaterial(payload);
+                toast.success("Raw Material Created Successfully!");
             }
-            alert("Raw Material Saved Successfully!");
             navigate('/inventory/raw-materials');
         } catch (error) {
             console.error("Error saving material", error);
-            alert("Failed to save raw material.");
+            toast.error("Failed to save raw material.");
         }
     };
 
@@ -69,21 +70,21 @@ export default function AddRawMaterial() {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/inventory/raw-materials')}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                             {id ? 'Edit' : 'Add'} Raw Material
                         </h1>
-                        <p className="text-sm text-gray-500">Configure inventory item details</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Configure inventory item details</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
                     <button
                         onClick={handleSave}
-                        className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-lg shadow-red-600/20 flex items-center gap-2 transition-all"
+                        className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all"
                     >
                         <Save className="w-4 h-4" /> Save Material
                     </button>
@@ -134,19 +135,19 @@ export default function AddRawMaterial() {
                         </Field>
 
                         {/* Conversion Logic */}
-                        <div className="md:col-span-2 bg-blue-50/50 border border-blue-100 rounded-xl p-5 flex flex-col md:flex-row items-center gap-4 text-sm text-gray-700">
-                            <Info className="w-5 h-5 text-blue-500 shrink-0" />
+                        <div className="md:col-span-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl p-5 flex flex-col md:flex-row items-center gap-4 text-sm text-gray-700 dark:text-gray-300">
+                            <Info className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
                             <div className="flex-1">
                                 <p className="mb-2"><strong>Conversion Formula:</strong> How much consumption unit is in one purchase unit?</p>
                                 <div className="flex items-center gap-3 flex-wrap">
-                                    <span className="text-gray-500">1 {formData.purchaseUnit || '(Purchase Unit)'} =</span>
+                                    <span className="text-gray-500 dark:text-gray-400">1 {formData.purchaseUnit || '(Purchase Unit)'} =</span>
                                     <input
                                         type="number"
-                                        className="w-24 px-3 py-1.5 border border-gray-200 rounded-lg text-center font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-24 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-center font-bold outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                         value={formData.conversionFactor}
                                         onChange={e => setFormData({ ...formData, conversionFactor: e.target.value })}
                                     />
-                                    <span className="font-bold text-blue-700">{formData.consumptionUnit || '(Cons. Unit)'}</span>
+                                    <span className="font-bold text-[var(--color-primary)]">{formData.consumptionUnit || '(Cons. Unit)'}</span>
                                 </div>
                             </div>
                         </div>
@@ -182,11 +183,11 @@ export default function AddRawMaterial() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Field label="Tax Type">
                             <div className="flex gap-4 p-1">
-                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'GST' ? 'bg-green-50 border-green-200 text-green-700 font-bold' : 'border-gray-200 text-gray-500'}`}>
+                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'GST' ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                                     <input type="radio" name="taxType" checked={formData.taxType === 'GST'} onChange={() => setFormData({ ...formData, taxType: 'GST' })} className="hidden" />
                                     GST
                                 </label>
-                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'VAT' ? 'bg-green-50 border-green-200 text-green-700 font-bold' : 'border-gray-200 text-gray-500'}`}>
+                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'VAT' ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                                     <input type="radio" name="taxType" checked={formData.taxType === 'VAT'} onChange={() => setFormData({ ...formData, taxType: 'VAT' })} className="hidden" />
                                     VAT
                                 </label>
@@ -240,15 +241,15 @@ export default function AddRawMaterial() {
                             <input value={formData.hsnCode} onChange={e => setFormData({ ...formData, hsnCode: e.target.value })} className="input-field" />
                         </Field>
                         <div className="md:col-span-2 pt-4 flex gap-6">
-                            <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex-1">
-                                <input type="checkbox" checked={formData.allowDecimalQty} onChange={e => setFormData({ ...formData, allowDecimalQty: e.target.checked })} className="w-5 h-5 rounded text-red-600 focus:ring-red-500" />
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex-1">
+                                <input type="checkbox" checked={formData.allowDecimalQty} onChange={e => setFormData({ ...formData, allowDecimalQty: e.target.checked })} className="w-5 h-5 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]" />
                                 <div>
                                     <div className="font-semibold text-gray-800">Allow Decimals</div>
                                     <div className="text-xs text-gray-400">Can be consumed in fractions</div>
                                 </div>
                             </label>
-                            <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex-1">
-                                <input type="checkbox" checked={formData.inExpiry} onChange={e => setFormData({ ...formData, inExpiry: e.target.checked })} className="w-5 h-5 rounded text-red-600 focus:ring-red-500" />
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex-1">
+                                <input type="checkbox" checked={formData.inExpiry} onChange={e => setFormData({ ...formData, inExpiry: e.target.checked })} className="w-5 h-5 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]" />
                                 <div>
                                     <div className="font-semibold text-gray-800">Has Expiry</div>
                                     <div className="text-xs text-gray-400">Track expiration dates</div>
@@ -289,7 +290,7 @@ function Field({ label, required, children }) {
     return (
         <div className="flex flex-col gap-1.5 w-full">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {label} {required && <span className="text-red-500">*</span>}
+                {label} {required && <span className="text-[var(--status-error)]">*</span>}
             </label>
             {children}
         </div>

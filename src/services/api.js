@@ -124,6 +124,7 @@ export const inventoryService = {
     getRecipes: () => api.get('/inventory/recipes'),
     getRecipe: (params) => api.get('/inventory/recipe', { params }), // { itemId, variantId }
     saveRecipe: (data) => api.post('/inventory/recipes', data),
+    deleteRecipe: (id) => api.delete(`/inventory/recipes/${id}`),
 
     // Procurement
     getSuppliers: () => api.get('/inventory/suppliers'),
@@ -148,6 +149,7 @@ export const inventoryService = {
     getStockSummaryReport: (params) => api.get('/inventory/reports/stock-summary', { params }), // New
     getOrderWiseConsumptionReport: (params) => api.get('/inventory/reports/order-consumption', { params }), // New
     getConsumptionSummaryReport: (params) => api.get('/inventory/reports/consumption-summary', { params }), // New
+    getStockHistory: (params) => api.get('/inventory/reports/stock-history', { params }), // New
 };
 
 export const settingsService = {

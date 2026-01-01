@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Upload, MoreHorizontal, Calendar, Edit2, RotateCcw, X, Search, Filter, ArrowUpDown, FileQuestion, ChevronDown } from 'lucide-react';
 import { inventoryService } from '../../services/api';
+import { getTodayLocal } from '../../utils/dateUtils';
 
 
 export function PurchaseEntry() {
@@ -660,7 +661,7 @@ const initialItemState = { rawMaterialId: '', quantity: '', unit: '', price: '',
 function initialFormState() {
     return {
         supplierId: '',
-        invoiceDate: new Date().toISOString().split('T')[0],
+        invoiceDate: getTodayLocal(),
         invoiceNo: '',
         poNumber: '',
         items: [{ ...initialItemState }],

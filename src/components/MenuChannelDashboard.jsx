@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, RotateCcw, Filter, Smartphone, Upload, Download, FileText, Calendar } from 'lucide-react';
 import Papa from 'papaparse';
 import { menuService } from '../services/api';
+import { getTodayLocal } from '../utils/dateUtils';
 
 export function MenuChannelDashboard() {
     const [items, setItems] = useState([]);
@@ -170,7 +171,7 @@ export function MenuChannelDashboard() {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `menu_export_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `menu_export_${getTodayLocal()}.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
