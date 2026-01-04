@@ -1,15 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Store, ChevronDown, Lightbulb, Bell, Link as LinkIcon, Settings, Grid, LogOut, User, FileText, Monitor, Search, Maximize, MessageSquare, PlusCircle, Box, ShoppingBag, ShoppingCart, FileCheck, Truck, ArrowRightLeft, RotateCcw, Users, File } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export function Header({ onToggleSidebar }) {
     const { logout, user } = useAuth();
+    const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(null);
-    const dropdownRef = useRef(null);
+    const profileDropdownRef = useRef(null);
+    const addDropdownRef = useRef(null);
 
     useEffect(() => {
         function handleClickOutside(event) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (showDropdown === 'profile' && profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+                setShowDropdown(null);
+            }
+            if (showDropdown === 'add_new' && addDropdownRef.current && !addDropdownRef.current.contains(event.target)) {
                 setShowDropdown(null);
             }
         }
@@ -17,7 +23,7 @@ export function Header({ onToggleSidebar }) {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [dropdownRef]);
+    }, [showDropdown]);
 
     return (
         <header
@@ -40,7 +46,7 @@ export function Header({ onToggleSidebar }) {
                         placeholder="Search in QSR..."
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <span className="text-muted text-xs border rounded px-1.5 py-0.5" style={{ borderColor: 'var(--border-color)' }}>CTRL + /</span>
+                        <span className="bg-blue-50/80 text-blue-400 text-[10px] font-black border border-blue-100 rounded-md px-1.5 py-0.5 tracking-tight">CTRL + /</span>
                     </div>
                 </div>
             </div>
@@ -48,38 +54,48 @@ export function Header({ onToggleSidebar }) {
             {/* Right Section: Icons & Profile */}
             <div className="flex items-center gap-3">
                 {/* Add New Dropdown */}
-                <div className="relative z-50">
+                <div className="relative z-50" ref={addDropdownRef}>
                     <button
-                        className="hidden lg:flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-semibold text-sm shadow-sm"
+                        className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#f9a01b] hover:bg-[#e89112] text-white rounded-xl transition-all font-black text-sm shadow-lg shadow-orange-500/20 active:scale-95 border-2 border-transparent hover:border-orange-300/30"
                         onClick={() => setShowDropdown(showDropdown === 'add_new' ? null : 'add_new')}
                     >
-                        <PlusCircle className="w-4 h-4" /> Add New
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-white/50">
+                            <PlusCircle className="w-3 h-3 fill-white" />
+                        </div>
+                        <span className="tracking-tight">Add New</span>
                     </button>
 
                     {showDropdown === 'add_new' && (
                         <div
-                            className="absolute right-0 mt-2 w-[550px] bg-white rounded-xl shadow-2xl border p-4 z-50 animate-in fade-in zoom-in-95 duration-100"
+                            className="absolute right-0 mt-4 w-[680px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 p-8 z-50 animate-in fade-in slide-in-from-top-4 duration-300"
                         >
-                            <div className="grid grid-cols-6 gap-4">
+                            <div className="grid grid-cols-6 gap-y-10 gap-x-2">
                                 {[
-                                    { label: 'Category', icon: Grid, color: 'text-blue-500', bg: 'bg-blue-50' },
-                                    { label: 'Product', icon: Box, color: 'text-orange-500', bg: 'bg-orange-50' },
-                                    { label: 'Purchase', icon: ShoppingBag, color: 'text-green-500', bg: 'bg-green-50' },
-                                    { label: 'Sale', icon: ShoppingCart, color: 'text-purple-500', bg: 'bg-purple-50' },
-                                    { label: 'Expense', icon: FileText, color: 'text-red-500', bg: 'bg-red-50' },
-                                    { label: 'Quotation', icon: File, color: 'text-teal-500', bg: 'bg-teal-50' },
-                                    { label: 'Return', icon: RotateCcw, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-                                    { label: 'User', icon: User, color: 'text-pink-500', bg: 'bg-pink-50' },
-                                    { label: 'Customer', icon: Users, color: 'text-yellow-500', bg: 'bg-yellow-50' },
-                                    { label: 'Biller', icon: FileCheck, color: 'text-cyan-500', bg: 'bg-cyan-50' },
-                                    { label: 'Supplier', icon: Truck, color: 'text-gray-500', bg: 'bg-gray-50' },
-                                    { label: 'Transfer', icon: ArrowRightLeft, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                                    { label: 'Category', icon: Grid, color: 'text-blue-500', bg: 'bg-blue-50', path: '/menu' },
+                                    { label: 'Product', icon: Box, color: 'text-orange-500', bg: 'bg-orange-50', path: '/menu' },
+                                    { label: 'Purchase', icon: ShoppingBag, color: 'text-emerald-500', bg: 'bg-emerald-50', path: '/inventory/purchase' },
+                                    { label: 'Sale', icon: ShoppingCart, color: 'text-violet-500', bg: 'bg-violet-100', path: '/orders' },
+                                    { label: 'Expense', icon: FileText, color: 'text-rose-500', bg: 'bg-rose-50', path: '/financial/expenses' },
+                                    { label: 'Quotation', icon: File, color: 'text-teal-500', bg: 'bg-teal-50', path: '/inventory/purchase-order' },
+                                    { label: 'Return', icon: RotateCcw, color: 'text-indigo-500', bg: 'bg-indigo-50', path: '/inventory/purchase-return' },
+                                    { label: 'User', icon: User, color: 'text-pink-500', bg: 'bg-pink-50', path: '/users' },
+                                    { label: 'Customer', icon: Users, color: 'text-amber-500', bg: 'bg-amber-50', path: '/crm/customers' },
+                                    { label: 'Biller', icon: FileCheck, color: 'text-cyan-500', bg: 'bg-cyan-50', path: '/users/biller' },
+                                    { label: 'Supplier', icon: Truck, color: 'text-slate-400', bg: 'bg-slate-50', path: '/config/outlet' },
+                                    { label: 'Transfer', icon: ArrowRightLeft, color: 'text-green-500', bg: 'bg-green-50', path: '/inventory/transfer' },
                                 ].map((item, index) => (
-                                    <button key={index} className="flex flex-col items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors group">
-                                        <div className={`w-10 h-10 rounded-lg ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
-                                            <item.icon className="w-5 h-5" />
+                                    <button
+                                        key={index}
+                                        className="flex flex-col items-center gap-3 transition-all group"
+                                        onClick={() => {
+                                            navigate(item.path);
+                                            setShowDropdown(null);
+                                        }}
+                                    >
+                                        <div className={`w-14 h-14 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 group-hover:shadow-lg transition-all shadow-sm border border-transparent`}>
+                                            <item.icon className="w-6 h-6 stroke-[2.5]" />
                                         </div>
-                                        <span className="text-xs font-medium text-gray-600">{item.label}</span>
+                                        <span className="text-[13px] font-black text-gray-500 tracking-tight">{item.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -115,7 +131,7 @@ export function Header({ onToggleSidebar }) {
                 <div className="h-8 w-px bg-gray-200 mx-1"></div>
 
                 {/* Profile Dropdown */}
-                <div className="relative" ref={dropdownRef}>
+                <div className="relative" ref={profileDropdownRef}>
                     <button
                         className="flex items-center gap-3 hover:bg-main-app p-1.5 rounded-lg transition-colors"
                         onClick={() => setShowDropdown(showDropdown === 'profile' ? null : 'profile')}

@@ -132,9 +132,13 @@ export const inventoryService = {
 
     getPurchases: () => api.get('/inventory/purchases'),
     createPurchase: (data) => api.post('/inventory/purchases', data),
+    updatePurchase: (id, data) => api.put(`/inventory/purchases/${id}`, data),
+    deletePurchase: (id) => api.delete(`/inventory/purchases/${id}`),
 
     getPurchaseOrders: () => api.get('/inventory/orders'),
     createPurchaseOrder: (data) => api.post('/inventory/orders', data),
+    updatePurchaseOrder: (id, data) => api.put(`/inventory/orders/${id}`, data),
+    receivePurchaseOrder: (id, data) => api.post(`/inventory/orders/${id}/receive`, data),
 
     getPurchaseReturns: () => api.get('/inventory/returns'),
     createPurchaseReturn: (data) => api.post('/inventory/returns', data),

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, ShoppingCart, Archive, FileText, ChevronRight, ChevronDown,
@@ -20,6 +20,16 @@ export function InventoryLayout() {
         'Masters': true
     });
 
+    // Auto-expand group containing active link
+    useEffect(() => {
+        const currentGroup = navItems.find(group =>
+            group.items?.some(item => location.pathname === item.path)
+        );
+        if (currentGroup) {
+            setExpandedGroups(prev => ({ ...prev, [currentGroup.group]: true }));
+        }
+    }, [location.pathname]);
+
     const toggleGroup = (group) => {
         setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
     };
@@ -38,15 +48,16 @@ export function InventoryLayout() {
             group: 'Purchase',
             icon: ShoppingCart,
             items: [
-                { label: 'Stock Purchase', path: '/inventory/purchase' },
                 { label: 'Purchase Order', path: '/inventory/purchase-order' },
+                { label: 'Stock Purchase', path: '/inventory/purchase' },
+                { label: 'Purchase Return', path: '/inventory/purchase-return' },
             ]
         },
         {
             group: 'Manage Stock',
             icon: Archive,
             items: [
-                { label: 'Available Stock', path: '/inventory/stock/available' },
+                { label: 'Inventory', path: '/inventory/stock/available' },
                 { label: 'Closing Stock', path: '/inventory/stock/closing' },
             ]
         },
@@ -54,7 +65,7 @@ export function InventoryLayout() {
             group: 'Consumption',
             icon: BarChart3,
             items: [
-                { label: 'Consumption Summary', path: '/inventory/consumption-summary' },
+                { label: 'Sales', path: '/inventory/reports' }, // Placeholder for Sales reports
                 { label: 'Transfer', path: '/inventory/transfer' },
                 { label: 'Wastage', path: '/inventory/wastage' },
             ]
@@ -71,6 +82,7 @@ export function InventoryLayout() {
             icon: FileText,
             items: [
                 { label: 'Inventory Reports', path: '/inventory/reports' },
+                { label: 'Stock History', path: '/inventory/reports/stock-history' },
             ]
         },
         {
@@ -83,6 +95,7 @@ export function InventoryLayout() {
                 { label: 'Settings', path: '/inventory/settings' },
             ]
         }
+
     ];
 
     return (

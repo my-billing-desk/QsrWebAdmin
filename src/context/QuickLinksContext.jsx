@@ -70,14 +70,7 @@ export const initialMenuGroups = [
             { id: 'expense_category', path: '/financial/expense-category', label: 'Expense Category', icon: Layers },
         ]
     },
-    {
-        id: 'group_purchases',
-        title: 'Purchases',
-        items: [
-            { id: 'purchase', path: '/inventory/purchase', label: 'Purchase', icon: ShoppingCart },
-            { id: 'purchase_return', path: '/inventory/purchase-return', label: 'Purchase Return', icon: RotateCcw },
-        ]
-    },
+
     {
         id: 'group_reports_stock',
         title: 'Reports',

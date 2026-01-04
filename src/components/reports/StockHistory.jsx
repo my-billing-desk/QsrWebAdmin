@@ -1,28 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, Plus, FileSpreadsheet, FileText, RotateCcw, Calendar, Filter, Printer } from 'lucide-react';
+import { inventoryService } from '../../services/api';
+import { getTodayLocal, formatDateDisplay } from '../../utils/dateUtils';
 
 export function StockHistory() {
     const [activeTab, setActiveTab] = useState('Stock History');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [reportData, setReportData] = useState([]);
+    const [filters, setFilters] = useState({
+        fromDate: getTodayLocal(),
+        toDate: getTodayLocal(),
+        category: 'All',
+        product: 'All'
+    });
 
-    // Mock Data based on reference
-    const [stockHistory] = useState([
-        { id: 1, sku: 'PT001', product: 'Lenovo IdeaPad 3', img: 'lp', initial: 6000, added: 100, sold: 100, defective: 100, final: 100 },
-        { id: 2, sku: 'PT002', product: 'Beats Pro', img: 'hp', initial: 10, added: 140, sold: 140, defective: 140, final: 140 },
-        { id: 3, sku: 'PT003', product: 'Nike Jordan', img: 'shoe', initial: 8, added: 300, sold: 300, defective: 300, final: 300 },
-        { id: 4, sku: 'PT004', product: 'Apple Series 5 Watch', img: 'watch', initial: 10, added: 450, sold: 450, defective: 450, final: 450 },
-        { id: 5, sku: 'PT005', product: 'Amazon Echo Dot', img: 'echo', initial: 5, added: 320, sold: 320, defective: 320, final: 320 },
-        { id: 6, sku: 'PT006', product: 'Sanford Chair Sofa', img: 'sofa', initial: 7, added: 650, sold: 650, defective: 650, final: 650 },
-        { id: 7, sku: 'PT007', product: 'Red Premium Satchel', img: 'bag', initial: 15, added: 700, sold: 700, defective: 700, final: 700 },
-        { id: 8, sku: 'PT008', product: 'Iphone 14 Pro', img: 'ph', initial: 12, added: 630, sold: 630, defective: 630, final: 630 },
-        { id: 9, sku: 'PT009', product: 'Gaming Chair', img: 'ch', initial: 10, added: 410, sold: 410, defective: 410, final: 410 },
-        { id: 10, sku: 'PT010', product: 'Borealis Backpack', img: 'bp', initial: 20, added: 550, sold: 550, defective: 550, final: 550 },
-    ]);
+    const fetchReport = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await inventoryService.getStockSummaryReport({
+                fromDate: filters.fromDate,
+                toDate: filters.toDate
+            });
+            setReportData(res.data);
+        } catch (err) {
+            console.error('Failed to fetch stock history:', err);
+            setError('Failed to load report data. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchReport();
+    }, []);
+
+    const handleGenerateReport = () => {
+        fetchReport();
+    };
+
+    const handleReset = () => {
+        setFilters({
+            fromDate: getTodayLocal(),
+            toDate: getTodayLocal(),
+            category: 'All',
+            product: 'All'
+        });
+    };
 
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
             {/* 1. Header Section */}
             <div className="flex justify-between items-center">
-                {/* Tabs - Styled like buttons in header area or just below title if standard */}
                 <div className="flex bg-gray-200 p-1 rounded-lg">
                     {['Inventory Report', 'Stock History', 'Sold Stock'].map((tab) => (
                         <button
@@ -42,7 +72,13 @@ export function StockHistory() {
                     <div className="text-sm text-gray-500">View Reports of Stock History</div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><RotateCcw className="w-4 h-4" /></button>
+                    <button
+                        onClick={handleReset}
+                        className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"
+                        title="Reset Filters"
+                    >
+                        <RotateCcw className="w-4 h-4" />
+                    </button>
                     <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><ChevronDown className="w-4 h-4" /></button>
                 </div>
             </div>
@@ -52,33 +88,47 @@ export function StockHistory() {
             <div className="bg-white border rounded-lg shadow-sm p-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div className="space-y-1 relative">
-                        <label className="text-sm font-semibold text-gray-700">Choose Date</label>
+                        <label className="text-sm font-semibold text-gray-700">From Date</label>
                         <div className="relative">
-                            <input type="text" defaultValue="12/24/2025 - 12/30/2025" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
-                            <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                            <input
+                                type="date"
+                                value={filters.fromDate}
+                                onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
+                                className="w-full border rounded p-2 text-sm focus:outline-none focus:border-orange-500"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-1 relative">
+                        <label className="text-sm font-semibold text-gray-700">To Date</label>
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={filters.toDate}
+                                onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
+                                className="w-full border rounded p-2 text-sm focus:outline-none focus:border-orange-500"
+                            />
                         </div>
                     </div>
                     <div className="space-y-1 relative">
                         <label className="text-sm font-semibold text-gray-700">Category</label>
                         <div className="relative">
-                            <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
-                                <option>All</option>
-                            </select>
-                            <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
-                        </div>
-                    </div>
-                    <div className="space-y-1 relative">
-                        <label className="text-sm font-semibold text-gray-700">Products</label>
-                        <div className="relative">
-                            <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
+                            <select
+                                value={filters.category}
+                                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                                className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500"
+                            >
                                 <option>All</option>
                             </select>
                             <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
                         </div>
                     </div>
                     <div>
-                        <button className="w-full py-2.5 bg-orange-500 text-white rounded font-bold shadow-sm hover:bg-orange-600">
-                            Generate Report
+                        <button
+                            onClick={handleGenerateReport}
+                            disabled={loading}
+                            className="w-full py-2.5 bg-orange-500 text-white rounded font-bold shadow-sm hover:bg-orange-600 disabled:bg-orange-300"
+                        >
+                            {loading ? 'Generating...' : 'Generate Report'}
                         </button>
                     </div>
                 </div>
@@ -87,7 +137,7 @@ export function StockHistory() {
             {/* 3. Main Content Card - Table */}
             <div className="bg-white border rounded-lg shadow-sm flex flex-col flex-1 overflow-hidden">
                 <div className="p-4 border-b flex justify-between items-center">
-                    <h2 className="font-bold text-gray-800 text-lg">Customer Report</h2> {/* Reference says Customer Report in body? Might be a typo in design, likely Stock Report */}
+                    <h2 className="font-bold text-gray-800 text-lg">Stock Summary Report</h2>
                     <div className="flex gap-2">
                         <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-red-500 shadow-sm"><FileText className="w-4 h-4" /></button>
                         <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-green-600 shadow-sm"><FileSpreadsheet className="w-4 h-4" /></button>
@@ -96,37 +146,52 @@ export function StockHistory() {
                 </div>
 
                 <div className="flex-1 overflow-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-white text-xs font-bold text-gray-800 border-b text-gray-600">
-                            <tr>
-                                <th className="p-4">SKU</th>
-                                <th className="p-4">Product</th>
-                                <th className="p-4">Initial Quantity</th>
-                                <th className="p-4">Added Quantity</th>
-                                <th className="p-4">Sold Quantity</th>
-                                <th className="p-4">Defective Quantity</th>
-                                <th className="p-4">Final Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody className="text-sm divide-y">
-                            {stockHistory.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50">
-                                    <td className="p-4 text-gray-600">{item.sku}</td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center border text-xs text-gray-400">img</div>
-                                            <span className="font-bold text-gray-700">{item.product}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-4 text-gray-600">{item.initial}</td>
-                                    <td className="p-4 text-gray-600">{item.added}</td>
-                                    <td className="p-4 text-gray-600">{item.sold}</td>
-                                    <td className="p-4 text-gray-600">{item.defective}</td>
-                                    <td className="p-4 text-gray-600">{item.final}</td>
+                    {error ? (
+                        <div className="flex items-center justify-center h-full text-red-500 p-4 font-medium italic">
+                            {error}
+                        </div>
+                    ) : reportData.length === 0 && !loading ? (
+                        <div className="flex items-center justify-center h-full text-gray-400 p-4 font-medium italic">
+                            No records found for the selected period.
+                        </div>
+                    ) : (
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-gray-50 text-xs font-bold text-gray-800 border-b">
+                                <tr>
+                                    <th className="p-4">SKU</th>
+                                    <th className="p-4">Product</th>
+                                    <th className="p-4 text-center">Initial Qty</th>
+                                    <th className="p-4 text-center text-green-600">Added Qty (+)</th>
+                                    <th className="p-4 text-center text-red-500">Sold Qty (-)</th>
+                                    <th className="p-4 text-center text-orange-600">Defective (-)</th>
+                                    <th className="p-4 text-center font-bold text-orange-600 bg-orange-50/30">Final Qty</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="text-sm divide-y">
+                                {reportData.map((item) => (
+                                    <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="p-4 text-gray-600 font-mono text-xs">{item.sku}</td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded bg-orange-50 flex items-center justify-center border border-orange-100 text-[10px] text-orange-400 font-bold uppercase">
+                                                    {item.name.substring(0, 2)}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-gray-700">{item.name}</span>
+                                                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">{item.unit}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-center font-medium text-gray-600">{(item.opening || 0).toFixed(2)}</td>
+                                        <td className="p-4 text-center font-medium text-green-600">{(item.purchase || 0).toFixed(2)}</td>
+                                        <td className="p-4 text-center font-medium text-red-500">{(item.consumed || 0).toFixed(2)}</td>
+                                        <td className="p-4 text-center font-medium text-orange-500">{(item.wastage || 0).toFixed(2)}</td>
+                                        <td className="p-4 text-center font-bold text-gray-800 bg-orange-50/20">{(item.closingStock || 0).toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
                 {/* Pagination */}
@@ -135,6 +200,8 @@ export function StockHistory() {
                         Row Per Page
                         <select className="border rounded px-2 py-1 bg-white">
                             <option>10</option>
+                            <option>25</option>
+                            <option>50</option>
                         </select>
                         Entries
                     </div>

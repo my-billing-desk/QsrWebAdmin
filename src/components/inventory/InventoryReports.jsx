@@ -169,9 +169,9 @@ export function InventoryReports() {
                                     <td className="p-3 font-medium">{row.RawMaterial?.name}</td>
                                     <td className="p-3">
                                         <span className={`px-2 py-1 rounded text-xs font-medium uppercase ${row.type === 'purchase' ? 'bg-green-100 text-green-700' :
-                                                row.type === 'order' ? 'bg-blue-100 text-blue-700' :
-                                                    row.type === 'waste' ? 'bg-red-100 text-red-700' :
-                                                        'bg-gray-100 text-gray-700'
+                                            row.type === 'order' ? 'bg-blue-100 text-blue-700' :
+                                                row.type === 'waste' ? 'bg-red-100 text-red-700' :
+                                                    'bg-gray-100 text-gray-700'
                                             }`}>
                                             {row.type}
                                         </span>
@@ -253,15 +253,15 @@ export function InventoryReports() {
                             <div className="bg-black rounded-full w-6 h-6 flex items-center justify-center text-white font-bold">=</div>
                             <div className="border border-gray-200 rounded p-2 text-center w-64 bg-gray-50">
                                 <div className="font-bold text-gray-700 border-b border-gray-300 pb-1">
-                                    {summary.totalSales.toFixed(3)} - {summary.totalCost.toFixed(3)}
+                                    {(summary.totalSales || 0).toFixed(3)} - {(summary.totalCost || 0).toFixed(3)}
                                 </div>
-                                <div className="font-medium text-gray-600 pt-1">{summary.totalSales.toFixed(3)}</div>
+                                <div className="font-medium text-gray-600 pt-1">{(summary.totalSales || 0).toFixed(3)}</div>
                             </div>
                             <div className="bg-gray-400 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-bold">X</div>
                             <div className="font-bold text-gray-800 text-lg">100</div>
                             <div className="bg-black rounded-full w-6 h-6 flex items-center justify-center text-white font-bold">=</div>
                             <div className="flex-1 bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-center">
-                                <span className="text-3xl font-bold text-gray-900">{summary.profitPercent.toFixed(3)} %</span>
+                                <span className="text-3xl font-bold text-gray-900">{(summary.profitPercent || 0).toFixed(3)} %</span>
                             </div>
                         </div>
                     </div>
@@ -276,9 +276,9 @@ export function InventoryReports() {
                                         <span className="font-bold text-gray-700">Order No - {order.orderNo}</span>
                                         <span className="text-gray-400 text-xs">ⓘ {order.date} ⓘ</span>
                                     </div>
-                                    <div className="font-bold text-gray-800">Total Order Price (₹) = {order.totalPrice.toFixed(3)}</div>
-                                    <div className="font-bold text-green-600">Profit/Loss(%) = {order.profitPercent}</div>
-                                    <div className="font-bold text-gray-800">Cost of Good Sold = ₹ {order.cogs.toFixed(3)}</div>
+                                    <div className="font-bold text-gray-800">Total Order Price (₹) = {(order.totalPrice || 0).toFixed(3)}</div>
+                                    <div className="font-bold text-green-600">Profit/Loss(%) = {order.profitPercent || 0}</div>
+                                    <div className="font-bold text-gray-800">Cost of Good Sold = ₹ {(order.cogs || 0).toFixed(3)}</div>
                                 </div>
                                 {/* Order Details Table - Split View */}
                                 <div className="flex divide-x divide-gray-200">
@@ -300,7 +300,7 @@ export function InventoryReports() {
                                                             {item.name}
                                                         </td>
                                                         <td className="p-3 text-center">{item.qty}</td>
-                                                        <td className="p-3 text-right font-medium">{item.price.toFixed(3)}</td>
+                                                        <td className="p-3 text-right font-medium">{(item.price || 0).toFixed(3)}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -322,7 +322,7 @@ export function InventoryReports() {
                                                         <tr key={`${j}`}>
                                                             <td className="p-3 text-gray-600">{ing.name}</td>
                                                             <td className="p-3 text-gray-500">{ing.qty}</td>
-                                                            <td className="p-3 text-gray-500">{ing.cost.toFixed(3)}</td>
+                                                            <td className="p-3 text-gray-500">{(ing.cost || 0).toFixed(3)}</td>
                                                         </tr>
                                                     ))
                                                 )}
@@ -365,18 +365,18 @@ export function InventoryReports() {
                                     <td className="p-3 sticky left-0 bg-white font-medium text-gray-800 border-r border-gray-50">
                                         {row.name} <span className="text-gray-400 font-normal">[{row.unit}]</span>
                                     </td>
-                                    <td className="p-3 text-right text-gray-600">{(row.opening || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{(row.purchase || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{(row.excess || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{(row.totalInput || row.total_in || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-green-600 font-medium">{(row.consumed || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-red-500">{(row.wastage || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-orange-500">{(row.loss || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{(row.transfer || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{(row.shortage || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right text-gray-600">{(row.conversion || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{(row.totalOutput || row.total_out || 0).toFixed(3)}</td>
-                                    <td className="p-3 text-right font-bold text-gray-900">{(row.closingStock || row.closing || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(parseFloat(row.opening) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(parseFloat(row.purchase) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(parseFloat(row.excess) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{(parseFloat(row.totalInput || row.total_in) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-green-600 font-medium">{(parseFloat(row.consumed) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-red-500">{(parseFloat(row.wastage) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-orange-500">{(parseFloat(row.loss) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(parseFloat(row.transfer) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(parseFloat(row.shortage) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right text-gray-600">{(parseFloat(row.conversion) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right font-bold text-blue-800 bg-blue-50/30">{(parseFloat(row.totalOutput || row.total_out) || 0).toFixed(3)}</td>
+                                    <td className="p-3 text-right font-bold text-gray-900">{(parseFloat(row.closingStock || row.closing) || 0).toFixed(3)}</td>
                                 </tr>
                             ))}
                         </tbody>

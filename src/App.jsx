@@ -75,7 +75,6 @@ import { DiscountPlan } from './components/promo/DiscountPlan';
 import { Discount } from './components/promo/Discount';
 import { Expenses } from './components/financial/Expenses';
 import { ExpenseCategory } from './components/financial/ExpenseCategory';
-import { Purchase } from './components/inventory/Purchase';
 import { StockHistory } from './components/reports/StockHistory';
 import { Toaster } from 'react-hot-toast';
 
@@ -170,9 +169,6 @@ function AppRoutes() {
         <Route path="/financial/expenses" element={<Expenses />} />
         <Route path="/financial/expense-category" element={<ExpenseCategory />} />
 
-        {/* Inventory - Purchase */}
-        <Route path="/inventory/purchase" element={<Purchase />} />
-        <Route path="/inventory/purchase-return" element={<PurchaseReturn />} />
 
         {/* Reports */}
         <Route path="/reports/stock-history" element={<StockHistory />} />
@@ -270,6 +266,7 @@ function AppRoutes() {
         <Route path="stock/opening" element={<OpeningStock />} />
         <Route path="indent" element={<Indent />} />
         <Route path="reports" element={<InventoryReports />} />
+        <Route path="reports/stock-history" element={<StockHistory />} />
         <Route path="consumption-summary" element={<StockSummary />} />
         <Route path="settings" element={<InventorySettings />} />
       </Route>
