@@ -3,7 +3,7 @@ import { Search, ChevronDown, Edit, Calendar } from 'lucide-react';
 import { financialService } from '../../services/api';
 import toast from 'react-hot-toast';
 
-export function ExpenseCategory() {
+export function CashTopUpMaster() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -21,11 +21,11 @@ export function ExpenseCategory() {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const res = await financialService.getExpenseMaster();
+            const res = await financialService.getCashTopUpMaster();
             setCategories(res.data.data);
         } catch (error) {
-            console.error('Error fetching master:', error);
-            toast.error('Failed to load expense master');
+            console.error('Error fetching cash top-up master:', error);
+            toast.error('Failed to load cash top-up master');
         } finally {
             setLoading(false);
         }
@@ -37,7 +37,7 @@ export function ExpenseCategory() {
             return;
         }
         try {
-            await financialService.createExpenseCategory(newCategory);
+            await financialService.createCashTopUpCategory(newCategory);
             toast.success('Category added successfully');
             setIsAddModalOpen(false);
             setNewCategory({ title: '', status: true });
@@ -50,7 +50,7 @@ export function ExpenseCategory() {
 
     const handleToggleStatus = async (id, currentStatus) => {
         try {
-            await financialService.updateExpenseCategory(id, { status: !currentStatus });
+            await financialService.updateCashTopUpCategory(id, { status: !currentStatus });
             fetchCategories();
         } catch (error) {
             toast.error('Failed to update status');
@@ -69,7 +69,10 @@ export function ExpenseCategory() {
                     onClick={() => setIsAddModalOpen(true)}
                     className="px-4 py-2 bg-red-600 text-white rounded font-bold shadow-sm hover:bg-red-700 text-sm"
                 >
-                    Add Expense Master
+                    Add Cash Top-Up Master
+                </button>
+                <button className="px-4 py-2 bg-red-600 text-white rounded font-bold shadow-sm hover:bg-red-700 text-sm">
+                    Import Cash Top-Up Master
                 </button>
                 <button className="px-3 py-2 bg-white border rounded text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
                     Action <ChevronDown className="w-4 h-4" />
@@ -132,7 +135,7 @@ export function ExpenseCategory() {
                         <thead className="bg-blue-50/50 text-xs font-bold text-gray-800 border-b">
                             <tr>
                                 <th className="p-4 w-10 text-center"><input type="checkbox" className="rounded border-gray-300" /></th>
-                                <th className="p-4">Reason / Title</th>
+                                <th className="p-4">Title</th>
                                 <th className="p-4 text-center">Status</th>
                                 <th className="p-4 text-center">Usage Count</th>
                                 <th className="p-4">Last Reported Date</th>
@@ -143,8 +146,8 @@ export function ExpenseCategory() {
                             {filteredCategories.length === 0 ? (
                                 <tr><td colSpan="5" className="p-4 text-center text-gray-500">No categories found</td></tr>
                             ) : (
-                                filteredCategories.map((cat, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50">
+                                filteredCategories.map((cat) => (
+                                    <tr key={cat.id} className="hover:bg-gray-50">
                                         <td className="p-4 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
                                         <td className="p-4 font-medium text-gray-800">{cat.title}</td>
                                         <td className="p-4 text-center">
@@ -193,14 +196,14 @@ export function ExpenseCategory() {
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl shadow-2xl p-5 w-80 border animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wider">New Expense Master</h2>
+                            <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wider">New Cash Master</h2>
                             <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="space-y-4">
                             <input
                                 type="text"
                                 autoFocus
-                                placeholder="Enter reason (e.g. Rent, Electricity)"
+                                placeholder="Enter title (e.g. Daily Sales)"
                                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
                                 value={newCategory.title}
                                 onChange={(e) => setNewCategory({ ...newCategory, title: e.target.value })}

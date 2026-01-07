@@ -339,8 +339,13 @@ export function ItemsView() {
                                                 <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{item.name}</div>
                                                 <div className="flex gap-2 mt-1">
                                                     {/* Indicators */}
-                                                    <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1 rounded border border-red-100">O</span>
-                                                    <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1 rounded border border-red-100">V</span>
+                                                    <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1 rounded border border-red-100" title="Visible Online">O</span>
+                                                    {item.availableOndc && (
+                                                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1 rounded border border-blue-100" title="Listed on ONDC">ONDC</span>
+                                                    )}
+                                                    {item.Variants?.length > 0 && (
+                                                        <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1 rounded border border-red-100" title="Multiple Variations">V</span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="p-3 text-sm text-gray-600">{item.shortCode || '-'}</td>
@@ -375,6 +380,7 @@ export function ItemsView() {
                     </div>
                     <div className="flex gap-4">
                         <span className="flex items-center gap-1"><b className="text-red-600">O</b> Expose in online order</span>
+                        <span className="flex items-center gap-1"><b className="text-blue-600">ONDC</b> Listed on ONDC Network</span>
                         <span className="flex items-center gap-1"><b className="text-red-600">V</b> Item having Variation</span>
                         <span className="flex items-center gap-1"><b className="text-red-600">A</b> Addon details</span>
                         <span className="flex items-center gap-1"><b className="text-red-600">C</b> Set as combo</span>

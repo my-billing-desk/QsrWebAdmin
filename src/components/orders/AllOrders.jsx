@@ -8,6 +8,7 @@ export function AllOrders() {
     const [showChart, setShowChart] = useState(false);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
     const [filters, setFilters] = useState({
         startDate: getDateTimeLocalInput(),
@@ -102,77 +103,83 @@ export function AllOrders() {
                 {showChart && <div className="h-40 bg-white border rounded p-4 flex items-center justify-center text-muted">Chart Area</div>}
 
                 {/* 3. Search / Collapse Filter Toggle */}
-                <div className="flex justify-between items-center">
+                <div
+                    className="flex justify-between items-center cursor-pointer select-none bg-white p-3 rounded-lg border shadow-sm hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                >
                     <div className="font-bold text-sm flex items-center gap-2">
-                        <Search className="w-4 h-4" /> Search
+                        <Search className="w-4 h-4 text-gray-500" />
+                        <span>Search</span>
                     </div>
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isSearchExpanded ? 'rotate-180' : ''}`} />
                 </div>
 
                 {/* 4. Filter Panel */}
-                <div className="bg-white border rounded-lg p-4 shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">Start Date</label>
-                            <div className="relative">
-                                <input type="datetime-local" className="w-full border rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-blue-500" value={filters.startDate} onChange={e => setFilters({ ...filters, startDate: e.target.value })} />
+                {isSearchExpanded && (
+                    <div className="bg-white border rounded-lg p-4 shadow-sm animate-in slide-in-from-top-2 duration-200">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">Start Date</label>
+                                <div className="relative">
+                                    <input type="datetime-local" className="w-full border rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-blue-500" value={filters.startDate} onChange={e => setFilters({ ...filters, startDate: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">End Date</label>
+                                <div className="relative">
+                                    <input type="datetime-local" className="w-full border rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-blue-500" value={filters.endDate} onChange={e => setFilters({ ...filters, endDate: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">Order ID</label>
+                                <input type="text" className="w-full border rounded px-2 py-1.5 text-xs" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">Customer Name</label>
+                                <input type="text" className="w-full border rounded px-2 py-1.5 text-xs" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">Customer Phone</label>
+                                <input type="text" className="w-full border rounded px-2 py-1.5 text-xs" />
                             </div>
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">End Date</label>
-                            <div className="relative">
-                                <input type="datetime-local" className="w-full border rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-blue-500" value={filters.endDate} onChange={e => setFilters({ ...filters, endDate: e.target.value })} />
-                            </div>
+                        {/* Row 2 Selects */}
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                            {['All Order Type', 'Sub Order Type', 'All Payment Type', 'Order Status', 'Other Status'].map((label, i) => (
+                                <div key={i} className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-600">{label}</label>
+                                    <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
+                                        <option>{label === 'All Order Type' ? 'Select' : 'All'}</option>
+                                    </select>
+                                </div>
+                            ))}
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">Order ID</label>
-                            <input type="text" className="w-full border rounded px-2 py-1.5 text-xs" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">Customer Name</label>
-                            <input type="text" className="w-full border rounded px-2 py-1.5 text-xs" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">Customer Phone</label>
-                            <input type="text" className="w-full border rounded px-2 py-1.5 text-xs" />
-                        </div>
-                    </div>
-                    {/* Row 2 Selects */}
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-                        {['All Order Type', 'Sub Order Type', 'All Payment Type', 'Order Status', 'Other Status'].map((label, i) => (
-                            <div key={i} className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-600">{label}</label>
+                        {/* Row 3  */}
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">Grand Total</label>
                                 <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
-                                    <option>{label === 'All Order Type' ? 'Select' : 'All'}</option>
+                                    <option>=</option>
                                 </select>
                             </div>
-                        ))}
-                    </div>
-                    {/* Row 3  */}
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">Grand Total</label>
-                            <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
-                                <option>=</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1">
-                            <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
-                                <option></option>
-                            </select>
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-600">GSTIN</label>
-                            <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
-                                <option>All</option>
-                            </select>
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="px-4 py-1.5 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700 shadow-sm">Search</button>
-                            <button className="px-4 py-1.5 border text-gray-600 rounded text-xs font-bold hover:bg-gray-50">Show All</button>
+                            <div className="space-y-1">
+                                <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
+                                    <option></option>
+                                </select>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-600">GSTIN</label>
+                                <select className="w-full border rounded px-2 py-1.5 text-xs bg-white">
+                                    <option>All</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-2">
+                                <button className="px-4 py-1.5 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700 shadow-sm">Search</button>
+                                <button className="px-4 py-1.5 border text-gray-600 rounded text-xs font-bold hover:bg-gray-50">Show All</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* 5. Date Range Tag Mockup */}
                 <div className="flex items-center gap-2">

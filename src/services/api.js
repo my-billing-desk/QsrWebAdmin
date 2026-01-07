@@ -77,7 +77,13 @@ export const roleService = {
 export const aggregatorService = {
     getAll: () => api.get('/aggregators'),
     toggle: (id, data) => api.post(`/aggregators/${id}/toggle`, data),
-    verify: (id) => api.post(`/aggregators/${id}/verify`)
+    verify: (id) => api.post(`/aggregators/${id}/verify`),
+    sync: () => api.post('/aggregators/sync')
+};
+
+export const subscriptionService = {
+    getAll: () => api.get('/subscriptions'),
+    buy: (slug) => api.post('/subscriptions/buy', { slug })
 };
 
 export const specialNoteService = {
@@ -178,9 +184,88 @@ export const outletService = {
 
 export const customerService = {
     getAll: (params) => api.get('/customers', { params }),
+    getDetail: (id) => api.get(`/customers/${id}`),
     lookup: (phone) => api.get(`/customers/lookup/${phone}`),
     create: (data) => api.post('/customers', data),
     getStats: () => api.get('/customers/stats'),
 };
+
+export const financialService = {
+    // Expenses
+    getExpenses: (params) => api.get('/financial/expenses', { params }),
+    createExpense: (data) => api.post('/financial/expenses', data),
+    deleteExpense: (id) => api.delete(`/financial/expenses/${id}`),
+    deleteExpensesByDate: (date) => api.delete('/financial/expenses', { params: { date } }),
+
+    getExpenseCategories: () => api.get('/financial/expense-categories'),
+    getExpenseMaster: () => api.get('/financial/expense-master'),
+    createExpenseCategory: (data) => api.post('/financial/expense-categories', data),
+    updateExpenseCategory: (id, data) => api.put(`/financial/expense-categories/${id}`, data),
+    deleteExpenseCategory: (id) => api.delete(`/financial/expense-categories/${id}`),
+
+    // Withdrawals
+    getWithdrawals: (params) => api.get('/financial/withdrawals', { params }),
+    getWithdrawalMaster: () => api.get('/financial/withdrawal-master'),
+    createWithdrawal: (data) => api.post('/financial/withdrawals', data),
+    deleteWithdrawal: (id) => api.delete(`/financial/withdrawals/${id}`),
+
+    getWithdrawalCategories: () => api.get('/financial/withdrawal-categories'),
+    createWithdrawalCategory: (data) => api.post('/financial/withdrawal-categories', data),
+    updateWithdrawalCategory: (id, data) => api.put(`/financial/withdrawal-categories/${id}`, data),
+    deleteWithdrawalCategory: (id) => api.delete(`/financial/withdrawal-categories/${id}`),
+
+    // Cash Top-Ups
+    getCashTopUps: (params) => api.get('/financial/cash-topups', { params }),
+    getCashTopUpMaster: () => api.get('/financial/cash-topup-master'),
+    createCashTopUp: (data) => api.post('/financial/cash-topups', data),
+    deleteCashTopUp: (id) => api.delete(`/financial/cash-topups/${id}`),
+
+    getCashTopUpCategories: () => api.get('/financial/cash-topup-categories'),
+    createCashTopUpCategory: (data) => api.post('/financial/cash-topup-categories', data),
+    updateCashTopUpCategory: (id, data) => api.put(`/financial/cash-topup-categories/${id}`, data),
+    deleteCashTopUpCategory: (id) => api.delete(`/financial/cash-topup-categories/${id}`),
+};
+
+export const reportService = {
+    getProfitLoss: (params) => api.get('/reports/profit-loss', { params }),
+};
+
+export const loyaltyService = {
+    getConfig: () => api.get('/loyalty/config'),
+    updateConfig: (data) => api.put('/loyalty/config', data),
+    getTiers: () => api.get('/loyalty/tiers'),
+    saveTier: (data) => api.post('/loyalty/tiers', data),
+    deleteTier: (id) => api.delete(`/loyalty/tiers/${id}`),
+    getRewards: () => api.get('/loyalty/rewards'),
+    saveReward: (data) => api.post('/loyalty/rewards', data),
+    deleteReward: (id) => api.delete(`/loyalty/rewards/${id}`),
+    getCustomerStatus: (phone) => api.get(`/loyalty/customer/${phone}`),
+    getAnalytics: () => api.get('/loyalty/analytics'),
+    redeem: (data) => api.post('/loyalty/redeem', data),
+};
+
+export const giftCardService = {
+    getAll: () => api.get('/gift-cards'),
+    getDetails: (cardNumber) => api.get(`/gift-cards/${cardNumber}`),
+    issue: (data) => api.post('/gift-cards/issue', data),
+    redeem: (data) => api.post('/gift-cards/redeem', data),
+    reload: (data) => api.post('/gift-cards/reload', data),
+    bulkGenerate: (data) => api.post('/gift-cards/bulk-generate', data),
+};
+
+export const ondcService = {
+    getConfig: () => api.get('/ondc/config'),
+    updateConfig: (config) => api.post('/ondc/config', { config }),
+};
+
+export const feedbackService = {
+    submit: (data) => api.post('/feedback/submit', data),
+    getAll: (params) => api.get('/feedback', { params }),
+    getAnalytics: () => api.get('/feedback/analytics'),
+    updateStatus: (id, status) => api.put(`/feedback/${id}/status`, { status }),
+};
+
+
+
 
 export default api;

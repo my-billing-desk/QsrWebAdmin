@@ -100,7 +100,7 @@ export default function IntegrationDetail({ integration, onBack }) {
                                 {integration.isConnected && integration.verificationStatus === 'verified' ? (
                                     <div className="flex flex-col items-end gap-1">
                                         <span className="bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded border border-green-200 flex items-center gap-1">
-                                            <Check size={12} /> Activated
+                                            <Check size={12} /> Connected
                                         </span>
                                         <div className="text-[10px] text-gray-500 text-right">
                                             Service is expiring on: <span className="font-bold text-gray-800">6 Apr 2026</span><br />

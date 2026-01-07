@@ -44,7 +44,7 @@ export const MenuOnOff = () => {
 
         try {
             await menuService.updateStatus(itemId, { [field]: newStatus });
-            const fieldLabel = field === 'availableOffline' ? 'Offline' : field === 'availableSwiggy' ? 'Swiggy' : 'Zomato';
+            const fieldLabel = field === 'availableOffline' ? 'Offline' : field === 'availableSwiggy' ? 'Swiggy' : field === 'availableOndc' ? 'ONDC' : 'Zomato';
             toast.success(`${fieldLabel} updated`);
         } catch (error) {
             // Revert on error
@@ -240,6 +240,7 @@ export const MenuOnOff = () => {
                         <div className="w-20 text-center">Offline</div>
                         <div className="w-20 text-center">Swiggy</div>
                         <div className="w-20 text-center">Zomato</div>
+                        <div className="w-20 text-center">ONDC</div>
                     </div>
 
                     {/* Scrollable List */}
@@ -273,6 +274,9 @@ export const MenuOnOff = () => {
                                             </th>
                                             <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 Zomato
+                                            </th>
+                                            <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                ONDC
                                             </th>
                                         </tr>
                                     </thead>
@@ -324,6 +328,12 @@ export const MenuOnOff = () => {
                                                             <ToggleSwitch
                                                                 checked={item.availableZomato !== false}
                                                                 onChange={() => handleToggleStatus(item.id, 'availableZomato', item.availableZomato !== false)}
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2 text-center">
+                                                            <ToggleSwitch
+                                                                checked={item.availableOndc !== false}
+                                                                onChange={() => handleToggleStatus(item.id, 'availableOndc', item.availableOndc !== false)}
                                                             />
                                                         </td>
                                                     </tr>

@@ -52,6 +52,8 @@ import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PlaceholderPage } from './components/PlaceholderPage';
 import { GiftCard } from './components/crm/GiftCard';
+import { Feedback } from './components/crm/Feedback';
+import { Customers } from './components/crm/Customers';
 import { VirtualWallet } from './components/accounting/VirtualWallet';
 import { SubOrderType } from './components/configuration/SubOrderType';
 import { DeliveryDistance } from './components/configuration/DeliveryDistance';
@@ -68,6 +70,7 @@ import { MarketplaceSetting } from './components/configuration/MarketplaceSettin
 import { ThemeConfiguration } from './components/configuration/ThemeConfiguration';
 import { SubscriptionPlans } from './components/configuration/SubscriptionPlans';
 import { ActivityTimeline } from './components/user-logs/ActivityTimeline';
+import LoyaltyDashboard from './components/loyalty/LoyaltyDashboard';
 
 import { Coupons } from './components/promo/Coupons';
 import { GiftCards } from './components/promo/GiftCards';
@@ -228,10 +231,10 @@ function AppRoutes() {
         <Route path="/crm/reputation" element={<PlaceholderPage title="Reputation" />} />
         <Route path="/crm/beta" element={<PlaceholderPage title="Beta" />} />
         <Route path="/crm/automation" element={<PlaceholderPage title="Marketing Automation" />} />
-        <Route path="/crm/customers" element={<PlaceholderPage title="Customers" />} />
-        <Route path="/crm/feedback" element={<PlaceholderPage title="Feedback" />} />
+        <Route path="/crm/customers" element={<Customers />} />
+        <Route path="/crm/feedback" element={<Feedback />} />
         <Route path="/crm/gift-card" element={<GiftCard />} />
-        <Route path="/crm/loyalty" element={<PlaceholderPage title="Loyalty" />} />
+        <Route path="/crm/loyalty" element={<LoyaltyDashboard />} />
         <Route path="/crm/dual-screen" element={<PlaceholderPage title="Dual Screen Marketing" />} />
         <Route path="/crm/ebill" element={<PlaceholderPage title="Ebill Templates" />} />
 

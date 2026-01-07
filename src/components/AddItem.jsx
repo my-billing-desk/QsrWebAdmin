@@ -78,6 +78,10 @@ export function AddItem({ onBack, itemToEdit }) {
         orderTakeAway: true,
         orderDineIn: true,
         isAvailable: true, // Online Expose
+        availableOndc: true,
+        ondcTags: {
+            veg_nonveg: 'veg'
+        },
         image: null,
         imagePreview: null,
         showImage: false,
@@ -126,7 +130,9 @@ export function AddItem({ onBack, itemToEdit }) {
                     price: v.price
                 })) : [],
                 addonGroupIds: itemToEdit.addonGroups ? itemToEdit.addonGroups.map(g => g.id) : [],
-                itemVariationGroups: itemToEdit.variationGroups ? itemToEdit.variationGroups.map(vg => vg.id) : []
+                itemVariationGroups: itemToEdit.variationGroups ? itemToEdit.variationGroups.map(vg => vg.id) : [],
+                availableOndc: itemToEdit.availableOndc !== false, // default true
+                ondcTags: itemToEdit.ondcTags || { veg_nonveg: itemToEdit.isVeg ? 'veg' : 'non_veg' }
             });
         }
     }, [itemToEdit]); // Re-run if itemToEdit changes
@@ -213,7 +219,9 @@ export function AddItem({ onBack, itemToEdit }) {
             data.append('orderTakeAway', formData.orderTakeAway);
             data.append('orderDineIn', formData.orderDineIn);
             data.append('isAvailable', formData.isAvailable);
+            data.append('availableOndc', formData.availableOndc);
             data.append('showImage', formData.showImage);
+            data.append('ondcTags', JSON.stringify(formData.ondcTags));
 
             if (formData.image instanceof File) {
                 data.append('image', formData.image);
@@ -364,6 +372,8 @@ export function AddItem({ onBack, itemToEdit }) {
                                     ))}
                                 </div>
                             </div>
+
+
                         </div>
 
                         {/* Compact Image Upload Row */}

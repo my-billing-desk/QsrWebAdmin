@@ -11,6 +11,7 @@ import { posDeviceService } from '../../services/api';
 
 export function OutletConfiguration() {
     const { user } = useAuth();
+    console.log('OutletConfiguration user:', user);
     const [deviceStats, setDeviceStats] = useState(null);
     const [devices, setDevices] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -35,8 +36,9 @@ export function OutletConfiguration() {
     };
 
     const copyTenantId = () => {
-        if (user?.tenantId) {
-            navigator.clipboard.writeText(user.tenantId.toString());
+        const id = user?.tenantId || user?.Tenant?.id;
+        if (id) {
+            navigator.clipboard.writeText(id.toString());
             toast.success('Restaurant ID copied to clipboard!');
         }
     };
@@ -51,7 +53,7 @@ export function OutletConfiguration() {
 
                 <div className="flex justify-end gap-2 mt-4 text-xs font-semibold">
                     <div className="px-3 py-1 bg-white border rounded shadow-sm text-gray-700 flex items-center gap-2">
-                        Restaurant: ID - <span className="text-red-600 font-bold">{user?.tenantId || 'N/A'}</span>
+                        Restaurant: ID - <span className="text-red-600 font-bold">{user?.tenantId || user?.Tenant?.id || 'N/A'}</span>
                         <button
                             onClick={copyTenantId}
                             className="ml-2 px-2 py-0.5 bg-gray-100 hover:bg-gray-200 rounded border text-[10px] uppercase"

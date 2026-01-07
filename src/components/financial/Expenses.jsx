@@ -1,198 +1,539 @@
-import React, { useState } from 'react';
-import { Search, ChevronDown, Plus, FileSpreadsheet, FileText, RotateCcw, Eye, Edit, Trash2, X, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, ChevronDown, Plus, FileSpreadsheet, FileText, RotateCcw, Eye, Edit, Trash2, X, Calendar, ArrowLeft } from 'lucide-react';
+import { ExpenseCategory } from './ExpenseCategory';
+import { WithdrawalListing } from './WithdrawalListing';
+import { WithdrawalMaster } from './WithdrawalMaster';
+import { CashTopUpListing } from './CashTopUpListing';
+import { CashTopUpMaster } from './CashTopUpMaster';
+import { financialService } from '../../services/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import toast from 'react-hot-toast';
 
 export function Expenses() {
-    // Mock Data based on reference
-    const [expenses] = useState([
-        { id: 1, ref: 'EX849', category: 'Utilities', desc: '', date: '24 Dec 2024', amount: '$200', status: 'Approved' },
-        { id: 2, ref: 'EX848', category: 'Office Supplies', desc: 'Office', date: '10 Dec 2024', amount: '$50', status: 'Pending' },
-        { id: 3, ref: 'EX847', category: 'Repairs & Maintenance', desc: '', date: '27 Nov 2024', amount: '$800', status: 'Approved' },
-        { id: 4, ref: 'EX846', category: 'Marketing', desc: 'Campaign', date: '18 Nov 2024', amount: '$100', status: 'Approved' },
-        { id: 5, ref: 'EX845', category: 'Travel Expenses', desc: 'Meeting', date: '06 Nov 2024', amount: '$700', status: 'Approved' },
-        { id: 6, ref: 'EX844', category: 'Employee Benefits', desc: 'Team Lunch', date: '25 Oct 2024', amount: '$1000', status: 'Pending' },
-        { id: 7, ref: 'EX843', category: 'Business Flight Ticket', desc: 'Flight tickets for meetings', date: '14 Oct 2024', amount: '$1200', status: 'Approved' },
-        { id: 8, ref: 'EX842', category: 'Chair Purchase', desc: 'Ergonomic chairs for staff', date: '03 Oct 2024', amount: '$750', status: 'Approved' },
-        { id: 9, ref: 'EX841', category: 'Plumbing', desc: 'Plumbing repairs in office', date: '20 Sep 2024', amount: '$450', status: 'Approved' },
-        { id: 10, ref: 'EX840', category: 'Internet Bill Payment', desc: 'Monthly internet subscription', date: '10 Sep 2024', amount: '$300', status: 'Pending' },
+    const [activeTab, setActiveTab] = useState('expense_listing');
+    const [expenses, setExpenses] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [categories, setCategories] = useState([]);
+
+    // Add Expense Flow State
+    const [isAddExpenseFlow, setIsAddExpenseFlow] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [expenseEntries, setExpenseEntries] = useState([
+        { id: 1, reason: '', amount: '', explanation: '', employee: 'Admin', paidFrom: 'Cash' }
     ]);
 
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
+        title: ''
+    });
 
-    return (
-        <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
-            {/* 1. Header Section */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
-                    <div className="text-sm text-gray-500">Manage Your Expenses</div>
-                </div>
-                <div className="flex items-center gap-2">
-                    {/* Action Icons */}
-                    <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-red-500 shadow-sm"><FileText className="w-4 h-4" /></button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-green-600 shadow-sm"><FileSpreadsheet className="w-4 h-4" /></button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><RotateCcw className="w-4 h-4" /></button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><ChevronDown className="w-4 h-4" /></button>
+    const [rawExpenses, setRawExpenses] = useState([]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
-                    {/* Main Action */}
-                    <button onClick={() => setIsAddModalOpen(true)} className="px-4 py-2 bg-orange-500 text-white rounded font-bold shadow-sm hover:bg-orange-600 flex items-center gap-2 ml-2">
-                        <Plus className="w-4 h-4" /> Add Expense
+    const tabs = [
+        { id: 'expense_listing', label: 'Expense Listing' },
+        { id: 'expense_master', label: 'Expense Master' },
+        { id: 'withdrawal_listing', label: 'Withdrawal Listing' },
+        { id: 'withdrawal_master', label: 'Withdrawal Master' },
+        { id: 'cash_topup_listing', label: 'Cash Top-Up Listing' },
+        { id: 'cash_topup_master', label: 'Cash Top-Up Master' },
+    ];
+
+    useEffect(() => {
+        if (activeTab === 'expense_listing') {
+            fetchExpenses();
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (isAddExpenseFlow) {
+            fetchMasterReasons();
+        }
+    }, [isAddExpenseFlow]);
+
+    const fetchExpenses = async () => {
+        try {
+            setLoading(true);
+            const res = await financialService.getExpenses(filters);
+
+            // Store raw expenses for editing
+            const rawData = res.data.data;
+            setRawExpenses(rawData);
+
+            // Aggregate by Reason
+            const aggregated = rawData.reduce((acc, curr) => {
+                const reason = curr.reason || 'Other';
+                if (!acc[reason]) {
+                    acc[reason] = {
+                        reason: reason,
+                        amount: 0,
+                        count: 0,
+                        entries: []
+                    };
+                }
+                acc[reason].amount += parseFloat(curr.amount);
+                acc[reason].count += 1;
+                acc[reason].entries.push(curr);
+                return acc;
+            }, {});
+
+            setExpenses(Object.values(aggregated).sort((a, b) => b.amount - a.amount));
+        } catch (error) {
+            console.error('Error fetching expenses:', error);
+            toast.error('Failed to load expenses');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchMasterReasons = async () => {
+        try {
+            const res = await financialService.getExpenseMaster();
+            setCategories(res.data.data);
+        } catch (error) {
+            console.error('Error fetching master reasons:', error);
+        }
+    };
+
+    const handleAddExpenseClick = () => {
+        setIsEditing(false);
+        setIsAddExpenseFlow(true);
+        setExpenseEntries([{ id: 1, reason: '', amount: '', explanation: '', employee: 'Admin', paidFrom: 'Cash' }]);
+    };
+
+    const handleEditDayClick = () => {
+        if (filters.startDate !== filters.endDate) return;
+
+        setSelectedDate(filters.startDate);
+        const entries = rawExpenses.map(exp => ({
+            id: exp.id,
+            reason: exp.reason,
+            amount: exp.amount,
+            explanation: exp.explanation || '',
+            employee: exp.employee || '',
+            paidFrom: exp.paidFrom || 'Cash',
+            isExisting: true
+        }));
+
+        if (entries.length === 0) {
+            setExpenseEntries([{ id: Date.now(), reason: '', amount: '', explanation: '', employee: 'Admin', paidFrom: 'Cash' }]);
+        } else {
+            setExpenseEntries(entries);
+        }
+
+        setIsEditing(true);
+        setIsAddExpenseFlow(true);
+    };
+
+    const setDatePreset = (preset) => {
+        const today = new Date();
+        let start = new Date();
+        let end = new Date();
+
+        switch (preset) {
+            case 'today':
+                break;
+            case 'yesterday':
+                start.setDate(today.getDate() - 1);
+                end.setDate(today.getDate() - 1);
+                break;
+            case 'this_week':
+                start.setDate(today.getDate() - today.getDay());
+                break;
+            case 'last_7':
+                start.setDate(today.getDate() - 7);
+                break;
+            case 'this_month':
+                start = new Date(today.getFullYear(), today.getMonth(), 1);
+                break;
+            case 'last_30':
+                start.setDate(today.getDate() - 30);
+                break;
+            default:
+                break;
+        }
+
+        const newFilters = {
+            ...filters,
+            startDate: start.toISOString().split('T')[0],
+            endDate: end.toISOString().split('T')[0]
+        };
+        setFilters(newFilters);
+        // We need to trigger fetch manually or rely on useEffect if we add filters to dep
+    };
+
+    // Update useEffect to watch filters
+    useEffect(() => {
+        if (activeTab === 'expense_listing') {
+            fetchExpenses();
+        }
+    }, [activeTab, filters.startDate, filters.endDate]);
+
+    const handleAddEntryRow = () => {
+        setExpenseEntries([...expenseEntries, { id: Date.now(), reason: '', amount: '', explanation: '', employee: '', paidFrom: 'Cash' }]);
+    };
+
+    const handleRemoveEntryRow = (id) => {
+        setExpenseEntries(expenseEntries.filter(e => e.id !== id));
+    };
+
+    const handleClearEntryRow = (id) => {
+        setExpenseEntries(expenseEntries.map(e => e.id === id ? { ...e, reason: '', amount: '', explanation: '', employee: '', paidFrom: 'Cash' } : e));
+    };
+
+    const handleEntryChange = (id, field, value) => {
+        setExpenseEntries(expenseEntries.map(e => e.id === id ? { ...e, [field]: value } : e));
+    };
+
+    const handleSaveExpenses = async () => {
+        const validEntries = expenseEntries.filter(e => e.reason && e.amount);
+        if (validEntries.length === 0) {
+            toast.error('Please add at least one valid expense (Reason and Amount required)');
+            return;
+        }
+
+        try {
+            if (isEditing) {
+                // To "Edit" a day, we clear all existing entries for that date and rebuild from UI list
+                await financialService.deleteExpensesByDate(selectedDate);
+            }
+
+            const payload = validEntries.map(e => ({
+                date: selectedDate,
+                reason: e.reason,
+                amount: parseFloat(e.amount),
+                explanation: e.explanation,
+                employee: e.employee,
+                paidFrom: e.paidFrom
+            }));
+
+            await financialService.createExpense(payload);
+            toast.success(isEditing ? 'Expenses for the day updated successfully' : 'Expenses saved successfully');
+            setIsAddExpenseFlow(false);
+            setExpenseEntries([{ id: 1, reason: '', amount: '', explanation: '', employee: 'Admin', paidFrom: 'Cash' }]);
+            fetchExpenses();
+        } catch (error) {
+            console.error('Error saving expenses:', error);
+            toast.error('Failed to save expenses');
+        }
+    };
+
+    // Chart Data Preparation
+    const chartData = expenses.slice(0, 10).map(e => ({
+        name: e.reason,
+        amount: parseFloat(e.amount)
+    }));
+
+    const grandTotal = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
+    if (isAddExpenseFlow) {
+        return (
+            <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
+                <div className="flex items-center gap-4 mb-4">
+                    <button onClick={() => setIsAddExpenseFlow(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                        <ArrowLeft className="w-6 h-6 text-gray-600" />
                     </button>
-                </div>
-            </div>
-
-            {/* 2. Main Content Card */}
-            <div className="bg-white border rounded-lg shadow-sm flex flex-col flex-1 overflow-hidden">
-                {/* 2a. Filter Row */}
-                <div className="p-4 border-b flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="relative w-full md:w-64">
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            className="w-full pl-9 pr-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
-                        />
-                        <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                    </div>
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                        <div className="relative">
-                            <button className="px-3 py-2 border rounded-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50 min-w-[100px] justify-between">
-                                Category <ChevronDown className="w-4 h-4 text-gray-400" />
-                            </button>
-                        </div>
-                        <div className="relative">
-                            <button className="px-3 py-2 border rounded-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50 min-w-[90px] justify-between">
-                                Status <ChevronDown className="w-4 h-4 text-gray-400" />
-                            </button>
-                        </div>
-                    </div>
+                    <h1 className="text-2xl font-bold text-gray-800">Add Expenses</h1>
                 </div>
 
-                {/* 2b. Data Table */}
-                <div className="flex-1 overflow-auto">
+                <div className="bg-white border rounded-lg shadow-sm p-6 flex-1 overflow-auto">
+                    <div className="mb-6">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Date :</label>
+                        <div className="relative w-64">
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500 pl-10"
+                            />
+                            <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-3 pointer-events-none" />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">Note: Only rows with reason & amount will get saved.</p>
+                        <p className="text-xs text-gray-500">Note: Record added from the web dashboard would not be visible in PoS</p>
+                    </div>
+
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-white text-xs font-bold text-gray-800 border-b">
+                        <thead className="bg-gray-50 text-xs font-bold text-gray-800 border-b">
                             <tr>
-                                <th className="p-4 w-10 text-center"><input type="checkbox" className="rounded border-gray-300" /></th>
-                                <th className="p-4">Reference</th>
-                                <th className="p-4">Category</th>
-                                <th className="p-4">Description</th>
-                                <th className="p-4">Date</th>
-                                <th className="p-4">Amount</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4 text-center">Actions</th>
+                                <th className="p-4 w-1/6">Reason</th>
+                                <th className="p-4 w-24">Amount</th>
+                                <th className="p-4 w-1/4">Explanation</th>
+                                <th className="p-4 w-1/6">Employee</th>
+                                <th className="p-4 w-1/6">Paid From</th>
+                                <th className="p-4 text-center w-24">Action</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm divide-y">
-                            {expenses.map((exp) => (
-                                <tr key={exp.id} className="hover:bg-gray-50">
-                                    <td className="p-4 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
-                                    <td className="p-4 text-gray-600">{exp.ref}</td>
-                                    <td className="p-4 font-bold text-gray-800">{exp.category}</td>
-                                    <td className="p-4 text-gray-500 truncate max-w-[200px]">{exp.desc}</td>
-                                    <td className="p-4 text-gray-600">{exp.date}</td>
-                                    <td className="p-4 text-gray-800">{exp.amount}</td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold text-white ${exp.status === 'Approved' ? 'bg-green-600' : 'bg-cyan-500'}`}>
-                                            {exp.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex justify-center gap-2">
-                                            <button className="p-1.5 border rounded hover:bg-gray-50 text-gray-500"><Eye className="w-3 h-3" /></button>
-                                            <button className="p-1.5 border rounded hover:bg-gray-50 text-green-600"><Edit className="w-3 h-3" /></button>
-                                            <button className="p-1.5 border rounded hover:bg-gray-50 text-red-500"><Trash2 className="w-3 h-3" /></button>
+                            {expenseEntries.map((entry) => (
+                                <tr key={entry.id} className="hover:bg-gray-50">
+                                    <td className="p-2">
+                                        <div className="relative">
+                                            <input
+                                                list={`master-reasons-${entry.id}`}
+                                                className="w-full border rounded p-2 focus:outline-none focus:border-red-500"
+                                                placeholder="Type or select reason"
+                                                value={entry.reason}
+                                                onChange={(e) => handleEntryChange(entry.id, 'reason', e.target.value)}
+                                            />
+                                            <datalist id={`master-reasons-${entry.id}`}>
+                                                {categories.map((reason, idx) => (
+                                                    <option key={idx} value={reason.get ? reason.get('title') : reason.title} />
+                                                ))}
+                                            </datalist>
                                         </div>
+                                    </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="number"
+                                            className="w-full border rounded p-2 focus:outline-none focus:border-orange-500"
+                                            placeholder="0"
+                                            value={entry.amount}
+                                            onChange={(e) => handleEntryChange(entry.id, 'amount', e.target.value)}
+                                        />
+                                    </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="text"
+                                            className="w-full border rounded p-2 focus:outline-none focus:border-orange-500"
+                                            placeholder="Description"
+                                            value={entry.explanation}
+                                            onChange={(e) => handleEntryChange(entry.id, 'explanation', e.target.value)}
+                                        />
+                                    </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="text"
+                                            className="w-full border rounded p-2 focus:outline-none focus:border-red-500"
+                                            placeholder="Enter name"
+                                            value={entry.employee}
+                                            onChange={(e) => handleEntryChange(entry.id, 'employee', e.target.value)}
+                                        />
+                                    </td>
+                                    <td className="p-2">
+                                        <select
+                                            className="w-full border rounded p-2 bg-white focus:outline-none focus:border-orange-500"
+                                            value={entry.paidFrom}
+                                            onChange={(e) => handleEntryChange(entry.id, 'paidFrom', e.target.value)}
+                                        >
+                                            <option value="Cash">From Cash</option>
+                                            <option value="Bank">From Bank</option>
+                                        </select>
+                                    </td>
+                                    <td className="p-2 text-center">
+                                        <button onClick={() => handleClearEntryRow(entry.id)} className="px-3 py-1 border rounded hover:bg-gray-100 text-gray-600 text-xs font-medium">Clear</button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+
+                    <div className="mt-4">
+                        <button onClick={handleAddEntryRow} className="text-orange-500 font-medium text-sm hover:underline flex items-center gap-1">
+                            <Plus className="w-4 h-4" /> Add More Rows
+                        </button>
+                    </div>
                 </div>
 
-                {/* 2c. Pagination */}
-                <div className="p-4 border-t flex justify-between items-center text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                        Row Per Page
-                        <select className="border rounded px-2 py-1 bg-white">
-                            <option>10</option>
-                        </select>
-                        Entries
+                <div className="flex justify-end gap-4 mt-4">
+                    <button onClick={() => setIsAddExpenseFlow(false)} className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded font-bold hover:bg-gray-50">Cancel</button>
+                    <button onClick={handleSaveExpenses} className="px-6 py-2 bg-red-700 text-white rounded font-bold hover:bg-red-800 shadow-sm">Save Changes</button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                {/* Tabs */}
+                <div className="flex gap-6 border-b w-full overflow-x-auto">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`pb-3 text-sm font-bold whitespace-nowrap transition-colors ${activeTab === tab.id
+                                ? 'text-gray-900 border-b-2 border-red-500'
+                                : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex items-center gap-2 ml-4 shrink-0">
+                    {activeTab === 'expense_listing' && (
+                        <button onClick={handleAddExpenseClick} className="px-4 py-2 bg-red-600 text-white rounded font-bold shadow-sm hover:bg-red-700 flex items-center gap-2 text-sm">
+                            Add Expense
+                        </button>
+                    )}
+                    <div className="text-sm font-bold text-gray-700 whitespace-nowrap">
+                        Grand Total : <span className="text-red-600">₹ {grandTotal.toLocaleString()}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button className="p-1 rounded hover:bg-gray-100 text-gray-500">&lt;</button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-orange-500 text-white rounded-full text-sm font-bold shadow-lg shadow-orange-200">1</button>
-                        <button className="p-1 rounded hover:bg-gray-100 text-gray-500">&gt;</button>
-                    </div>
+                    <button className="px-3 py-2 bg-white border rounded text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
+                        Export Excel <ChevronDown className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
-            {/* 3. Add Expense Modal */}
-            {isAddModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg w-[600px] shadow-2xl animate-in fade-in zoom-in duration-200">
-                        {/* Modal Header */}
-                        <div className="flex justify-between items-center p-6 border-b">
-                            <h2 className="text-xl font-bold text-gray-800">Add Expense</h2>
-                            <button onClick={() => setIsAddModalOpen(false)} className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
-                                <X className="w-4 h-4" />
-                            </button>
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+                {activeTab === 'expense_listing' && (
+                    <div className="flex flex-col h-full gap-4">
+                        {/* Date Presets */}
+                        <div className="bg-white p-3 rounded-lg shadow-sm border flex flex-wrap gap-2 items-center">
+                            <span className="text-xs font-bold text-gray-400 uppercase mr-2">Quick Filters:</span>
+                            {[
+                                { id: 'today', label: 'Today' },
+                                { id: 'yesterday', label: 'Yesterday' },
+                                { id: 'this_week', label: 'This Week' },
+                                { id: 'last_7', label: 'Last 7 Days' },
+                                { id: 'this_month', label: 'This Month' },
+                                { id: 'last_30', label: 'Last 30 Days' }
+                            ].map(preset => (
+                                <button
+                                    key={preset.id}
+                                    onClick={() => setDatePreset(preset.id)}
+                                    className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${(preset.id === 'today' && filters.startDate === filters.endDate && filters.startDate === new Date().toISOString().split('T')[0])
+                                        ? 'bg-red-50 border-red-200 text-red-600'
+                                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {preset.label}
+                                </button>
+                            ))}
+
+                            {filters.startDate === filters.endDate && (
+                                <button
+                                    onClick={handleEditDayClick}
+                                    className="ml-auto px-4 py-1.5 bg-orange-500 text-white text-xs font-bold rounded-full hover:bg-orange-600 shadow-sm flex items-center gap-1.5"
+                                >
+                                    <Edit className="w-3 h-3" /> Manage This Day
+                                </button>
+                            )}
                         </div>
 
-                        {/* Modal Body */}
-                        <div className="p-6 grid grid-cols-2 gap-6">
-                            <div className="col-span-2 space-y-1">
-                                <label className="text-sm font-semibold text-gray-700">Expense <span className="text-red-500">*</span></label>
-                                <input type="text" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                        {/* Filters */}
+                        <div
+                            className="bg-white p-3 rounded-lg shadow-sm border flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                        >
+                            <div className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                <Search className="w-4 h-4 text-gray-500" /> Custom Search
                             </div>
+                            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isSearchExpanded ? 'rotate-180' : ''}`} />
+                        </div>
 
-                            <div className="col-span-2 space-y-1">
-                                <label className="text-sm font-semibold text-gray-700">Description</label>
-                                <textarea rows="3" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500 resize-none"></textarea>
-                            </div>
-
-                            <div className="space-y-1 relative">
-                                <label className="text-sm font-semibold text-gray-700">Category <span className="text-red-500">*</span></label>
-                                <div className="relative">
-                                    <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
-                                        <option>Select</option>
-                                        <option>Utilities</option>
-                                        <option>Office Supplies</option>
-                                    </select>
-                                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                        {isSearchExpanded && (
+                            <div className="bg-white p-4 rounded-lg shadow-sm border flex flex-wrap items-end gap-4 animate-in slide-in-from-top-2 duration-200">
+                                <div className="w-full">
+                                    <div className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                        <Search className="w-4 h-4" /> Refine Selection
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="space-y-1 relative">
-                                <label className="text-sm font-semibold text-gray-700">Date <span className="text-red-500">*</span></label>
-                                <input type="text" placeholder="dd/mm/yyyy" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
-                                <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-9 pointer-events-none" />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-sm font-semibold text-gray-700">Amount <span className="text-red-500">*</span></label>
-                                <input type="text" className="w-full border rounded p-2.5 text-sm focus:outline-none focus:border-orange-500" />
-                            </div>
-
-                            <div className="space-y-1 relative">
-                                <label className="text-sm font-semibold text-gray-700">Status <span className="text-red-500">*</span></label>
-                                <div className="relative">
-                                    <select className="w-full border rounded p-2.5 text-sm appearance-none bg-white focus:outline-none focus:border-orange-500">
-                                        <option>Select</option>
-                                        <option>Approved</option>
-                                        <option>Pending</option>
-                                    </select>
-                                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">Start Date</label>
+                                    <div className="relative">
+                                        <input
+                                            type="date"
+                                            className="border rounded p-2 text-sm w-40 pl-8"
+                                            value={filters.startDate}
+                                            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                                        />
+                                        <Calendar className="w-4 h-4 text-gray-400 absolute left-2 top-2.5 pointer-events-none" />
+                                    </div>
                                 </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">End Date</label>
+                                    <div className="relative">
+                                        <input
+                                            type="date"
+                                            className="border rounded p-2 text-sm w-40 pl-8"
+                                            value={filters.endDate}
+                                            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                                        />
+                                        <Calendar className="w-4 h-4 text-gray-400 absolute left-2 top-2.5 pointer-events-none" />
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-[200px]">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">Title</label>
+                                    <input
+                                        type="text"
+                                        className="border rounded p-2 text-sm w-full"
+                                        value={filters.title}
+                                        onChange={(e) => setFilters({ ...filters, title: e.target.value })}
+                                    />
+                                </div>
+                                <button onClick={fetchExpenses} className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 text-sm">Search</button>
+                            </div>
+                        )}
+
+                        {/* Chart Placeholder */}
+                        <div className="bg-white p-6 rounded-lg shadow-sm border min-h-[200px] flex flex-col justify-center">
+                            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                                    <FileSpreadsheet className="w-4 h-4" />
+                                </div>
+                                Top 10 Expenses(View Chart) <ChevronDown className="w-4 h-4" />
+                            </h3>
+                            {/* Simple Bar Chart Visualization */}
+                            <div className="h-32 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={chartData}>
+                                        <Tooltip />
+                                        <Bar dataKey="amount" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
 
-                        {/* Modal Footer */}
-                        <div className="p-6 border-t flex justify-end gap-4">
-                            <button onClick={() => setIsAddModalOpen(false)} className="px-6 py-2.5 bg-gray-800 text-white rounded font-bold hover:bg-gray-900">Cancel</button>
-                            <button className="px-6 py-2.5 bg-orange-500 text-white rounded font-bold hover:bg-orange-600 shadow-lg shadow-orange-200">Add Expense</button>
+                        {/* Table */}
+                        <div className="bg-white border rounded-lg shadow-sm flex-1 overflow-auto">
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : (
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-blue-50/50 text-xs font-bold text-gray-800 border-b">
+                                        <tr>
+                                            <th className="p-4">Title</th>
+                                            <th className="p-4">Total Expense Reported (₹)</th>
+                                            <th className="p-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-sm divide-y">
+                                        {expenses.length === 0 ? (
+                                            <tr><td colSpan="3" className="p-4 text-center text-gray-500">No expenses found</td></tr>
+                                        ) : (
+                                            expenses.map((exp) => (
+                                                <tr key={exp.id} className="hover:bg-gray-50">
+                                                    <td className="p-4 font-medium text-gray-800">{exp.reason}</td>
+                                                    <td className="p-4 text-gray-600">{parseFloat(exp.amount).toFixed(2)}</td>
+                                                    <td className="p-4 text-right">
+                                                        <button className="text-xs text-gray-500 hover:text-blue-600 underline">View details</button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+
+                        <div className="text-xs font-bold text-gray-500">
+                            Showing 1 to {expenses.length} of {expenses.length} records
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+
+                {activeTab === 'expense_master' && <ExpenseCategory />}
+                {activeTab === 'withdrawal_listing' && <WithdrawalListing />}
+                {activeTab === 'withdrawal_master' && <WithdrawalMaster />}
+                {activeTab === 'cash_topup_listing' && <CashTopUpListing />}
+                {activeTab === 'cash_topup_master' && <CashTopUpMaster />}
+            </div>
         </div>
     );
 }

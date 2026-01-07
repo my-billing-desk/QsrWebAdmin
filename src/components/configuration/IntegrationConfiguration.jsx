@@ -27,20 +27,45 @@ export default function IntegrationConfiguration({ integration, onClose }) {
         autoAccept: integration.autoAccept || false,
         apiKey: integration.apiKey || '',
         merchantId: integration.merchantId || '',
+        subscriberId: integration.subscriberId || '',
+        ukId: integration.ukId || '',
+        signingPublicKey: integration.signingPublicKey || '',
+        encryptionPublicKey: integration.encryptionPublicKey || '',
+        privateKey: integration.privateKey || '',
+        bppUri: integration.bppUri || '',
+        cityCode: integration.cityCode || 'std:080',
+        domain: integration.domain || 'RET11',
         verificationStatus: integration.verificationStatus || 'none'
     });
 
     const handleVerify = async () => {
-        if (!config.apiKey || !config.merchantId) {
-            alert("API Key and Merchant ID are required for verification");
-            return;
+        const isOndc = integrationName === 'ONDC';
+        if (isOndc) {
+            if (!config.subscriberId || !config.ukId || !config.privateKey) {
+                alert("Subscriber ID, Unique Key ID and Secret Key are required for ONDC");
+                return;
+            }
+        } else {
+            if (!config.apiKey || !config.merchantId) {
+                alert("API Key and Merchant ID are required for verification");
+                return;
+            }
         }
+
         setLoading(true);
         try {
             // First save credentials
             await aggregatorService.toggle(integration.id, {
                 apiKey: config.apiKey,
-                merchantId: config.merchantId
+                merchantId: config.merchantId,
+                subscriberId: config.subscriberId,
+                ukId: config.ukId,
+                signingPublicKey: config.signingPublicKey,
+                encryptionPublicKey: config.encryptionPublicKey,
+                privateKey: config.privateKey,
+                bppUri: config.bppUri,
+                cityCode: config.cityCode,
+                domain: config.domain
             });
             // Then verify
             const res = await aggregatorService.verify(integration.id);
@@ -134,38 +159,140 @@ export default function IntegrationConfiguration({ integration, onClose }) {
                             <MessageSquare size={10} /> How to get this?
                         </a>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1 capitalize">
-                                {integrationName} API Key *
-                                <span className="ml-2 font-normal text-gray-400">(Available in {integrationName} Partner Portal)</span>
-                            </label>
-                            <input
-                                type="password"
-                                value={config.apiKey}
-                                onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
-                                placeholder="Enter your vendor API key"
-                            />
+                    {integrationName === 'ONDC' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Subscriber ID *</label>
+                                <input
+                                    type="text"
+                                    value={config.subscriberId || ''}
+                                    onChange={(e) => setConfig({ ...config, subscriberId: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                    placeholder="e.g., your-bpp-id.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Unique Key ID *</label>
+                                <input
+                                    type="text"
+                                    value={config.ukId || ''}
+                                    onChange={(e) => setConfig({ ...config, ukId: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                    placeholder="e.g., ukid-123"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Secret Key (Private Key) *</label>
+                                <input
+                                    type="password"
+                                    value={config.privateKey || ''}
+                                    onChange={(e) => setConfig({ ...config, privateKey: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none font-mono"
+                                    placeholder="Paste your 32-byte Ed25519 private key..."
+                                />
+                                <p className="text-[10px] text-gray-500 mt-1">This is never shared. It is used locally to sign Beckn protocol requests.</p>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Signing Public Key</label>
+                                <textarea
+                                    value={config.signingPublicKey || ''}
+                                    onChange={(e) => setConfig({ ...config, signingPublicKey: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none h-20 font-mono text-[10px]"
+                                    placeholder="Paste your signing public key here..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Encryption Public Key</label>
+                                <textarea
+                                    value={config.encryptionPublicKey || ''}
+                                    onChange={(e) => setConfig({ ...config, encryptionPublicKey: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none h-20 font-mono text-[10px]"
+                                    placeholder="Paste your encryption public key (X25519) here..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">City Code</label>
+                                <input
+                                    type="text"
+                                    value={config.cityCode || ''}
+                                    onChange={(e) => setConfig({ ...config, cityCode: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                    placeholder="std:080"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">Domain</label>
+                                <input
+                                    type="text"
+                                    value={config.domain || ''}
+                                    onChange={(e) => setConfig({ ...config, domain: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                    placeholder="RET11"
+                                />
+                            </div>
+                            <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-100 mt-2">
+                                <label className="block text-xs font-bold text-blue-700 mb-2">ONDC Webhook / Callback URL</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        value={`${window.location.origin.replace('5173', '5001')}/api/ondc/search`}
+                                        className="flex-1 p-2 bg-white border border-blue-200 rounded text-xs font-mono text-blue-800 focus:outline-none"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${window.location.origin.replace('5173', '5001')}/api/ondc/search`);
+                                            alert("URL Copied!");
+                                        }}
+                                        className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
+                                    >
+                                        Copy
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-blue-600 mt-2">Register this URL as your BPP URI in the ONDC Registry Portal.</p>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1">
-                                Merchant ID / Restaurant ID *
-                                <span className="ml-2 font-normal text-gray-400">(Unique ID for your outlet)</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={config.merchantId}
-                                onChange={(e) => setConfig({ ...config, merchantId: e.target.value })}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
-                                placeholder="e.g., 18274552"
-                            />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1 capitalize">
+                                    {integrationName} API Key *
+                                    <span className="ml-2 font-normal text-gray-400">(Available in {integrationName} Partner Portal)</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    value={config.apiKey}
+                                    onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                    placeholder="Enter your vendor API key"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">
+                                    Merchant ID / Restaurant ID *
+                                    <span className="ml-2 font-normal text-gray-400">(Unique ID for your outlet)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={config.merchantId}
+                                    onChange={(e) => setConfig({ ...config, merchantId: e.target.value })}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                                    placeholder="e.g., 18274552"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100/50">
                         <h4 className="text-[11px] font-bold text-blue-900 mb-2 border-b border-blue-100 pb-1">Step-by-Step Guide: How to get credentials</h4>
                         <div className="space-y-3">
-                            {integrationName === 'Swiggy' ? (
+                            {integrationName === 'ONDC' ? (
+                                <div className="text-[10px] text-blue-800 leading-relaxed font-medium">
+                                    <p className="mb-1">1. Register as a Seller App on the <strong>ONDC Registry</strong>.</p>
+                                    <p className="mb-1">2. Generate your <strong>Signing Public/Private Keys</strong>.</p>
+                                    <p className="mb-1">3. Use the <strong>ondc-node</strong> library to handle authorization headers.</p>
+                                    <p>4. Configure your callback URL as: <code>{window.location.origin}/api/ondc/search</code> on your gateway.</p>
+                                </div>
+                            ) : integrationName === 'Swiggy' ? (
                                 <div className="text-[10px] text-blue-800 leading-relaxed font-medium">
                                     <p className="mb-1">1. Log in to <strong>partner.swiggy.com</strong></p>
                                     <p className="mb-1">2. Go to <strong>Settings</strong> → <strong>POS Integration</strong></p>

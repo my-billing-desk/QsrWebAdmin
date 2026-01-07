@@ -7,9 +7,9 @@ const ThemeContext = createContext();
 export function ThemeProvider({ children }) {
     const { token } = useAuth();
     const [theme, setTheme] = useState({
-        themeColor: '#10b981',
-        themeName: 'Emerald',
-        palette: ['#10b981', '#059669', '#34d399', '#6ee7b7', '#a7f3d0']
+        themeColor: '#10B981',
+        themeName: 'Emerald & Slate (Light)',
+        palette: ['#10B981', '#0F172A', '#F8FAFC', '#64748B', '#FFFFFF']
     });
 
     useEffect(() => {
@@ -28,7 +28,7 @@ export function ThemeProvider({ children }) {
 
                 if (res.data?.data) {
                     const data = res.data.data;
-                    let palette = ['#10b981', '#059669', '#34d399', '#6ee7b7', '#a7f3d0'];
+                    let palette = ['#10B981', '#0F172A', '#F8FAFC', '#64748B', '#FFFFFF'];
                     if (data.themePalette) {
                         try {
                             palette = JSON.parse(data.themePalette);
@@ -36,7 +36,9 @@ export function ThemeProvider({ children }) {
                             console.error('Failed to parse palette', e);
                         }
                     } else if (data.themeColor) {
-                        palette = [data.themeColor, data.themeColor, data.themeColor, data.themeColor, data.themeColor];
+                        // Generate a proper palette from the single color if possible, or use defaults with the primary color
+                        // [Primary, Sidebar, MainBG, TextMuted, Surface]
+                        palette = [data.themeColor, '#0F172A', '#F8FAFC', '#64748B', '#FFFFFF'];
                     }
 
                     const newTheme = {

@@ -23,30 +23,24 @@ export const AuthProvider = ({ children }) => {
 
                 // Restore session from local storage first for UI speed
                 const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
+                if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                    } catch (e) {
+                        console.error("Error parsing stored user", e);
+                        localStorage.removeItem('user');
+                    }
                 }
 
                 try {
                     // Fetch fresh profile from backend
                     const res = await api.get('/auth/me');
-                    if (res.data.success !== false) { // check for success flag if API wrapper returns it, but auth controller returns explicit object
-                        // AuthController 'sendLoginResponse' returns { token, user: {...} } or { user: ... } ? 
-                        // It returns res.json({ token, user: ... }).
-                        const { user: freshUser, token: freshToken, daysLeft } = res.data;
-                        if (daysLeft !== undefined) {
-                            freshUser.daysLeft = daysLeft;
-                            // Keep legacy for now if needed, or just use daysLeft
-                            freshUser.trialDaysLeft = daysLeft;
-                        }
+                    // /auth/me returns the user object directly
+                    const freshUser = res.data;
 
+                    if (freshUser && freshUser.id) {
                         setUser(freshUser);
                         localStorage.setItem('user', JSON.stringify(freshUser));
-                        if (freshToken) {
-                            // Update token if rotated (optional, but good practice)
-                            localStorage.setItem('token', freshToken);
-                            setToken(freshToken);
-                        }
                     }
                 } catch (error) {
                     console.error("Failed to refresh session:", error);

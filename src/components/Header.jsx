@@ -136,9 +136,8 @@ export function Header({ onToggleSidebar }) {
                         className="flex items-center gap-3 hover:bg-main-app p-1.5 rounded-lg transition-colors"
                         onClick={() => setShowDropdown(showDropdown === 'profile' ? null : 'profile')}
                     >
-                        <div className="w-9 h-9 rounded bg-orange-100 flex items-center justify-center overflow-hidden border border-orange-200">
-                            <img src="https://dreamspos.com/img/user-01.jpg" alt="user" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '' }} />
-                            {!user?.name && <span className="text-orange-500 font-bold">A</span>}
+                        <div className="w-9 h-9 rounded bg-orange-100 flex items-center justify-center overflow-hidden border border-orange-200 text-orange-600">
+                            <User className="w-5 h-5" />
                         </div>
                     </button>
 

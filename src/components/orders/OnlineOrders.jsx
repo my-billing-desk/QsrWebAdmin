@@ -1,21 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, Grid, LayoutGrid, HelpCircle, Download } from 'lucide-react';
+import { aggregatorService } from '../../services/api';
 
 export function OnlineOrders() {
     const [activeTab, setActiveTab] = useState('All');
     const [showChart, setShowChart] = useState(false);
+    const [integrations, setIntegrations] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Mock Aggregators matching reference
+    useEffect(() => {
+        async function loadAggregators() {
+            try {
+                setLoading(true);
+                const res = await aggregatorService.getAll();
+                // Filter only connected and verified ones
+                const activeOnes = res.data.filter(item => item.isConnected && item.verificationStatus === 'verified');
+                setIntegrations(activeOnes);
+            } catch (err) {
+                console.error("Failed to load aggregators in online activity", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadAggregators();
+    }, []);
+
+    // Prepare the list for tabs: "All" + active integrations
     const aggregators = [
         { id: 'All', label: 'All', logo: LayoutGrid, color: 'text-gray-600' },
-        { id: 'Zomato', label: 'Zomato', logo: null, img: 'https://upload.wikimedia.org/wikipedia/commons/7/75/Zomato_logo.png' }, // Placeholder URL or local asset
-        { id: 'Swiggy', label: 'Swiggy', logo: null, img: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' },
-        { id: 'Magicpin', label: 'Magicpin', logo: null, iconText: '📍' },
-        { id: 'Eksecond', label: 'Eksecond', logo: Grid, color: 'text-red-500' },
-        { id: 'Gintaa', label: 'Gintaa Food', logo: Grid, color: 'text-red-500' },
+        ...integrations.map(agg => ({
+            id: agg.slug,
+            label: agg.name,
+            logo: null,
+            img: agg.icon || (agg.slug === 'ondc' ? 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg' :
+                agg.slug === 'zomato' ? 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg' :
+                    agg.slug === 'swiggy' ? 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' : null),
+            iconText: agg.name[0]
+        }))
     ];
 
-    const [orders, setOrders] = useState([]); // Mock empty for "No Record Found" state first
+    const [orders, setOrders] = useState([]);
+    const [fetchingOrders, setFetchingOrders] = useState(false);
+
+    useEffect(() => {
+        async function fetchOrders() {
+            try {
+                setFetchingOrders(true);
+                const params = {};
+                if (activeTab !== 'All') {
+                    // Normalize slug to match source in DB (e.g. 'ondc' -> 'ONDC')
+                    params.source = activeTab.toUpperCase();
+                }
+                const res = await orderService.getAll(params);
+                setOrders(res.data);
+            } catch (err) {
+                console.error("Failed to fetch orders", err);
+            } finally {
+                setFetchingOrders(false);
+            }
+        }
+        fetchOrders();
+    }, [activeTab]);
 
     return (
         <div className="flex flex-col h-full bg-white font-sans overflow-hidden">
@@ -106,8 +151,52 @@ export function OnlineOrders() {
                         <div className="col-span-1 text-right">Actions</div>
                     </div>
 
-                    {/* Empty State */}
-                    {orders.length === 0 && (
+                    {/* Data Rows */}
+                    {fetchingOrders ? (
+                        <div className="flex items-center justify-center p-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+                        </div>
+                    ) : orders.length > 0 ? (
+                        <div className="divide-y">
+                            {orders.map(order => (
+                                <div key={order.id} className="grid grid-cols-12 p-3 text-xs text-gray-700 hover:bg-gray-50 items-center">
+                                    <div className="col-span-1 font-bold">#{order.orderNumber.split('-').pop()}</div>
+                                    <div className="col-span-2">
+                                        <div className="font-bold text-gray-800">Sunburst Stack</div>
+                                        <div className="text-blue-500">{order.source}</div>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <div>{order.orderType}</div>
+                                        <div className="text-gray-400">Not Assigned</div>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <div className="font-bold">{order.customerName}</div>
+                                        <div>{order.customerPhone || '-'}</div>
+                                    </div>
+                                    <div className="col-span-1 text-center font-mono">1234</div>
+                                    <div className="col-span-1">
+                                        {new Date(order.createdAt).toLocaleDateString()}<br />
+                                        {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="col-span-1 text-center font-bold bg-green-50/30 py-4 border-x border-green-100/50">
+                                        ₹{parseFloat(order.totalAmount).toFixed(2)}
+                                    </div>
+                                    <div className="col-span-1 text-center">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${order.status === 'placed' ? 'bg-blue-100 text-blue-700' :
+                                                order.status === 'preparing' ? 'bg-yellow-100 text-yellow-700' :
+                                                    order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                        order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                                            }`}>
+                                            {order.status}
+                                        </span>
+                                    </div>
+                                    <div className="col-span-1 text-right">
+                                        <button className="text-blue-600 font-bold hover:underline">Details</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
                         <div className="flex flex-col items-center justify-center p-12 h-64">
                             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
                                 <Search className="w-8 h-8" />

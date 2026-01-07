@@ -4,14 +4,17 @@ import {
     ShoppingCart, Truck, Calculator, Users, CreditCard, Monitor, Award,
     Zap, Share2, Layers
 } from 'lucide-react';
-import { aggregatorService } from '../services/api';
+import { aggregatorService, subscriptionService } from '../services/api';
 import IntegrationDetail from './configuration/IntegrationDetail';
+import { toast } from 'react-hot-toast';
 
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function Marketplace() {
     const [activeTab, setActiveTab] = useState('integration');
     const [integrations, setIntegrations] = useState([]);
+    const [dbSubscriptions, setDbSubscriptions] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedIntegration, setSelectedIntegration] = useState(null);
 
     // QR Code Modal State
@@ -19,80 +22,105 @@ export default function Marketplace() {
     const [qrType, setQrType] = useState('dine-in'); // 'dine-in' | 'take-away'
     const [tableNo, setTableNo] = useState('1');
 
-    // Mock Data for Services Tab
-    const servicesCategories = [
-        {
-            title: 'POS Plans', items: [
-                { id: 1, title: 'POS Subscription - Renewal', icon: Monitor, label: 'Renewal' },
-                { id: 2, title: ' - Growth Plan', icon: Layers, label: 'Explore Now' },
-                { id: 3, title: ' - Scale Plan', icon: Layers, label: 'Explore Now' },
-            ]
-        },
-        {
-            title: 'Easy Operations', items: [
-                { id: 4, title: 'Kitchen Display System (KDS)', icon: Monitor, label: 'Free Trial', badge: '7 Days Free' },
-                { id: 5, title: 'Inventory Application', icon: Layers, label: 'Activated', badge: 'Active' },
-                { id: 6, title: 'Captain Application', icon: Users, label: 'Explore Now' },
-            ]
-        }
-    ];
-
-    // Mock Data for Active Subscription Tab
-    const subscriptions = [
-        { id: 1, title: ' Scan & Order', expiry: '05 Oct 2025', price: '4,500', tax: '+ Taxes', status: 'Active', isScanOrder: true },
-        { id: 2, title: 'WhatsApp Alerts', expiry: '14 Dec 2025', price: '1000', tax: '+ Taxes', status: 'Active' },
-        { id: 3, title: 'POS Subscription', expiry: '20 Feb 2026', price: '7000', tax: '+ Taxes', status: 'Active' },
-    ];
-
     useEffect(() => {
-        // Fetch real aggregators for the "Online Orders" section
-        async function loadAggregators() {
-            try {
-                const res = await aggregatorService.getAll();
-                const backendAggs = res.data.map(agg => ({
-                    ...agg,
-                    category: 'Online Orders',
-                    status: agg.isConnected ? 'Activated' : 'Explore Now',
-                    // Use higher res icons
-                    icon: agg.slug === 'zomato' ? 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg' :
-                        agg.slug === 'swiggy' ? 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' : agg.icon
-                }));
-
-                // If backend is empty (though we just seeded), provide placeholders
-                const onlineOrders = backendAggs.length > 0 ? backendAggs : [
-                    { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Explore Now', isConnected: false },
-                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now', isConnected: false },
-                    { id: 'ondc', name: 'ONDC', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg', status: 'Explore Now', isConnected: false }
-                ];
-
-                const otherIntegrations = [
-                    { id: 101, name: 'Shadowfax', category: 'Order Delivery', icon: null, status: 'Explore Now' },
-                    { id: 102, name: 'Dunzo', category: 'Order Delivery', icon: null, status: 'Explore Now' },
-                    { id: 103, name: 'Tally', category: 'Accounting', icon: null, status: 'Explore Now' },
-                    { id: 104, name: 'Zoho Books', category: 'Accounting', icon: null, status: 'Explore Now' },
-                    { id: 105, name: 'Bingage', category: 'Loyalty Programs', icon: null, status: 'Explore Now' },
-                    { id: 106, name: 'Reelo', category: 'Loyalty Programs', icon: null, status: 'Explore Now' },
-                    { id: 107, name: 'Razorpay', category: 'Payments', icon: null, status: 'Explore Now' },
-                    { id: 108, name: 'Paytm', category: 'Payments', icon: null, status: 'Explore Now' },
-                ];
-                setIntegrations([...onlineOrders, ...otherIntegrations]);
-            } catch (e) {
-                console.error("Failed to load aggregators", e);
-                const fallback = [
-                    { id: 'zomato', name: 'Zomato', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg', status: 'Explore Now' },
-                    { id: 'swiggy', name: 'Swiggy', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg', status: 'Explore Now' },
-                    { id: 'ondc', name: 'ONDC', category: 'Online Orders', icon: 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg', status: 'Explore Now' }
-                ];
-                setIntegrations(fallback);
-            }
-        }
-        loadAggregators();
+        loadPageData();
     }, []);
+
+    async function loadPageData() {
+        try {
+            setLoading(true);
+            const [aggRes, subRes] = await Promise.allSettled([
+                aggregatorService.getAll(),
+                subscriptionService.getAll()
+            ]);
+
+            let currentIntegrations = [];
+            let currentSubs = [];
+
+            if (aggRes.status === 'fulfilled' && aggRes.value.data) {
+                currentIntegrations = aggRes.value.data;
+            }
+
+            if (subRes.status === 'fulfilled' && subRes.value.data) {
+                currentSubs = subRes.value.data;
+            }
+
+            // If no aggregators found, try to sync
+            if (currentIntegrations.length === 0) {
+                try {
+                    await aggregatorService.sync();
+                    const reRes = await aggregatorService.getAll();
+                    currentIntegrations = reRes.data || [];
+                } catch (syncErr) {
+                    console.error("Sync failed", syncErr);
+                }
+            }
+
+            // Final fallback if still empty
+            if (currentIntegrations.length === 0) {
+                currentIntegrations = [
+                    { id: 'ondc', name: 'ONDC', slug: 'ondc', category: 'Online Orders', isConnected: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg' },
+                    { id: 'zomato', name: 'Zomato', slug: 'zomato', category: 'Online Orders', isConnected: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg' },
+                    { id: 'swiggy', name: 'Swiggy', slug: 'swiggy', category: 'Online Orders', isConnected: false, icon: 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' }
+                ];
+            }
+
+            setIntegrations(currentIntegrations);
+            setDbSubscriptions(currentSubs);
+        } catch (e) {
+            console.error("Critical Marketplace Error", e);
+            toast.error("Marketplace is operating in offline mode");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const iconMap = {
+        'qrcode': ShoppingCart,
+        'message': Share2,
+        'monitor': Monitor,
+        'layers': Layers,
+        'users': Users
+    };
+
+    // Transform DB subscriptions into categories for UI
+    const servicesCategories = dbSubscriptions.filter(s => s.category !== 'Active Subscription').reduce((acc, sub) => {
+        const cat = acc.find(c => c.title === sub.category);
+        const item = {
+            id: sub.id,
+            title: sub.serviceName,
+            icon: iconMap[sub.iconName] || Layers,
+            label: sub.status === 'active' ? 'Activated' : 'Explore Now',
+            badge: sub.badge
+        };
+        if (cat) {
+            cat.items.push(item);
+        } else {
+            acc.push({ title: sub.category, items: [item] });
+        }
+        return acc;
+    }, []);
+
+    const activeSubscriptions = dbSubscriptions.filter(s => s.category === 'Active Subscription').map(sub => ({
+        id: sub.id,
+        title: sub.serviceName,
+        expiry: sub.expiryDate ? new Date(sub.expiryDate).toLocaleDateString() : 'Available',
+        price: sub.price,
+        tax: '+ Taxes',
+        status: sub.status === 'active' ? 'Active' : 'Available',
+        isScanOrder: sub.slug === 'scan-order'
+    }));
 
     // Helper to group integrations by category
     const groupedIntegrations = integrations.reduce((acc, item) => {
         if (!acc[item.category]) acc[item.category] = [];
-        acc[item.category].push(item);
+        acc[item.category].push({
+            ...item,
+            // Fallback icons if not present in DB
+            icon: item.icon || (item.slug === 'ondc' ? 'https://upload.wikimedia.org/wikipedia/commons/2/29/ONDC_Official_Logo.svg' :
+                item.slug === 'zomato' ? 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg' :
+                    item.slug === 'swiggy' ? 'https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg' : null)
+        });
         return acc;
     }, {});
 
@@ -114,15 +142,38 @@ export default function Marketplace() {
         );
     }
 
+    const integratedPlatforms = integrations
+        .filter(item => item.isConnected && item.verificationStatus === 'verified')
+        .map(item => item.name);
+
     return (
         <div className="bg-gray-50 min-h-screen font-sans pb-10 relative">
+            {loading && (
+                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-sm font-bold text-gray-600">Syncing Marketplace...</p>
+                    </div>
+                </div>
+            )}
+
             {/* Find Next-Gen Tools Banner */}
             <div className="bg-gradient-to-r from-red-50 to-pink-100 p-8 mb-6 border-b border-pink-100 relative overflow-hidden">
                 <div className="relative z-10 max-w-3xl">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Next-Gen Tools To Revolutionalize</h1>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Restaurant Business</h2>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        {integratedPlatforms.length > 0
+                            ? "Your Connected Platforms"
+                            : "Connect Your Online Platforms"}
+                    </h1>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                        {integratedPlatforms.length > 0
+                            ? integratedPlatforms.join(", ")
+                            : "ONDC, Zomato & Swiggy"}
+                    </h2>
                     <div className="bg-black text-white text-xs inline-flex items-center px-3 py-1.5 rounded uppercase tracking-wider font-semibold">
-                        Explore 23+ Services & 40+ Integrations
+                        {integratedPlatforms.length > 0
+                            ? `Connected Platforms: ${integratedPlatforms.length}`
+                            : "Starting with ONDC Integration"}
                     </div>
                 </div>
                 {/* Illustration placeholder */}
@@ -189,8 +240,8 @@ export default function Marketplace() {
                     <div className="space-y-12">
                         {/* Category Filter Bar (Visual Only) */}
                         <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
-                            {['Online Orders', 'Order Delivery', 'Accounting', 'Loyalty Programs', 'Payments', 'Hardware'].map(cat => (
-                                <button key={cat} className="px-4 py-2 bg-white border border-gray-200 rounded text-xs font-medium text-gray-600 hover:bg-gray-50 whitespace-nowrap shadow-sm">
+                            {['Online Orders'].map(cat => (
+                                <button key={cat} className="px-4 py-2 bg-red-600 border border-red-600 rounded text-xs font-bold text-white whitespace-nowrap shadow-md">
                                     {cat}
                                 </button>
                             ))}
@@ -223,8 +274,8 @@ export default function Marketplace() {
                                             <h4 className="text-sm font-bold text-gray-800 mb-1">{item.name}</h4>
 
                                             <div className="mt-auto pt-3 w-full text-center">
-                                                {item.isConnected ? (
-                                                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Connected</span>
+                                                {item.isConnected && item.verificationStatus === 'verified' ? (
+                                                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Activated</span>
                                                 ) : (
                                                     <button className="text-xs font-bold text-orange-500 flex items-center justify-center gap-1 w-full hover:underline">
                                                         Explore Now <ChevronRight size={12} />
@@ -241,13 +292,15 @@ export default function Marketplace() {
 
                 {activeTab === 'subscription' && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {subscriptions.map(sub => (
+                        {activeSubscriptions.map(sub => (
                             <div key={sub.id} className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center hover:shadow-lg transition-transform hover:-translate-y-1">
                                 <div className="w-12 h-12 bg-red-100 text-red-600 rounded flex items-center justify-center mb-6">
                                     <FileCheck size={24} />
                                 </div>
                                 <h3 className="font-bold text-lg text-gray-800 mb-2">{sub.title}</h3>
-                                <p className="text-xs text-gray-500 mb-6 font-medium">Expired on : {sub.expiry}</p>
+                                <p className="text-xs text-gray-500 mb-6 font-medium">
+                                    {sub.status === 'Active' ? `Expires on : ${sub.expiry}` : 'Plan not activated'}
+                                </p>
 
                                 <div className="flex items-end gap-1 mb-8">
                                     <span className="text-3xl font-bold text-gray-800">₹ {sub.price}</span>

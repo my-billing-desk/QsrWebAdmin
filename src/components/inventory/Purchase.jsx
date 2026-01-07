@@ -5,9 +5,20 @@ import { inventoryService } from '../../services/api';
 
 export function Purchase() {
     const [purchases, setPurchases] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
+    const [rawMaterials, setRawMaterials] = useState([]);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [newPurchase, setNewPurchase] = useState({
+        supplierId: '',
+        invoiceDate: new Date().toISOString().split('T')[0],
+        invoiceNumber: '',
+        items: []
+    });
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         loadPurchases();
+        loadInitialData();
     }, []);
 
     const loadPurchases = async () => {
@@ -15,12 +26,22 @@ export function Purchase() {
             const res = await inventoryService.getPurchases();
             setPurchases(res.data);
         } catch (error) {
-            console.error(error);
+            console.error('Error loading purchases:', error);
         }
     };
 
-
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const loadInitialData = async () => {
+        try {
+            const [suppliersRes, materialsRes] = await Promise.all([
+                inventoryService.getSuppliers(),
+                inventoryService.getRawMaterials()
+            ]);
+            setSuppliers(suppliersRes.data);
+            setRawMaterials(materialsRes.data);
+        } catch (error) {
+            console.error('Error loading initial data:', error);
+        }
+    };
 
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
@@ -133,9 +154,15 @@ export function Purchase() {
                                         <label className="text-sm font-semibold text-gray-700">Supplier Name <span className="text-red-500">*</span></label>
                                         <div className="flex gap-2">
                                             <div className="relative flex-1">
-                                                <select className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm appearance-none bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600">
-                                                    <option>Select</option>
-                                                    <option>Apex Computers</option>
+                                                <select
+                                                    value={newPurchase.supplierId}
+                                                    onChange={(e) => setNewPurchase({ ...newPurchase, supplierId: e.target.value })}
+                                                    className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm appearance-none bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600"
+                                                >
+                                                    <option value="">Select Supplier</option>
+                                                    {suppliers.map(s => (
+                                                        <option key={s.id} value={s.id}>{s.name}</option>
+                                                    ))}
                                                 </select>
                                                 <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none" />
                                             </div>
@@ -145,23 +172,70 @@ export function Purchase() {
                                     <div className="space-y-1.5 relative">
                                         <label className="text-sm font-semibold text-gray-700">Purchase Date <span className="text-red-500">*</span></label>
                                         <div className="relative">
-                                            <input type="text" placeholder="19 Jan 2025" className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600" />
-                                            <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none" />
+                                            <input
+                                                type="date"
+                                                value={newPurchase.invoiceDate}
+                                                onChange={(e) => setNewPurchase({ ...newPurchase, invoiceDate: e.target.value })}
+                                                className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600"
+                                            />
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-sm font-semibold text-gray-700">Reference No.</label>
-                                        <input type="text" placeholder="REF-001" className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600" />
+                                        <input
+                                            type="text"
+                                            value={newPurchase.invoiceNumber}
+                                            onChange={(e) => setNewPurchase({ ...newPurchase, invoiceNumber: e.target.value })}
+                                            placeholder="REF-001"
+                                            className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600"
+                                        />
                                     </div>
                                 </div>
 
                                 {/* Product Search */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 relative">
                                     <label className="text-sm font-semibold text-gray-700">Product Name</label>
                                     <div className="relative">
-                                        <input type="text" placeholder="Please type product code and select..." className="w-full border border-gray-300 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 bg-gray-50" />
-                                        <svg className="w-5 h-5 text-gray-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                        <input
+                                            type="text"
+                                            placeholder="Search raw material to add..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full border border-gray-300 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 bg-gray-50"
+                                        />
+                                        <Search className="w-5 h-5 text-gray-400 absolute right-3 top-2.5" />
                                     </div>
+
+                                    {searchTerm && (
+                                        <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
+                                            {rawMaterials.filter(rm => rm.name.toLowerCase().includes(searchTerm.toLowerCase())).map(rm => (
+                                                <button
+                                                    key={rm.id}
+                                                    onClick={() => {
+                                                        const exists = newPurchase.items.find(i => i.rawMaterialId === rm.id);
+                                                        if (exists) {
+                                                            alert('Item already added');
+                                                        } else {
+                                                            setNewPurchase({
+                                                                ...newPurchase,
+                                                                items: [...newPurchase.items, {
+                                                                    rawMaterialId: rm.id,
+                                                                    name: rm.name,
+                                                                    quantity: 1,
+                                                                    price: rm.purchasePrice || 0,
+                                                                    unit: rm.unit
+                                                                }]
+                                                            });
+                                                        }
+                                                        setSearchTerm('');
+                                                    }}
+                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                                >
+                                                    {rm.name} ({rm.unit}) - Stock: {rm.currentStock}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Product Table */}
@@ -171,66 +245,81 @@ export function Purchase() {
                                             <tr>
                                                 <th className="p-3 font-semibold text-xs uppercase tracking-wider">Product</th>
                                                 <th className="p-3 font-semibold text-xs uppercase tracking-wider text-center">Qty</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Purchase Price($)</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Discount($)</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Tax(%)</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Tax Amount($)</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Unit Cost($)</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Total Cost($)</th>
+                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider text-center">Unit</th>
+                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Purchase Price</th>
+                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">Total Cost</th>
                                                 <th className="p-3 w-10 text-center"><Trash2 className="w-4 h-4 mx-auto text-gray-500" /></th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y text-gray-600 bg-white">
-                                            {/* Example Row 1 */}
-                                            <tr className="hover:bg-gray-50/50">
-                                                <td className="p-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded bg-gray-100 border flex items-center justify-center text-xs text-gray-500">Img</div>
-                                                        <span className="font-medium text-gray-800">Nike Jordan</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-3">
-                                                    <div className="flex items-center justify-center border rounded-md w-24 mx-auto">
-                                                        <button className="px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-orange-500 font-bold">-</button>
-                                                        <input type="text" value="2" className="w-full text-center text-sm focus:outline-none font-medium" readOnly />
-                                                        <button className="px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-orange-500 font-bold">+</button>
-                                                    </div>
-                                                </td>
-                                                <td className="p-3">2000.00</td>
-                                                <td className="p-3">500.00</td>
-                                                <td className="p-3">0.00</td>
-                                                <td className="p-3">0.00</td>
-                                                <td className="p-3">0.00</td>
-                                                <td className="p-3 text-gray-800 font-semibold">1500.00</td>
-                                                <td className="p-3 text-center">
-                                                    <button className="text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                </td>
-                                            </tr>
-                                            {/* Example Row 2 */}
-                                            <tr className="hover:bg-gray-50/50">
-                                                <td className="p-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded bg-gray-100 border flex items-center justify-center text-xs text-gray-500">Img</div>
-                                                        <span className="font-medium text-gray-800">Apple Series 5 Watch</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-3">
-                                                    <div className="flex items-center justify-center border rounded-md w-24 mx-auto">
-                                                        <button className="px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-orange-500 font-bold">-</button>
-                                                        <input type="text" value="2" className="w-full text-center text-sm focus:outline-none font-medium" readOnly />
-                                                        <button className="px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-orange-500 font-bold">+</button>
-                                                    </div>
-                                                </td>
-                                                <td className="p-3">3000.00</td>
-                                                <td className="p-3">400.00</td>
-                                                <td className="p-3">0.00</td>
-                                                <td className="p-3">0.00</td>
-                                                <td className="p-3">0.00</td>
-                                                <td className="p-3 text-gray-800 font-semibold">1700.00</td>
-                                                <td className="p-3 text-center">
-                                                    <button className="text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                </td>
-                                            </tr>
+                                            {newPurchase.items.map((item, idx) => (
+                                                <tr key={idx} className="hover:bg-gray-50/50">
+                                                    <td className="p-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded bg-gray-100 border flex items-center justify-center text-xs text-gray-500 font-bold">{item.name[0]}</div>
+                                                            <span className="font-medium text-gray-800">{item.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <div className="flex items-center justify-center border rounded-md w-24 mx-auto">
+                                                            <button
+                                                                onClick={() => {
+                                                                    const updated = [...newPurchase.items];
+                                                                    updated[idx].quantity = Math.max(1, updated[idx].quantity - 1);
+                                                                    setNewPurchase({ ...newPurchase, items: updated });
+                                                                }}
+                                                                className="px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-orange-500 font-bold"
+                                                            >-</button>
+                                                            <input
+                                                                type="number"
+                                                                value={item.quantity}
+                                                                onChange={(e) => {
+                                                                    const updated = [...newPurchase.items];
+                                                                    updated[idx].quantity = parseFloat(e.target.value) || 0;
+                                                                    setNewPurchase({ ...newPurchase, items: updated });
+                                                                }}
+                                                                className="w-full text-center text-sm focus:outline-none font-medium"
+                                                            />
+                                                            <button
+                                                                onClick={() => {
+                                                                    const updated = [...newPurchase.items];
+                                                                    updated[idx].quantity += 1;
+                                                                    setNewPurchase({ ...newPurchase, items: updated });
+                                                                }}
+                                                                className="px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-orange-500 font-bold"
+                                                            >+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-3 text-center text-gray-500 font-bold">{item.unit}</td>
+                                                    <td className="p-3">
+                                                        <input
+                                                            type="number"
+                                                            value={item.price}
+                                                            onChange={(e) => {
+                                                                const updated = [...newPurchase.items];
+                                                                updated[idx].price = parseFloat(e.target.value) || 0;
+                                                                setNewPurchase({ ...newPurchase, items: updated });
+                                                            }}
+                                                            className="w-24 border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                                        />
+                                                    </td>
+                                                    <td className="p-3 text-gray-800 font-semibold">₹{(item.quantity * item.price).toLocaleString()}</td>
+                                                    <td className="p-3 text-center">
+                                                        <button
+                                                            onClick={() => {
+                                                                const updated = newPurchase.items.filter((_, i) => i !== idx);
+                                                                setNewPurchase({ ...newPurchase, items: updated });
+                                                            }}
+                                                            className="text-gray-400 hover:text-red-500"
+                                                        ><Trash2 className="w-3.5 h-3.5" /></button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {newPurchase.items.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="6" className="p-10 text-center text-gray-400 italic">No items added yet. Search products above to add to this purchase.</td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
@@ -239,21 +328,9 @@ export function Purchase() {
                                 <div className="flex justify-end">
                                     <div className="w-full md:w-1/3">
                                         <div className="border rounded-md divide-y text-sm">
-                                            <div className="flex justify-between p-3">
-                                                <span className="text-gray-600">Order Tax</span>
-                                                <span className="font-medium text-gray-800">$ 0.00</span>
-                                            </div>
-                                            <div className="flex justify-between p-3">
-                                                <span className="text-gray-600">Discount</span>
-                                                <span className="font-medium text-gray-800">$ 0.00</span>
-                                            </div>
-                                            <div className="flex justify-between p-3">
-                                                <span className="text-gray-600">Shipping</span>
-                                                <span className="font-medium text-gray-800">$ 0.00</span>
-                                            </div>
                                             <div className="flex justify-between p-3 bg-gray-50 font-bold">
                                                 <span className="text-orange-600">Grand Total</span>
-                                                <span className="text-gray-900">$ 3200.00</span>
+                                                <span className="text-gray-900">₹{newPurchase.items.reduce((sum, i) => sum + (i.quantity * i.price), 0).toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -306,7 +383,37 @@ export function Purchase() {
                         {/* Modal Footer */}
                         <div className="p-5 border-t shrink-0 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
                             <button onClick={() => setIsAddModalOpen(false)} className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-md font-bold hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button className="px-6 py-2 bg-orange-500 text-white rounded-md font-bold hover:bg-orange-600 shadow-md transition-colors">Submit</button>
+                            <button
+                                onClick={async () => {
+                                    if (!newPurchase.supplierId || newPurchase.items.length === 0) {
+                                        alert('Please select a supplier and add at least one item');
+                                        return;
+                                    }
+                                    try {
+                                        const payload = {
+                                            supplierId: newPurchase.supplierId,
+                                            invoiceNumber: newPurchase.invoiceNumber,
+                                            invoiceDate: newPurchase.invoiceDate,
+                                            totalAmount: newPurchase.items.reduce((sum, i) => sum + (i.quantity * i.price), 0),
+                                            status: 'Completed',
+                                            items: newPurchase.items.map(i => ({
+                                                rawMaterialId: i.rawMaterialId,
+                                                quantity: i.quantity,
+                                                price: i.price,
+                                                unit: i.unit
+                                            }))
+                                        };
+                                        await inventoryService.createPurchase(payload);
+                                        setIsAddModalOpen(false);
+                                        setNewPurchase({ supplierId: '', invoiceDate: new Date().toISOString().split('T')[0], invoiceNumber: '', items: [] });
+                                        loadPurchases();
+                                    } catch (error) {
+                                        console.error('Error saving purchase:', error);
+                                        alert('Failed to save purchase');
+                                    }
+                                }}
+                                className="px-6 py-2 bg-orange-500 text-white rounded-md font-bold hover:bg-orange-600 shadow-md transition-colors"
+                            >Submit</button>
                         </div>
                     </div>
                 </div>

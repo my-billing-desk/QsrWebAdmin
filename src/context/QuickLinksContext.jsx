@@ -67,7 +67,6 @@ export const initialMenuGroups = [
         title: 'Financials',
         items: [
             { id: 'expenses', path: '/financial/expenses', label: 'Expenses', icon: Wallet },
-            { id: 'expense_category', path: '/financial/expense-category', label: 'Expense Category', icon: Layers },
         ]
     },
 

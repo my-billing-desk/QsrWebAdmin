@@ -99,16 +99,16 @@ export function InventoryLayout() {
     ];
 
     return (
-        <div className="flex h-screen bg-[#F8F9FC] dark:bg-gray-900 overflow-hidden font-sans">
+        <div className="flex h-screen font-sans overflow-hidden" style={{ backgroundColor: 'var(--bg-main)' }}>
             {/* Inventory Sidebar */}
-            <div className="w-72 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-r border-gray-100 dark:border-gray-700 flex flex-col h-full overflow-y-auto shrink-0 z-30 shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all">
+            <div className="w-72 flex flex-col h-full overflow-y-auto shrink-0 z-30 shadow-sm transition-all border-r" style={{ backgroundColor: 'var(--bg-sidebar)', borderColor: 'var(--border-color)' }}>
                 {/* Header */}
-                <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-gray-700 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+                <div className="h-20 flex items-center px-6 border-b sticky top-0 z-10" style={{ backgroundColor: 'var(--bg-header)', borderColor: 'var(--border-color)' }}>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20 text-white">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: 'var(--color-primary)' }}>
                             <Archive className="w-4 h-4" />
                         </div>
-                        <span className="font-bold text-lg text-gray-800 dark:text-white tracking-tight">Inventory</span>
+                        <span className="font-bold text-lg tracking-tight" style={{ color: 'var(--text-main)' }}>Inventory</span>
                     </div>
                 </div>
 
@@ -120,11 +120,20 @@ export function InventoryLayout() {
                                     key={item.path}
                                     onClick={() => navigate(item.path)}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl mb-1 transition-all duration-200 group ${isActive(item.path)
-                                        ? 'bg-gradient-to-r from-rose-50 to-white border border-rose-100 dark:from-rose-900/20 dark:to-transparent dark:border-rose-800 shadow-sm text-rose-600 dark:text-rose-400 font-bold'
-                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white font-medium'
+                                        ? 'shadow-sm font-bold'
+                                        : 'font-medium hover:bg-gray-50'
                                         }`}
+                                    style={isActive(item.path) ? {
+                                        backgroundColor: 'var(--sidebar-active)',
+                                        color: 'var(--sidebar-active-text)',
+                                        border: '1px solid var(--color-primary)'
+                                    } : {
+                                        color: 'var(--sidebar-text)'
+                                    }}
                                 >
-                                    <item.icon className={`w-5 h-5 mr-3 transition-transform group-hover:scale-110 ${isActive(item.path) ? 'text-rose-500' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                                    <item.icon className={`w-5 h-5 mr-3 transition-transform group-hover:scale-110`}
+                                        style={{ color: isActive(item.path) ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)' }}
+                                    />
                                     <span className="text-sm">{item.label}</span>
                                 </button>
                             ));
@@ -138,31 +147,35 @@ export function InventoryLayout() {
                             <div key={section.group} className="mb-2">
                                 <button
                                     onClick={() => toggleGroup(section.group)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${isExpanded ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-                                        }`}
+                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors hover:bg-gray-50`}
+                                    style={{ color: isExpanded ? 'var(--text-main)' : 'var(--text-muted)' }}
                                 >
                                     <div className="flex items-center">
-                                        <GroupIcon className={`w-5 h-5 mr-3 ${isExpanded ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`} />
+                                        <GroupIcon className={`w-5 h-5 mr-3`} style={{ color: isExpanded ? 'var(--text-main)' : 'var(--text-light)' }} />
                                         <span className="text-sm font-bold tracking-wide">{section.group}</span>
                                     </div>
                                     <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-                                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        <ChevronDown className="w-4 h-4" style={{ color: 'var(--text-light)' }} />
                                     </div>
                                 </button>
 
                                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-                                    <div className="ml-4 pl-4 border-l-2 border-gray-100 dark:border-gray-700 space-y-1 py-1">
+                                    <div className="ml-4 pl-4 border-l-2 space-y-1 py-1" style={{ borderColor: 'var(--border-color)' }}>
                                         {section.items.map(item => (
                                             <button
                                                 key={item.path}
                                                 onClick={() => navigate(item.path)}
-                                                className={`w-full flex items-center px-4 py-2.5 rounded-lg text-sm transition-all relative ${isActive(item.path)
-                                                    ? 'text-rose-600 dark:text-rose-400 font-bold bg-rose-50/50 dark:bg-rose-900/10'
-                                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                                                    }`}
+                                                className={`w-full flex items-center px-4 py-2.5 rounded-lg text-sm transition-all relative hover:bg-gray-50`}
+                                                style={isActive(item.path) ? {
+                                                    color: 'var(--color-primary)',
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: 'var(--sidebar-active)'
+                                                } : {
+                                                    color: 'var(--text-muted)'
+                                                }}
                                             >
                                                 {isActive(item.path) && (
-                                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-rose-500 rounded-full -ml-[18px]"></div>
+                                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full -ml-[18px]" style={{ backgroundColor: 'var(--color-primary)' }}></div>
                                                 )}
                                                 {item.label}
                                             </button>
@@ -176,13 +189,9 @@ export function InventoryLayout() {
             </div>
 
             {/* Main Content Area for Inventory Sub-routes */}
-            <div className="flex-1 overflow-auto p-6 scroll-smooth">
-                {/* Soft background gradient for main area */}
-                <div className="fixed inset-0 bg-gradient-to-br from-indigo-50/30 via-white to-rose-50/30 dark:from-gray-900 dark:to-gray-800 -z-10 pointer-events-none"></div>
+            <div className="flex-1 overflow-auto p-6 scroll-smooth" style={{ backgroundColor: 'var(--bg-main)' }}>
                 <Outlet />
             </div>
-
-
         </div>
     );
 }
