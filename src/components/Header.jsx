@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Store, ChevronDown, Lightbulb, Bell, Link as LinkIcon, Settings, Grid, LogOut, User, FileText, Monitor, Search, Maximize, MessageSquare, PlusCircle, Box, ShoppingBag, ShoppingCart, FileCheck, Truck, ArrowRightLeft, RotateCcw, Users, File, X, Mail } from 'lucide-react';
+import { Menu, Store, ChevronDown, Lightbulb, Bell, Link as LinkIcon, Settings, Grid, LogOut, User, FileText, Monitor, Search, Maximize, MessageSquare, PlusCircle, Box, ShoppingBag, ShoppingCart, FileCheck, Truck, ArrowRightLeft, RotateCcw, Users, File } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { initialMenuGroups } from '../context/QuickLinksContext';
 
@@ -8,8 +8,6 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(null);
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [showEmails, setShowEmails] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const profileDropdownRef = useRef(null);
@@ -193,36 +191,15 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                 )}
 
                 <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => {
-                            if (!document.fullscreenElement) {
-                                document.documentElement.requestFullscreen();
-                            } else {
-                                if (document.exitFullscreen) {
-                                    document.exitFullscreen();
-                                }
-                            }
-                        }}
-                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
-                        title="Expand"
-                    >
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Expand">
                         <Maximize className="w-5 h-5" />
                     </button>
-                    <button
-                        onClick={() => setShowEmails(true)}
-                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative"
-                        title="Emails"
-                    >
-                        <Mail className="w-5 h-5" />
-                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full border-2 border-white">4</span>
-                    </button>
-                    <button
-                        onClick={() => setShowNotifications(true)}
-                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative"
-                        title="Notifications"
-                    >
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative" title="Notifications">
                         <Bell className="w-5 h-5" />
-                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full border-2 border-white">3</span>
+                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Settings">
+                        <Settings className="w-5 h-5" />
                     </button>
                 </div>
 
@@ -245,16 +222,10 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                                 <p className="text-sm font-semibold text-gray-900">{user?.name || 'Admin'}</p>
                                 <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@qsr.com'}</p>
                             </div>
-                            <button
-                                onClick={() => { setShowDropdown(null); navigate('/users/admin'); }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                            >
+                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <User className="w-4 h-4" /> Profile
                             </button>
-                            <button
-                                onClick={() => { setShowDropdown(null); navigate('/settings'); }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                            >
+                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <Settings className="w-4 h-4" /> Settings
                             </button>
                             <div className="h-px bg-gray-100 my-1"></div>
@@ -271,153 +242,6 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                     )}
                 </div>
             </div>
-
-            {/* Notification Sidebar */}
-            {showNotifications && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
-                        onClick={() => setShowNotifications(false)}
-                    ></div>
-                    <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-200 flex flex-col border-l border-gray-200">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                            <div>
-                                <h3 className="font-bold text-gray-900">Notifications</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">You have 3 unread messages</p>
-                            </div>
-                            <button
-                                onClick={() => setShowNotifications(false)}
-                                className="p-1 hover:bg-gray-200 rounded-full text-gray-500 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                            {[
-                                {
-                                    title: "New Order Received",
-                                    desc: "Order #1234 from Table 5 requires attention.",
-                                    time: "2 mins ago",
-                                    type: "order",
-                                    color: "bg-blue-50 text-blue-600"
-                                },
-                                {
-                                    title: "Low Stock Alert",
-                                    desc: "Tomato stock is running low (below 5kg).",
-                                    time: "1 hour ago",
-                                    type: "alert",
-                                    color: "bg-red-50 text-red-600"
-                                },
-                                {
-                                    title: "Daily Report Ready",
-                                    desc: "Yesterday's sales report is ready for download.",
-                                    time: "5 hours ago",
-                                    type: "info",
-                                    color: "bg-green-50 text-green-600"
-                                },
-                                {
-                                    title: "System Update",
-                                    desc: "New feature deployed: Advanced Analytics.",
-                                    time: "1 day ago",
-                                    type: "system",
-                                    color: "bg-purple-50 text-purple-600"
-                                }
-                            ].map((note, idx) => (
-                                <div key={idx} className="flex gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100 items-start cursor-pointer">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${note.color}`}>
-                                        <Bell className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-gray-900">{note.title}</h4>
-                                        <p className="text-sm text-gray-600 mt-0.5 leading-snug">{note.desc}</p>
-                                        <span className="text-xs text-gray-400 mt-1.5 block">{note.time}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="p-4 border-t border-gray-200 bg-gray-50">
-                            <button className="w-full py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
-                                View all notifications
-                            </button>
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* Email Sidebar */}
-            {showEmails && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
-                        onClick={() => setShowEmails(false)}
-                    ></div>
-                    <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-200 flex flex-col border-l border-gray-200">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                            <div>
-                                <h3 className="font-bold text-gray-900">Emails & Inquiries</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">Inbox (4 new)</p>
-                            </div>
-                            <button
-                                onClick={() => setShowEmails(false)}
-                                className="p-1 hover:bg-gray-200 rounded-full text-gray-500 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                            {[
-                                {
-                                    sender: "support@foodaggregator.com",
-                                    subject: "Integration Issue #442",
-                                    preview: "The webhook for order updates seems to be failing intermittently...",
-                                    time: "10 mins ago",
-                                    color: "bg-red-50 text-red-600"
-                                },
-                                {
-                                    sender: "vendor@supplies.co",
-                                    subject: "Invoice #INV-2024-001",
-                                    preview: "Please find attached the invoice for the last delivery of fresh produce.",
-                                    time: "2 hours ago",
-                                    color: "bg-blue-50 text-blue-600"
-                                },
-                                {
-                                    sender: "customer.service@review.com",
-                                    subject: "New 5-Star Review!",
-                                    preview: "A seamless dining experience! Loved the ambience and the food.",
-                                    time: "4 hours ago",
-                                    color: "bg-green-50 text-green-600"
-                                },
-                                {
-                                    sender: "billing@utility.com",
-                                    subject: "Electricity Bill - Jan",
-                                    preview: "Your electricity bill for the month of January is generated.",
-                                    time: "1 day ago",
-                                    color: "bg-orange-50 text-orange-600"
-                                }
-                            ].map((email, idx) => (
-                                <div key={idx} className="flex gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100 items-start cursor-pointer group">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${email.color}`}>
-                                        <Mail className="w-5 h-5" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-start">
-                                            <h4 className="text-sm font-semibold text-gray-900 truncate">{email.sender}</h4>
-                                            <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">{email.time}</span>
-                                        </div>
-                                        <p className="text-sm font-medium text-gray-700 mt-0.5 truncate">{email.subject}</p>
-                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{email.preview}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="p-4 border-t border-gray-200 bg-gray-50">
-                            <button className="w-full py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
-                                Go to Inbox
-                            </button>
-                        </div>
-                    </div>
-                </>
-            )}
         </header>
     );
 }

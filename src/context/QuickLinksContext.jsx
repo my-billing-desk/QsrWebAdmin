@@ -129,15 +129,7 @@ export const initialMenuGroups = [
                 ]
             },
             { id: 'other_apps', path: '/apps/other', label: 'Other APPs', icon: Box },
-            {
-                id: 'financial',
-                label: 'Financial',
-                icon: Landmark,
-                items: [
-                    { id: 'fin_expenses', path: '/financial/expenses', label: 'Expenses' },
-                    { id: 'fin_category', path: '/financial/expense-category', label: 'Expense Category' },
-                ]
-            },
+            { id: 'finance', path: '/finance', label: 'Finance', icon: Landmark },
             { id: 'marketplace', path: '/marketplace', label: 'Marketplace', icon: Share2 },
         ]
     },
