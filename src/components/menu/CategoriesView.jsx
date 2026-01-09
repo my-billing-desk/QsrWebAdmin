@@ -42,6 +42,7 @@ export function CategoriesView() {
     const [searchTerm, setSearchTerm] = useState('');
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [blockingItems, setBlockingItems] = useState([]);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
 
     // Dnd Sensors
@@ -68,9 +69,29 @@ export function CategoriesView() {
         loadData();
     };
 
-    const handleDelete = (id) => {
-        setCategoryToDelete(id);
-        setDeleteModalOpen(true);
+    const handleDelete = async (id) => {
+        // Check if items are using this category
+        try {
+            const res = await menuService.getItems();
+            const items = res.data;
+            // Check for items linked to this category. Assuming item.categoryId or item.Category.id
+            const linkedItems = items.filter(i => i.categoryId === id || (i.Category && i.Category.id === id));
+
+            if (linkedItems.length > 0) {
+                setBlockingItems(linkedItems);
+                setCategoryToDelete(null); // Ensure we don't accidentally delete
+                return;
+            }
+
+            setCategoryToDelete(id);
+            setDeleteModalOpen(true);
+        } catch (error) {
+            console.error("Error checking linked items", error);
+            // Fallback to normal delete confirm if check fails, or show error?
+            // Safer to just show confirm modal and let server reject if constraint fails
+            setCategoryToDelete(id);
+            setDeleteModalOpen(true);
+        }
     };
 
     const confirmDelete = async () => {
@@ -187,6 +208,40 @@ export function CategoriesView() {
                                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
                             >
                                 Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Blocking Items Modal */}
+            {blockingItems.length > 0 && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 flex flex-col max-h-[80vh]">
+                        <div className="mb-4">
+                            <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
+                                Cannot Delete Category
+                            </h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                This category is currently assigned to the following items. Please reassign or remove these items before deleting the category.
+                            </p>
+                        </div>
+                        <div className="flex-1 overflow-y-auto min-h-0 border border-gray-100 rounded-md bg-gray-50 p-3 mb-4">
+                            <ul className="space-y-2">
+                                {blockingItems.map(item => (
+                                    <li key={item.id} className="text-sm text-gray-700 flex justify-between">
+                                        <span className="font-medium">{item.name}</span>
+                                        <span className="text-xs text-gray-500">ID: {item.id}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setBlockingItems([])}
+                                className="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-900"
+                            >
+                                Close
                             </button>
                         </div>
                     </div>
