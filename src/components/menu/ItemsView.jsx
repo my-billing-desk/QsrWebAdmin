@@ -114,10 +114,21 @@ export function ItemsView() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (confirm('Are you sure?')) {
-            await menuService.deleteItem(id);
+    const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+    const handleDeleteClick = (id) => {
+        setDeleteConfirm(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirm) return;
+        try {
+            await menuService.deleteItem(deleteConfirm);
             loadData();
+        } catch (error) {
+            console.error("Failed to delete item", error);
+        } finally {
+            setDeleteConfirm(null);
         }
     };
 
@@ -484,7 +495,7 @@ export function ItemsView() {
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
-                                                    <button onClick={() => handleDelete(item.id)} className="p-1.5 hover:bg-red-50 rounded text-red-500" title="Delete">
+                                                    <button onClick={() => handleDeleteClick(item.id)} className="p-1.5 hover:bg-red-50 rounded text-red-500" title="Delete">
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
@@ -537,6 +548,38 @@ export function ItemsView() {
                         }
                     }}
                 />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 space-y-4">
+                        <div className="text-center">
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <Trash2 className="h-6 w-6 text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900">Delete Item?</h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                Are you sure you want to delete item <b>{items.find(i => i.id === deleteConfirm)?.name}</b>?
+                                <br />This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setDeleteConfirm(null)}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-colors shadow-sm"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

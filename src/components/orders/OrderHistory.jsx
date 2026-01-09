@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, ChevronDown, Download, Grid, Filter, RefreshCcw, FileText, CheckSquare, Printer, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search as SearchIcon, Calendar, ChevronDown, Download, Grid, Filter, RefreshCcw, FileText, CheckSquare, Printer, Eye, Edit, Trash2, BarChart2 } from 'lucide-react';
 import { SmartTable } from '../ui/SmartTable';
 import { orderService } from '../../services/api';
 import { getDateTimeLocalInput } from '../../utils/dateUtils';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Papa from 'papaparse';
+import toast from 'react-hot-toast';
+import { GenerateInvoiceModal } from './GenerateInvoiceModal';
 
 export function OrderHistory() {
-    const [activeTab, setActiveTab] = useState('Order'); // 'Order' | 'Scheduled Order'
+    const [activeTab, setActiveTab] = useState('Order'); // 'Order' | 'Advance Order'
     const [viewMode, setViewMode] = useState('All'); // 'All' | 'Online'
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAllFilters, setShowAllFilters] = useState(false);
+    const [showChart, setShowChart] = useState(true);
+    const [showGenerateInvoiceModal, setShowGenerateInvoiceModal] = useState(false);
 
+    // Filter State (Inputs)
     const [filters, setFilters] = useState({
-        startDate: getDateTimeLocalInput(),
+        startDate: getDateTimeLocalInput(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)), // 15 days ago
         endDate: getDateTimeLocalInput(),
         orderId: '',
         customerName: '',
@@ -23,39 +30,117 @@ export function OrderHistory() {
         allPaymentType: 'All',
         orderStatus: 'All',
         otherStatus: 'All',
-        grandTotal: '=',
+        grandTotalOperator: '=',
+        grandTotalValue: '',
         gstin: 'All'
     });
 
+    // Applied Filters (Triggers Fetch)
+    const [appliedFilters, setAppliedFilters] = useState(filters);
+
     useEffect(() => {
-        // Mock fetch - replaced with actual service call
-        const fetchOrders = async () => {
-            setLoading(true);
-            try {
-                // Simulator delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const params = { ...filters, tab: activeTab };
-                if (viewMode === 'Online') {
-                    params.isOnline = true;
-                }
-                const response = await orderService.getAll(params);
-                // Enhanced mock data to match columns if API response is simple
-                const enhanced = response.data.map(o => ({
-                    ...o,
-                    assignTo: '-', // Placeholder
-                    payment: 'Other [UPI]', // Mock
-                    statusLabel: 'Printed', // Mock
-                    createdAtFormatted: new Date(o.createdAt).toLocaleString()
-                }));
-                setOrders(enhanced);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchOrders();
-    }, [filters, viewMode, activeTab]);
+    }, [appliedFilters, viewMode, activeTab]);
+
+    const fetchOrders = async () => {
+        setLoading(true);
+        try {
+            // Simulator delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const params = {
+                startDate: appliedFilters.startDate,
+                endDate: appliedFilters.endDate,
+                orderNumber: appliedFilters.orderId,
+                customerName: appliedFilters.customerName,
+                customerPhone: appliedFilters.customerPhone,
+                type: appliedFilters.allOrderType,
+                status: appliedFilters.orderStatus,
+                paymentMode: appliedFilters.allPaymentType,
+                tab: activeTab
+            };
+
+            if (viewMode === 'Online') {
+                params.isOnline = true;
+            }
+            const response = await orderService.getAll(params);
+
+            // Mock enhancement
+            const enhanced = response.data.map(o => ({
+                ...o,
+                assignTo: '-',
+                payment: 'Other [UPI]',
+                statusLabel: 'Printed',
+                createdAtFormatted: new Date(o.createdAt).toLocaleString(),
+                // Ensure numbers for calculations
+                totalAmount: parseFloat(o.totalAmount || 0),
+                taxAmount: parseFloat(o.taxAmount || 0)
+            }));
+            setOrders(enhanced);
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to load orders");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSearch = () => {
+        setAppliedFilters(filters);
+    };
+
+    const handleExportExcel = () => {
+        if (orders.length === 0) {
+            toast.error("No data to export");
+            return;
+        }
+        const csv = Papa.unparse(orders.map(o => ({
+            'Order No': o.orderNumber,
+            'Date': new Date(o.createdAt).toLocaleDateString(),
+            'Time': new Date(o.createdAt).toLocaleTimeString(),
+            'Customer': o.customerName || '-',
+            'Type': o.type,
+            'Total Amount': o.totalAmount,
+            'Status': o.status
+        })));
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `orders_export_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Orders exported successfully");
+    };
+
+    const handleGenerateInvoice = () => {
+        setShowGenerateInvoiceModal(true);
+    };
+
+    const handleAction = () => {
+        toast('Action menu clicked (Not implemented)', { icon: 'ℹ️' });
+    };
+
+    // Chart Data Generation (Mock based on current date range)
+    const getChartData = () => {
+        const data = [];
+        const today = new Date();
+        for (let i = 14; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const dayStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            // Random mock data
+            data.push({
+                name: dayStr,
+                orders: Math.floor(Math.random() * 50) + 10,
+                sales: Math.floor(Math.random() * 5000) + 1000
+            });
+        }
+        return data;
+    };
+    const chartData = getChartData();
 
     const columns = [
         {
@@ -94,12 +179,6 @@ export function OrderHistory() {
             header: 'Tax (₹)',
             align: 'right',
             render: (order) => <span className="text-gray-600">{(order.taxAmount || 0).toFixed(2)}</span>
-        },
-        {
-            key: 'discount',
-            header: 'Discount (₹)',
-            align: 'right',
-            render: (order) => <span className="text-gray-600">0.00</span>
         },
         {
             key: 'grandTotal',
@@ -145,7 +224,6 @@ export function OrderHistory() {
                     <button className="p-1.5 border rounded hover:bg-gray-100 text-gray-600"><Printer className="w-3 h-3" /></button>
                     <button className="p-1.5 border rounded hover:bg-gray-100 text-gray-600"><FileText className="w-3 h-3" /></button>
                     <button className="p-1.5 border rounded hover:bg-gray-100 text-gray-600"><Edit className="w-3 h-3" /></button>
-                    <button className="p-1.5 border rounded hover:bg-gray-100 text-gray-600"><Filter className="w-3 h-3" /></button>
                 </div>
             )
         }
@@ -153,22 +231,20 @@ export function OrderHistory() {
 
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
-            {/* Header / Top Bar (if excluding Main Header) - Assuming Main Header is present */}
-
             {/* 1. Tabs & Actions */}
-            <div className="bg-white px-4 pt-3 border-b flex justify-between items-end">
-                <div className="flex gap-6">
+            <div className="bg-white px-4 pt-3 border-b flex flex-col md:flex-row justify-between items-end gap-4 md:gap-0">
+                <div className="flex gap-6 w-full md:w-auto">
                     <button
                         onClick={() => setActiveTab('Order')}
-                        className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'Order' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'Order' ? 'border-[#444ce7] text-[#444ce7]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
                         Order
                     </button>
                     <button
-                        onClick={() => setActiveTab('Scheduled Order')}
-                        className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'Scheduled Order' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        onClick={() => setActiveTab('Advance Order')}
+                        className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'Advance Order' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
-                        Scheduled Orders
+                        Advance Order
                     </button>
                 </div>
 
@@ -186,25 +262,62 @@ export function OrderHistory() {
                         Online Only
                     </button>
                 </div>
-                <div className="flex gap-2 pb-2">
-                    <button className="px-3 py-1.5 border border-red-200 text-red-500 rounded text-xs font-semibold hover:bg-red-50">
+                <div className="flex gap-2 pb-2 w-full md:w-auto justify-end">
+                    <button
+                        onClick={handleGenerateInvoice}
+                        className="px-3 py-1.5 border border-red-200 text-red-500 rounded text-xs font-semibold hover:bg-red-50"
+                    >
                         Generate Invoice
                     </button>
-                    <div className="text-xs font-bold text-gray-600 flex items-center px-2">
+                    <div className="text-xs font-bold text-gray-600 flex items-center px-2 whitespace-nowrap">
                         Grand Total : <span className="text-red-500 ml-1">₹ {orders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0).toFixed(2)}</span>
                     </div>
-                    <button className="flex items-center gap-1 px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
+                    <button onClick={handleAction} className="flex items-center gap-1 px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
                         Action <ChevronDown className="w-3 h-3" />
                     </button>
-                    <button className="flex items-center gap-1 px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
+                    <button onClick={handleExportExcel} className="flex items-center gap-1 px-3 py-1.5 border rounded text-xs text-gray-600 hover:bg-gray-50">
                         <Download className="w-3 h-3" /> Export Excel <ChevronDown className="w-3 h-3" />
                     </button>
                 </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* 2. Chart Section */}
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <button
+                        onClick={() => setShowChart(!showChart)}
+                        className="w-full flex items-center justify-between p-4 bg-blue-50/50 hover:bg-blue-50 transition-colors"
+                    >
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-blue-100 rounded text-blue-600">
+                                <BarChart2 className="w-4 h-4" />
+                            </div>
+                            <span className="font-bold text-gray-800 text-sm">Last 15 Days Orders (View Chart)</span>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showChart ? 'rotate-180' : ''}`} />
+                    </button>
 
+                    {showChart && (
+                        <div className="p-4 h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6B7280' }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6B7280' }} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                        cursor={{ fill: '#F3F4F6' }}
+                                    />
+                                    <Legend />
+                                    <Bar dataKey="sales" name="Sales (₹)" fill="#444ce7" radius={[4, 4, 0, 0]} barSize={20} />
+                                    <Bar dataKey="orders" name="Orders" fill="#818cf8" radius={[4, 4, 0, 0]} barSize={20} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </div>
 
+                {/* 3. Table with Filters */}
                 <div className="flex-1 overflow-hidden">
                     <SmartTable
                         data={orders}
@@ -217,11 +330,11 @@ export function OrderHistory() {
                                 {/* Always Visible: Start & End Date */}
                                 <div className="space-y-1">
                                     <label className="text-xs font-semibold text-gray-600">Start Date</label>
-                                    <input type="datetime-local" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-red-500" value={filters.startDate} onChange={e => setFilters({ ...filters, startDate: e.target.value })} />
+                                    <input type="datetime-local" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#444ce7]" value={filters.startDate} onChange={e => setFilters({ ...filters, startDate: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-semibold text-gray-600">End Date</label>
-                                    <input type="datetime-local" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-red-500" value={filters.endDate} onChange={e => setFilters({ ...filters, endDate: e.target.value })} />
+                                    <input type="datetime-local" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#444ce7]" value={filters.endDate} onChange={e => setFilters({ ...filters, endDate: e.target.value })} />
                                 </div>
 
                                 {/* Expanded Fields */}
@@ -229,42 +342,121 @@ export function OrderHistory() {
                                     <>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-600">Order ID</label>
-                                            <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
+                                            <input
+                                                type="text"
+                                                value={filters.orderId}
+                                                onChange={e => setFilters({ ...filters, orderId: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-[#444ce7]"
+                                            />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-600">Customer Name</label>
-                                            <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
+                                            <input
+                                                type="text"
+                                                value={filters.customerName}
+                                                onChange={e => setFilters({ ...filters, customerName: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-[#444ce7]"
+                                            />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-600">Customer Phone</label>
-                                            <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
+                                            <input
+                                                type="text"
+                                                value={filters.customerPhone}
+                                                onChange={e => setFilters({ ...filters, customerPhone: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-[#444ce7]"
+                                            />
                                         </div>
 
-                                        {/* Row 2 */}
-                                        {['All Order Type', 'Sub Order Type', 'All Payment Type', 'Order Status', 'Other Status'].map((label, i) => (
-                                            <div key={i} className="space-y-1">
-                                                <label className="text-xs font-semibold text-gray-600">{label}</label>
-                                                <select className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-red-500">
-                                                    <option>{label === 'All Order Type' ? 'Select' : 'All'}</option>
-                                                </select>
-                                            </div>
-                                        ))}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-600">All Order Type</label>
+                                            <select
+                                                value={filters.allOrderType}
+                                                onChange={e => setFilters({ ...filters, allOrderType: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="All">All</option>
+                                                <option value="dine-in">Dine In</option>
+                                                <option value="take-away">Take Away</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-600">Sub Order Type</label>
+                                            <select
+                                                value={filters.subOrderType}
+                                                onChange={e => setFilters({ ...filters, subOrderType: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="">All</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-600">All Payment Type</label>
+                                            <select
+                                                value={filters.allPaymentType}
+                                                onChange={e => setFilters({ ...filters, allPaymentType: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="All">All</option>
+                                                <option value="cash">Cash</option>
+                                                <option value="card">Card</option>
+                                                <option value="online">Online</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-600">Order Status</label>
+                                            <select
+                                                value={filters.orderStatus}
+                                                onChange={e => setFilters({ ...filters, orderStatus: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="All">All</option>
+                                                <option value="completed">Completed</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="cancelled">Cancelled</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-600">Other Status</label>
+                                            <select
+                                                value={filters.otherStatus}
+                                                onChange={e => setFilters({ ...filters, otherStatus: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="All">All</option>
+                                            </select>
+                                        </div>
 
-                                        {/* Row 3 */}
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-600">Grand Total</label>
-                                            <select className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-red-500">
-                                                <option>=</option>
+                                            <select
+                                                value={filters.grandTotalOperator}
+                                                onChange={e => setFilters({ ...filters, grandTotalOperator: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="=">=</option>
+                                                <option value=">">&gt;</option>
+                                                <option value="<">&lt;</option>
                                             </select>
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-600 opacity-0 select-none">Amount</label>
-                                            <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
+                                            <input
+                                                type="number"
+                                                value={filters.grandTotalValue}
+                                                onChange={e => setFilters({ ...filters, grandTotalValue: e.target.value })}
+                                                placeholder="Amount"
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-[#444ce7]"
+                                            />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-600">GSTIN</label>
-                                            <select className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-red-500">
-                                                <option>All</option>
+                                            <select
+                                                value={filters.gstin}
+                                                onChange={e => setFilters({ ...filters, gstin: e.target.value })}
+                                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-[#444ce7]"
+                                            >
+                                                <option value="All">All</option>
                                             </select>
                                         </div>
                                     </>
@@ -272,7 +464,12 @@ export function OrderHistory() {
 
                                 {/* Action Buttons - Always aligned at the end of the current flow */}
                                 <div className="space-y-1 flex items-end">
-                                    <button className="w-full py-1.5 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700 shadow-sm transition-colors">Search</button>
+                                    <button
+                                        onClick={handleSearch}
+                                        className="w-full py-1.5 bg-[#444ce7] text-white rounded text-xs font-bold hover:bg-[#3538cd] shadow-sm transition-all active:scale-95"
+                                    >
+                                        Search
+                                    </button>
                                 </div>
                                 <div className="space-y-1 flex items-end">
                                     <button
@@ -297,12 +494,12 @@ export function OrderHistory() {
                         <div className="flex items-center gap-1 text-orange-500 font-bold">S Scheduled Order</div>
                     </div>
                 </div>
-
-                {/* Floating Chat Icon Mock */}
-                <div className="fixed bottom-6 right-6 w-12 h-12 bg-red-800 rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer hover:bg-red-900 z-50">
-                    <div className="font-bold text-lg">💬</div>
-                </div>
             </div>
+
+
+            {showGenerateInvoiceModal && (
+                <GenerateInvoiceModal onClose={() => setShowGenerateInvoiceModal(false)} />
+            )}
         </div>
     );
 }

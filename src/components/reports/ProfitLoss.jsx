@@ -149,8 +149,8 @@ export function ProfitLoss() {
             {/* 1. Header Section */}
             <div className="p-4 border-b flex flex-col gap-4">
                 <div className="flex justify-between items-start">
-                    <h1 className="text-xl font-extrabold text-gray-800 w-24 leading-tight tracking-tight">
-                        Cash<br />Profit<br />&<br />Loss
+                    <h1 className="text-xl font-extrabold text-gray-800 leading-tight tracking-tight whitespace-nowrap">
+                        Cash Profit & Loss
                     </h1>
 
                     <div className="flex items-center gap-2">

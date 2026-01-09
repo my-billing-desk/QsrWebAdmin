@@ -8,19 +8,35 @@ import { AddonsView } from './menu/AddonsView';
 import { TablesView } from './menu/TablesView';
 import { TaxesView } from './menu/TaxesView';
 import { DiscountsView } from './menu/DiscountsView';
+import { SpecialNote } from './menu/SpecialNote';
+import { StockHistory } from './reports/StockHistory';
+
+import { useParams, useNavigate } from 'react-router-dom';
 
 export function MenuManagement() {
-    const [activeTab, setActiveTab] = useState('Items'); // Default to Items view
-    const [dashboardProps, setDashboardProps] = useState({ initialTab: 'online', initialChannel: 'all' });
-
-    const handleNavigate = (tab, props = {}) => {
-        setActiveTab(tab);
-        setDashboardProps(props);
-    };
+    const { tab: urlTab } = useParams();
+    const navigate = useNavigate();
 
     const topTabs = [
-        'Availability', 'Items', 'Categories', 'Variations', 'Addons', 'Tables/Areas', 'Taxes', 'Discounts'
+        'Availability', 'Items', 'Categories', 'Variations', 'Addons', 'Tables/Areas', 'Taxes', 'Stock History', 'Discounts', 'Special Note'
     ];
+
+    // Helper to normalize tab name for URL (e.g., 'Tables/Areas' -> 'tables-areas')
+    const normalizeTab = (t) => t.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-');
+    const denormalizeTab = (u) => {
+        if (!u) return 'Items';
+        return topTabs.find(t => normalizeTab(t) === u.toLowerCase()) || 'Items';
+    };
+
+    const activeTab = denormalizeTab(urlTab);
+    const [dashboardProps, setDashboardProps] = useState({ initialTab: 'online', initialChannel: 'all' });
+
+    const handleTabChange = (tab) => {
+        navigate(`/menu/${normalizeTab(tab)}`);
+        if (tab === 'Availability') {
+            setDashboardProps({ initialTab: 'online', initialChannel: 'all' });
+        }
+    };
 
     return (
         <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 font-sans text-sm min-h-screen">
@@ -39,13 +55,7 @@ export function MenuManagement() {
                     {topTabs.map(tab => (
                         <button
                             key={tab}
-                            onClick={() => {
-                                setActiveTab(tab);
-                                // Reset dashboard props if switching manually to Availability
-                                if (tab === 'Availability') {
-                                    setDashboardProps({ initialTab: 'online', initialChannel: 'all' });
-                                }
-                            }}
+                            onClick={() => handleTabChange(tab)}
                             className={`py-3 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
                                 ? 'border-blue-600 text-blue-600'
                                 : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -72,7 +82,9 @@ export function MenuManagement() {
                 {activeTab === 'Addons' && <AddonsView />}
                 {activeTab === 'Tables/Areas' && <TablesView />}
                 {activeTab === 'Taxes' && <TaxesView />}
+                {activeTab === 'Stock History' && <StockHistory />}
                 {activeTab === 'Discounts' && <DiscountsView />}
+                {activeTab === 'Special Note' && <SpecialNote />}
             </div>
         </div>
     );

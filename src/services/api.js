@@ -107,6 +107,7 @@ export const orderService = {
     getAll: (params) => api.get('/orders', { params }),
     create: (data) => api.post('/orders', data),
     update: (id, data) => api.put(`/orders/${id}`, data),
+    updateStatus: (id, status) => api.put(`/orders/${id}`, { status }),
 };
 
 export const groupService = {

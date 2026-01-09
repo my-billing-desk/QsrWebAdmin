@@ -138,46 +138,46 @@ export function CategoriesView() {
     );
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="flex-1 flex gap-2">
+        <div className="p-6 max-w-4xl mx-auto font-sans relative">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
+                <p className="text-sm text-gray-500">Manage menu categories</p>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-300 items-end">
+                <div className="flex-1 w-full">
+                    <label className="block text-xs font-semibold text-gray-500 mb-1">Category Name</label>
                     <input
                         value={newCat}
                         onChange={(e) => setNewCat(e.target.value)}
-                        className="flex-1 p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                        placeholder="New Category Name"
+                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 bg-white"
+                        placeholder="e.g. Beverages"
                         onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                     />
-                    <button onClick={handleAdd} className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700 whitespace-nowrap">
-                        <Plus className="w-4 h-4" /> Add
-                    </button>
                 </div>
-
-                <div className="relative md:w-64">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none"
-                        placeholder="Search categories..."
-                    />
-                </div>
+                <button
+                    onClick={handleAdd}
+                    className="h-[38px] px-6 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
+                >
+                    <Plus className="w-4 h-4" /> Add
+                </button>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded shadow overflow-hidden">
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
                     <table className="w-full text-left">
-                        <thead className="bg-gray-50 dark:bg-gray-700 font-semibold text-gray-700 dark:text-gray-200">
+                        <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
                                 <th className="p-4 w-10"></th>
-                                <th className="p-4">Name</th>
-                                <th className="p-4 text-right">Actions</th>
+                                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody className="divide-y divide-gray-200">
                             <SortableContext
                                 items={filteredCategories.map(c => c.id)}
                                 strategy={verticalListSortingStrategy}
@@ -198,24 +198,27 @@ export function CategoriesView() {
 
             {/* Confirmation Modal */}
             {deleteModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="mb-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 space-y-4">
+                        <div className="text-center">
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <Trash2 className="h-6 w-6 text-red-600" />
+                            </div>
                             <h3 className="text-lg font-bold text-gray-900">Delete Category?</h3>
                             <p className="text-sm text-gray-500 mt-2">
                                 Are you sure you want to delete this category? This action cannot be undone.
                             </p>
                         </div>
-                        <div className="flex justify-end gap-3">
+                        <div className="flex gap-3 justify-center">
                             <button
                                 onClick={() => setDeleteModalOpen(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmDelete}
-                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-colors shadow-sm"
                             >
                                 Delete
                             </button>

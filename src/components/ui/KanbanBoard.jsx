@@ -16,14 +16,14 @@ export function KanbanBoard({ columns, data, onStatusChange }) {
     const getColumnData = (colId) => data.filter(item => item.status === colId);
 
     return (
-        <div className="flex gap-6 overflow-x-auto pb-4 h-full">
+        <div className="grid grid-cols-4 gap-4 h-full w-full min-w-[1024px] lg:min-w-0">
             {columns.map(col => (
-                <div key={col.id} className="min-w-[300px] flex flex-col bg-gray-50/50 rounded-xl h-full" style={{ backgroundColor: 'var(--bg-gray-50)' }}>
+                <div key={col.id} className="flex flex-col bg-gray-50/50 rounded-xl h-full overflow-hidden" style={{ backgroundColor: 'var(--bg-gray-50)' }}>
                     {/* Column Header */}
-                    <div className="p-4 flex items-center justify-between border-b border-transparent">
+                    <div className="p-4 flex items-center justify-between border-b border-transparent shrink-0">
                         <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${col.color}`}></div>
-                            <h3 className="font-bold text-lg" style={{ color: 'var(--text-main)' }}>{col.title}</h3>
+                            <h3 className="font-bold text-lg truncate" style={{ color: 'var(--text-main)' }}>{col.title}</h3>
                             <span className="bg-white px-2 py-0.5 rounded-full text-xs font-bold text-gray-500 border shadow-sm" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-white)' }}>
                                 {String(getColumnData(col.id).length).padStart(2, '0')}
                             </span>
@@ -34,7 +34,7 @@ export function KanbanBoard({ columns, data, onStatusChange }) {
                     </div>
 
                     {/* Cards Container */}
-                    <div className="p-4 flex flex-col gap-4 overflow-y-auto flex-1">
+                    <div className="p-4 flex flex-col gap-4 overflow-y-auto flex-1 min-h-0">
                         {getColumnData(col.id).map((item, idx) => (
                             <KanbanCard key={item.id || idx} item={item} />
                         ))}

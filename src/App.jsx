@@ -62,6 +62,7 @@ import { EmailTemplateSettings } from './components/configuration/EmailTemplateS
 import { DayEndSummary } from './components/reports/DayEndSummary';
 import { BusinessReport } from './components/reports/BusinessReport';
 import { OutletConfiguration } from './components/configuration/OutletConfiguration';
+import { OutletDetails } from './components/configuration/OutletDetails';
 import { ProfitLoss } from './components/reports/ProfitLoss';
 import { ConfigureProfitLoss } from './components/reports/ConfigureProfitLoss';
 import { MenuOnOff } from './components/menu/MenuOnOff';
@@ -135,8 +136,9 @@ function AppRoutes() {
       {/* Main App Routes */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/menu" element={<Navigate to="/menu/items" replace />} />
-        <Route path="/menu/items" element={<MenuManagement />} />
+        <Route path="/menu" element={<MenuManagement />}>
+          <Route path=":tab" element={<MenuManagement />} />
+        </Route>
         <Route path="/orders" element={<Navigate to="/orders/history" replace />} />
         <Route path="/orders/history" element={<OrderHistory />} />
         <Route path="/orders/kot" element={<KOT />} />
@@ -161,6 +163,7 @@ function AppRoutes() {
         <Route path="/reports/business-summary" element={<BusinessReport />} />
         <Route path="/reports/other" element={<PlaceholderPage title="Other Reports" />} />
         <Route path="/reports/delivery" element={<PlaceholderPage title="Delivery Management" />} />
+        <Route path="/reports/stock-history" element={<StockHistory />} />
 
 
 
@@ -176,11 +179,11 @@ function AppRoutes() {
 
 
         {/* Reports */}
-        <Route path="/reports/stock-history" element={<StockHistory />} />
         <Route path="/reports/profit-loss" element={<ProfitLoss />} />
 
         {/* Config */}
         <Route path="/config/outlet" element={<OutletConfiguration />} />
+        <Route path="/config/outlet-details" element={<OutletDetails />} />
 
         <Route path="/config/sub-order" element={<SubOrderType />} />
         <Route path="/config/delivery" element={<DeliveryDistance />} />

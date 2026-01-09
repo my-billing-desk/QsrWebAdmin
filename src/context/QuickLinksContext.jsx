@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
     LayoutDashboard, Layers, UtensilsCrossed, FileText, Archive, Truck, Bell, Settings,
     Calculator, Users, Box, Landmark, Share2, BarChart3, MessageSquare, Zap, UserCircle,
-    CreditCard, FileSpreadsheet, Ticket,
+    CreditCard, FileSpreadsheet, Ticket, ShieldCheck,
     Gift, Percent, Wallet, ShoppingCart, RotateCcw, BarChart2 // Added missing icons
 } from 'lucide-react';
 
@@ -11,34 +11,43 @@ const QuickLinksContext = createContext();
 export const initialMenuGroups = [
     {
         id: 'group_dashboard',
+        title: 'Daily Operations',
         items: [
-            { id: 'dashboard_home', path: '/', label: 'Dashboard', icon: LayoutDashboard },
-            {
-                id: 'daily_ops',
-                label: 'Daily Operations',
-                icon: Layers,
-                items: [
-                    { id: 'running_orders', path: '/orders/running', label: 'Running Orders' },
-                    { id: 'all_orders', path: '/orders/history', label: 'Order History' },
-                    { id: 'kot', path: '/orders/kot', label: 'KOT' },
-                    { id: 'due_payment', path: '/orders/due-payment', label: 'Due Payment Settlement' },
-                    { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss' },
-                ]
-            }
+            { id: 'dashboard', path: '/', label: 'Overview', icon: LayoutDashboard },
+            { id: 'running_orders', path: '/orders/running', label: 'Running Orders', icon: ShoppingCart },
+            { id: 'kot_orders', path: '/orders/kot', label: 'KOT', icon: FileSpreadsheet },
+            { id: 'order_history', path: '/orders/history', label: 'Order History', icon: Archive },
+            { id: 'due_settlement', path: '/orders/due-payment', label: 'Due Settlement', icon: Calculator },
         ]
     },
     {
         id: 'group_menu',
         title: 'Menu Management',
         items: [
-            { id: 'menu_discounts', path: '/menu/items', label: 'Menu & Discounts', icon: UtensilsCrossed },
-            { id: 'special_note', path: '/menu/special-note', label: 'Special Note', icon: FileText },
+            { id: 'menu_items', path: '/menu/items', label: 'Items', icon: UtensilsCrossed },
+            { id: 'menu_cats', path: '/menu/categories', label: 'Categories', icon: Layers },
+            { id: 'menu_taxes', path: '/menu/taxes', label: 'Taxes', icon: Percent },
+            { id: 'menu_on_off', path: '/menu/on-off', label: 'Menu On/Off', icon: Zap },
+            { id: 'menu_special', path: '/menu/special-note', label: 'Special Note', icon: MessageSquare },
+            { id: 'inventory_main', path: '/inventory', label: 'Inventory', icon: Archive },
         ]
     },
     {
-        id: 'group_inventory',
+        id: 'group_promo',
+        title: 'Marketing & Promo',
         items: [
-            { id: 'inventory_main', path: '/inventory', label: 'Inventory', icon: Archive },
+            { id: 'coupons', path: '/promo/coupons', label: 'Coupons', icon: Ticket },
+            { id: 'discount_plan', path: '/promo/discount-plan', label: 'Discount Plan', icon: Percent },
+            { id: 'gift_cards', path: '/promo/gift-cards', label: 'Gift Cards', icon: Gift },
+        ]
+    },
+    {
+        id: 'group_financials',
+        title: 'Financials',
+        items: [
+            { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss', icon: Landmark },
+            { id: 'expenses', path: '/financial/expenses', label: 'Expenses', icon: Wallet },
+            { id: 'expense_cat', path: '/financial/expense-category', label: 'Expense Category', icon: Layers },
         ]
     },
     {
@@ -47,17 +56,7 @@ export const initialMenuGroups = [
         items: [
             { id: 'day_end', path: '/reports/day-end', label: 'Day End Summary', icon: FileText },
             { id: 'business_summary', path: '/reports/business-summary', label: 'Business Report', icon: BarChart2 },
-            {
-                id: 'inventory_reports_sub',
-                label: 'Inventory Reports',
-                icon: Archive,
-                items: [
-                    { id: 'stock_history', path: '/reports/stock-history', label: 'Stock History' },
-                    { id: 'profit_loss_inventory', path: '/reports/profit-loss', label: 'Profit / Loss' }
-                ]
-            },
-            { id: 'other_reports', path: '/reports/other', label: 'Other Reports', icon: FileText },
-
+            { id: 'menu_stock_history', path: '/reports/stock-history', label: 'Stock History', icon: FileSpreadsheet },
             { id: 'del_mgmt', path: '/reports/delivery', label: 'Delivery Management', icon: Truck },
         ]
     },
@@ -74,7 +73,6 @@ export const initialMenuGroups = [
                     { id: 'sub_order', path: '/config/sub-order', label: 'Sub Order Type' },
                     { id: 'del_dist', path: '/config/delivery', label: 'Delivery Distance' },
                     { id: 'area_del', path: '/config/area-delivery', label: 'Area/Locality Wise Delivery Charges' },
-                    // { id: 'mkt_setting', path: '/config/marketplace', label: 'Marketplace Setting' },
                     { id: 'floor_plan', path: '/config/floor-plan', label: 'Floor Plan' },
                     { id: 'email_temp', path: '/config/email-template', label: 'Email Template Settings' },
                     { id: 'subscription_plan', path: '/config/subscription', label: 'Subscription Plans' },
@@ -93,7 +91,6 @@ export const initialMenuGroups = [
                             { id: 'virt_wallet', path: '/accounting/virtual-wallet', label: 'Virtual Wallet' },
                         ]
                     },
-                    // { id: 'online_recon', path: '/accounting/reconciliation', label: 'Online Order Reconciliation' },
                     { id: 'gst_info', path: '/accounting/gst', label: 'GST Information' },
                     { id: 'bank_details', path: '/accounting/bank', label: 'Bank Details' },
                     { id: 'kyc_details', path: '/accounting/kyc', label: 'KYC Details' },
@@ -109,7 +106,7 @@ export const initialMenuGroups = [
                 label: 'User Management',
                 icon: Users,
                 items: [
-                    { id: 'users_list', path: '/users', label: 'Users' },
+                    { id: 'users_list', path: '/users', label: 'Staff Management' },
                     { id: 'roles_config', path: '/roles', label: 'System Roles' },
                 ]
             },
@@ -118,8 +115,6 @@ export const initialMenuGroups = [
                 label: 'User Logs',
                 icon: FileText,
                 items: [
-                    // { id: 'log_store', path: '/logs/store', label: 'Online Store Logs' },
-                    // { id: 'log_item', path: '/logs/item-on-off', label: 'Online Item On/Off Logs' },
                     { id: 'log_auto', path: '/logs/auto-accept', label: 'Auto Accept Change Logs' },
                     { id: 'log_support', path: '/logs/support', label: 'Support Management' },
                     { id: 'log_notif', path: '/logs/notifications', label: 'Notification' },
@@ -149,13 +144,7 @@ export const initialMenuGroups = [
             { id: 'crm_dual', path: '/crm/dual-screen', label: 'Dual Screen Marketing', icon: Layers },
             { id: 'crm_ebill', path: '/crm/ebill', label: 'Ebill Templates', icon: FileSpreadsheet },
         ]
-    },
-    // {
-    //     id: 'group_aggregator',
-    //     items: [
-    //         { id: 'aggregator_center', path: '/aggregator-center', label: 'Aggregator Center', icon: Share2, badge: 'New' }
-    //     ]
-    // }
+    }
 ];
 
 export function QuickLinksProvider({ children }) {

@@ -1,19 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-    Search, Plus, Receipt, Edit2, Trash2, X
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import { specialNoteService } from '../../services/api';
 import toast from 'react-hot-toast';
-import { format } from 'date-fns';
-import { SmartTable } from '../ui/SmartTable';
 
 export const SpecialNote = () => {
     const [notes, setNotes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingNote, setEditingNote] = useState(null);
-    const [formData, setFormData] = useState({ name: '', isAvailable: true });
+    const [formData, setFormData] = useState({ name: '' });
+    const [deleteConfirm, setDeleteConfirm] = useState(null);
 
     useEffect(() => {
         loadNotes();
@@ -25,206 +18,130 @@ export const SpecialNote = () => {
             setNotes(res.data);
         } catch (error) {
             console.error("Failed to load notes", error);
-            toast.error("Failed to load special notes");
-        } finally {
-            setLoading(false);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
+        if (!formData.name) return;
         try {
-            if (editingNote) {
-                await specialNoteService.update(editingNote.id, formData);
-                toast.success('Note updated successfully');
-            } else {
-                await specialNoteService.create(formData);
-                toast.success('Note created successfully');
-            }
-            setIsModalOpen(false);
-            setEditingNote(null);
-            setFormData({ name: '', isAvailable: true });
+            await specialNoteService.create({ ...formData, isAvailable: true });
+            setFormData({ name: '' });
+            loadNotes();
+            toast.success('Note added');
+        } catch (error) {
+            console.error("Error creating note", error);
+            toast.error("Failed to add note");
+        }
+    };
+
+    const handleDeleteClick = (id) => {
+        setDeleteConfirm(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirm) return;
+        try {
+            await specialNoteService.delete(deleteConfirm);
+            toast.success('Note deleted');
             loadNotes();
         } catch (error) {
-            console.error("Error saving note", error);
-            toast.error("Failed to save note");
+            console.error("Error deleting note", error);
+            toast.error("Failed to delete note");
+        } finally {
+            setDeleteConfirm(null);
         }
     };
-
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this note?')) {
-            try {
-                await specialNoteService.delete(id);
-                toast.success('Note deleted');
-                setNotes(notes.filter(n => n.id !== id));
-            } catch (error) {
-                console.error("Error deleting note", error);
-                toast.error("Failed to delete note");
-            }
-        }
-    };
-
-    const handleToggle = async (id) => {
-        // Optimistic update
-        setNotes(prev => prev.map(n => n.id === id ? { ...n, isAvailable: !n.isAvailable } : n));
-        try {
-            await specialNoteService.toggleStatus(id);
-            toast.success('Status updated');
-        } catch (error) {
-            setNotes(prev => prev.map(n => n.id === id ? { ...n, isAvailable: !n.isAvailable } : n));
-            toast.error("Failed to update status");
-        }
-    };
-
-    const openEdit = (note) => {
-        setEditingNote(note);
-        setFormData({ name: note.name, isAvailable: note.isAvailable });
-        setIsModalOpen(true);
-    };
-
-    const filteredNotes = useMemo(() => {
-        return notes.filter(n => n.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }, [notes, searchQuery]);
-
-    const columns = [
-        {
-            key: 'name',
-            header: 'Special Note',
-            render: (note) => <span className="font-medium text-gray-900">{note.name}</span>
-        },
-        {
-            key: 'createdAt',
-            header: 'Created',
-            render: (note) => <span className="text-gray-500">{format(new Date(note.createdAt), 'dd MMM yyyy')}</span>
-        },
-        {
-            key: 'isAvailable',
-            header: 'Available',
-            render: (note) => (
-                <button
-                    onClick={() => handleToggle(note.id)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${note.isAvailable
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-600'
-                        }`}
-                >
-                    {note.isAvailable ? 'Yes' : 'No'}
-                </button>
-            )
-        },
-        {
-            key: 'actions',
-            header: 'Actions',
-            align: 'right',
-            render: (note) => (
-                <div className="flex justify-end gap-2">
-                    <button
-                        onClick={() => openEdit(note)}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                        <Edit2 size={16} />
-                    </button>
-                    <button
-                        onClick={() => handleDelete(note.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                        <Trash2 size={16} />
-                    </button>
-                </div>
-            )
-        }
-    ];
 
     return (
-        <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
-            <div className="flex-1 overflow-hidden p-4">
-                <SmartTable
-                    data={filteredNotes}
-                    columns={columns}
-                    title="Special Notes"
-                    isLoading={loading}
-                    emptyMessage="No special notes found"
-                    headerControls={
-                        <div className="relative w-64">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                            <input
-                                type="text"
-                                placeholder="Search notes..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm"
-                            />
-                        </div>
-                    }
-                    actionButtons={
-                        <button
-                            onClick={() => {
-                                setEditingNote(null);
-                                setFormData({ name: '', isAvailable: true });
-                                setIsModalOpen(true);
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors shadow-sm font-medium text-xs"
-                        >
-                            <Plus size={14} /> Add Special Note
-                        </button>
-                    }
-                />
+        <div className="p-6 max-w-5xl mx-auto font-sans relative">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Special Notes</h1>
+                <p className="text-sm text-gray-500">Manage order special instructions</p>
             </div>
 
-            {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                            <h3 className="font-bold text-gray-900">
-                                {editingNote ? 'Edit Special Note' : 'Add Special Note'}
-                            </h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                                <X size={20} />
+            {/* Simple Inline Form */}
+            <div className="flex gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-300 items-end">
+                <div className="flex-1">
+                    <label className="block text-xs font-semibold text-gray-500 mb-1">Note Name</label>
+                    <input
+                        type="text"
+                        placeholder="e.g. Less Spicy"
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 bg-white"
+                        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                    />
+                </div>
+                <button
+                    onClick={handleSubmit}
+                    className="h-[38px] px-6 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2"
+                >
+                    <Plus className="w-4 h-4" /> Add
+                </button>
+            </div>
+
+            {/* Simple Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Note Description</th>
+                            <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {notes.map(note => (
+                            <tr key={note.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="p-4 text-sm font-medium text-gray-900">{note.name}</td>
+                                <td className="p-4 text-right">
+                                    <button
+                                        onClick={() => handleDeleteClick(note.id)}
+                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Delete"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        {notes.length === 0 && (
+                            <tr>
+                                <td colSpan="2" className="p-8 text-center text-gray-500 text-sm">
+                                    No special notes found.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 space-y-4">
+                        <div className="text-center">
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <Trash2 className="h-6 w-6 text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900">Delete Special Note?</h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                Are you sure you want to delete <b>{notes.find(n => n.id === deleteConfirm)?.name}</b>? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setDeleteConfirm(null)}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-colors shadow-sm"
+                            >
+                                Delete
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Note Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-red-500 outline-none"
-                                    placeholder="e.g. Less Spicy"
-                                />
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={formData.isAvailable}
-                                        onChange={e => setFormData({ ...formData, isAvailable: e.target.checked })}
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                                </label>
-                                <span className="text-sm font-medium text-gray-700">Available</span>
-                            </div>
-                            <div className="pt-4 flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-                                >
-                                    {editingNote ? 'Update' : 'Create'}
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             )}

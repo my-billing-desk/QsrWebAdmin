@@ -51,8 +51,8 @@ export const getDateTimeLocal = () => {
  * Useful for <input type="datetime-local" />
  * @returns {string} Current date-time for input
  */
-export const getDateTimeLocalInput = () => {
-    const now = new Date();
+export const getDateTimeLocalInput = (date = new Date()) => {
+    const now = new Date(date);
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');

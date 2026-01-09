@@ -29,14 +29,21 @@ export function VariationsView() {
         }
     };
 
-    const handleDeleteGroup = async (id) => {
-        if (confirm('Are you sure you want to delete this group?')) {
-            try {
-                await groupService.deleteVariationGroup(id);
-                loadData();
-            } catch (error) {
-                alert("Failed to delete group");
-            }
+    const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+    const handleDeleteClick = (id) => {
+        setDeleteConfirm(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirm) return;
+        try {
+            await groupService.deleteVariationGroup(deleteConfirm);
+            loadData();
+        } catch (error) {
+            alert("Failed to delete group");
+        } finally {
+            setDeleteConfirm(null);
         }
     };
 
@@ -150,7 +157,7 @@ export function VariationsView() {
                                         <button onClick={() => handleEditGroup(group)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                                             <Edit3 className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => handleDeleteGroup(group.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                        <button onClick={() => handleDeleteClick(group.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </td>
@@ -306,6 +313,36 @@ export function VariationsView() {
                 </div>
             )
             }
+            {/* Confirmation Modal */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 space-y-4">
+                        <div className="text-center">
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <Trash2 className="h-6 w-6 text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900">Delete Variation?</h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                Are you sure you want to delete this variation group? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setDeleteConfirm(null)}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-colors shadow-sm"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }
