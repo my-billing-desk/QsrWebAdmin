@@ -200,7 +200,7 @@ function AppRoutes() {
         <Route path="/accounting/bank" element={<PlaceholderPage title="Bank Details" />} />
         <Route path="/accounting/kyc" element={<PlaceholderPage title="KYC Details" />} />
         <Route path="/accounting/utility" element={<PlaceholderPage title="Utility Bills" />} />
-        <Route path="/accounting/expense" element={<PlaceholderPage title="Expense & Withdrawal" />} />
+
         <Route path="/accounting/service-history" element={<PlaceholderPage title="Service Payment History" />} />
         <Route path="/accounting/agreement" element={<PlaceholderPage title="Agreement Info" />} />
         <Route path="/accounting/loan" element={<PlaceholderPage title="Loan Information" />} />

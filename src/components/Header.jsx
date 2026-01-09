@@ -191,18 +191,42 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                 )}
 
                 <div className="flex items-center gap-1">
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Expand">
+                    <button
+                        onClick={() => {
+                            if (!document.fullscreenElement) {
+                                document.documentElement.requestFullscreen();
+                            } else {
+                                if (document.exitFullscreen) {
+                                    document.exitFullscreen();
+                                }
+                            }
+                        }}
+                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
+                        title="Expand"
+                    >
                         <Maximize className="w-5 h-5" />
                     </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative" title="Messages">
+                    <button
+                        onClick={() => navigate('/logs/support')}
+                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative"
+                        title="Messages"
+                    >
                         <MessageSquare className="w-5 h-5" />
                         <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
                     </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative" title="Notifications">
+                    <button
+                        onClick={() => navigate('/logs/notifications')}
+                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative"
+                        title="Notifications"
+                    >
                         <Bell className="w-5 h-5" />
                         <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Settings">
+                    <button
+                        onClick={() => navigate('/settings')}
+                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
+                        title="Settings"
+                    >
                         <Settings className="w-5 h-5" />
                     </button>
                 </div>
@@ -226,10 +250,16 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                                 <p className="text-sm font-semibold text-gray-900">{user?.name || 'Admin'}</p>
                                 <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@qsr.com'}</p>
                             </div>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <button
+                                onClick={() => { setShowDropdown(null); navigate('/users/admin'); }}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
                                 <User className="w-4 h-4" /> Profile
                             </button>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <button
+                                onClick={() => { setShowDropdown(null); navigate('/settings'); }}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
                                 <Settings className="w-4 h-4" /> Settings
                             </button>
                             <div className="h-px bg-gray-100 my-1"></div>
