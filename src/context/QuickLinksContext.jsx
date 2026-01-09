@@ -19,8 +19,7 @@ export const initialMenuGroups = [
                 icon: Layers,
                 items: [
                     { id: 'running_orders', path: '/orders/running', label: 'Running Orders' },
-                    { id: 'all_orders', path: '/orders', label: 'All Orders' },
-                    { id: 'online_orders', path: '/orders/online', label: 'Online Orders' },
+                    { id: 'all_orders', path: '/orders/history', label: 'Order History' },
                     { id: 'kot', path: '/orders/kot', label: 'KOT' },
                     { id: 'due_payment', path: '/orders/due-payment', label: 'Due Payment Settlement' },
                     { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss' },
@@ -32,7 +31,7 @@ export const initialMenuGroups = [
         id: 'group_menu',
         title: 'Menu Management',
         items: [
-            { id: 'menu_discounts', path: '/menu', label: 'Menu & Discounts', icon: UtensilsCrossed },
+            { id: 'menu_discounts', path: '/menu/items', label: 'Menu & Discounts', icon: UtensilsCrossed },
             { id: 'special_note', path: '/menu/special-note', label: 'Special Note', icon: FileText },
         ]
     },
@@ -47,35 +46,19 @@ export const initialMenuGroups = [
         title: 'Reports',
         items: [
             { id: 'day_end', path: '/reports/day-end', label: 'Day End Summary', icon: FileText },
+            { id: 'business_summary', path: '/reports/business-summary', label: 'Business Report', icon: BarChart2 },
+            {
+                id: 'inventory_reports_sub',
+                label: 'Inventory Reports',
+                icon: Archive,
+                items: [
+                    { id: 'stock_history', path: '/reports/stock-history', label: 'Stock History' },
+                    { id: 'profit_loss_inventory', path: '/reports/profit-loss', label: 'Profit / Loss' }
+                ]
+            },
             { id: 'other_reports', path: '/reports/other', label: 'Other Reports', icon: FileText },
 
             { id: 'del_mgmt', path: '/reports/delivery', label: 'Delivery Management', icon: Truck },
-        ]
-    },
-    {
-        id: 'group_promo',
-        title: 'Promo', // Creating a new group for Promo/Coupons if typical
-        items: [
-            { id: 'coupons', path: '/promo/coupons', label: 'Coupons', icon: Ticket },
-            { id: 'gift_cards', path: '/promo/gift-cards', label: 'Gift Cards', icon: Gift },
-            { id: 'discount_plan', path: '/promo/discount-plan', label: 'Discount Plan', icon: Percent },
-            { id: 'discount', path: '/promo/discount', label: 'Discount', icon: Percent },
-        ]
-    },
-    {
-        id: 'group_financials',
-        title: 'Financials',
-        items: [
-            { id: 'expenses', path: '/financial/expenses', label: 'Expenses', icon: Wallet },
-        ]
-    },
-
-    {
-        id: 'group_reports_stock',
-        title: 'Reports',
-        items: [
-            { id: 'stock_history', path: '/reports/stock-history', label: 'Stock History', icon: BarChart2 },
-            { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit / Loss', icon: FileText },
         ]
     },
     {
@@ -115,7 +98,6 @@ export const initialMenuGroups = [
                     { id: 'bank_details', path: '/accounting/bank', label: 'Bank Details' },
                     { id: 'kyc_details', path: '/accounting/kyc', label: 'KYC Details' },
                     { id: 'utility_bills', path: '/accounting/utility', label: 'Utility Bills' },
-                    { id: 'exp_withdrawal', path: '/accounting/expense', label: 'Expense & Withdrawal' },
                     { id: 'serv_hist', path: '/accounting/service-history', label: 'Service Payment History' },
                     { id: 'agree_info', path: '/accounting/agreement', label: 'Agreement Info' },
                     { id: 'loan_info', path: '/accounting/loan', label: 'Loan Information' },

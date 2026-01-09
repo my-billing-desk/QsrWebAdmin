@@ -11,18 +11,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuickLinks } from '../context/QuickLinksContext';
 
 // Recursive Sidebar Item Component
-const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, toggleGroup, isSidebarOpen }) => {
+const SidebarItem = ({ item, isActive, onNavigate, expandedGroups, toggleGroup, isSidebarOpen }) => {
     const Icon = item.icon;
     const active = item.path ? isActive(item.path) : false;
     const hasSubItems = item.items && item.items.length > 0;
     const isExpanded = item.forceExpanded || expandedGroups[item.id];
 
-    // Indentation logic
-    const basePadding = 1.0; // rem
-    const depthPadding = depth * 0.75; // rem
-    const totalPadding = isSidebarOpen ? (depth > 0 ? basePadding : basePadding) : 0.75;
-
-    if (!isSidebarOpen && depth > 0) return null;
+    if (!isSidebarOpen) return null; // Simplified: Main sidebar items handle opacity/width in parent, but recursing hidden items is pointless
 
     return (
         <div className="w-full">
@@ -32,23 +27,18 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                     if (item.forceExpanded) return;
                     hasSubItems ? toggleGroup(item.id) : onNavigate(item.path);
                 }}
-                className={`w-full flex items-center justify-between py-2 transition-all duration-200 group relative
+                className={`w-full justify-between group relative
                     ${active && !hasSubItems
-                        ? 'sidebar-item-active' // Semantic Active Class
-                        : 'sidebar-item' // Semantic Inactive Class
+                        ? 'sidebar-item-active'
+                        : 'sidebar-item'
                     }
-                    ${!isSidebarOpen ? 'justify-center px-2' : ''}
                     ${item.forceExpanded ? 'cursor-default' : 'cursor-pointer'}
                 `}
-                style={{
-                    paddingLeft: isSidebarOpen ? `${totalPadding}rem` : '0.75rem',
-                    paddingRight: isSidebarOpen ? '0.75rem' : '0.75rem'
-                }}
                 title={!isSidebarOpen ? item.label : ''}
             >
-                <div className={`flex items-center gap-3 w-full overflow-hidden ${!isSidebarOpen ? 'justify-center' : ''}`}>
+                <div className={`flex items-center w-full overflow-hidden`}>
                     {Icon && (
-                        <Icon className={`w-5 h-5 shrink-0 transition-colors sidebar-icon`} />
+                        <Icon className={`sidebar-icon`} />
                     )}
 
                     {isSidebarOpen && (
@@ -65,19 +55,18 @@ const SidebarItem = ({ item, depth = 0, isActive, onNavigate, expandedGroups, to
                     )}
                 </div>
                 {hasSubItems && isSidebarOpen && !item.forceExpanded && (
-                    <div className="ml-2 shrink-0 sidebar-icon opacity-70">
-                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                    <div className="ml-2 shrink-0 transition-transform duration-200">
+                        {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
                     </div>
                 )}
             </button>
 
             {hasSubItems && isExpanded && isSidebarOpen && (
-                <div className="space-y-0.5 mt-1 relative ml-4 border-l-2 border-gray-100 dark:border-gray-800 transition-all">
+                <div className="ml-6 pl-2 border-l-2 border-gray-100 dark:border-gray-800 space-y-0.5 py-1 mt-1 transition-all">
                     {item.items.map((subItem, idx) => (
                         <SidebarItem
                             key={subItem.id || idx}
                             item={subItem}
-                            depth={depth + 1}
                             isActive={isActive}
                             onNavigate={onNavigate}
                             expandedGroups={expandedGroups}
@@ -195,22 +184,21 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
 
     return (
         <div
-            className={`h-screen flex flex-col z-20 transition-all duration-300 bg-sidebar border-r shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}
-            style={{ borderColor: 'var(--border-color)' }}
+            className={`h-screen flex flex-col z-20 transition-all duration-300 bg-white border-r border-gray-200 shrink-0 ${isOpen ? 'w-64' : 'w-20'}`}
         >
 
             {/* Header / Logo Area */}
-            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-4' : 'justify-center'} border-b`} style={{ borderColor: 'var(--border-color)' }}>
+            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-4' : 'justify-center'} border-b border-gray-200`}>
                 <div className={`flex items-center w-full ${isOpen ? 'gap-3' : 'justify-center'}`}>
                     {/* Logo - retained SmartHR style but adaptable */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-md`} style={{ backgroundColor: 'var(--color-primary)' }}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-md bg-indigo-600`}>
                         <Store className="w-5 h-5" />
                     </div>
 
                     {isOpen && (
                         <div className="flex flex-col overflow-hidden">
-                            <span className="font-bold text-gray-900 text-lg leading-tight truncate" style={{ color: 'var(--text-main)' }}>SmartQSR</span>
-                            <span className="text-[10px] text-muted font-medium uppercase tracking-wider truncate">
+                            <span className="font-bold text-gray-900 text-lg leading-tight truncate">SmartQSR</span>
+                            <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider truncate">
                                 {user?.tenantName || 'Admin Panel'}
                             </span>
                         </div>
@@ -219,7 +207,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
             </div>
 
             {/* Scrollable Nav */}
-            <nav className="flex-1 overflow-y-auto py-4 space-y-6 scrollbar-hide">
+            <nav className="flex-1 overflow-y-auto sidebar-content scrollbar-hide">
                 {menuLayout.map((group, idx) => {
                     // Filter items based on user role
                     const permissionMap = {
@@ -265,19 +253,19 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                         <div key={idx} className="space-y-1">
                             {/* Group Title */}
                             {group.title && isOpen && (
-                                <div
+                                <button
                                     onClick={() => group.id && toggleMainGroup(group.id)}
-                                    className={`px-5 py-2 mb-1 flex items-center justify-between group cursor-pointer hover:bg-gray-50/50 transition-colors ${!isMainExpanded ? 'opacity-80' : ''}`}
+                                    className={`sidebar-item justify-between w-full group mb-1 ${isMainExpanded ? 'bg-gray-50 text-gray-900' : 'text-gray-600'}`}
                                 >
-                                    <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest font-sans group-hover:text-gray-900 transition-colors">
+                                    <span className="text-sm font-medium">
                                         {group.title}
-                                    </h3>
+                                    </span>
                                     {group.id && (
-                                        <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
-                                            {isMainExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                        <div className="text-gray-400">
+                                            {isMainExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                         </div>
                                     )}
-                                </div>
+                                </button>
                             )}
 
                             <div className={`space-y-0.5 transition-all duration-300 overflow-hidden ${(!isOpen || !isMainExpanded) && group.id ? 'max-h-0' : 'max-h-[2000px]'}`}>
@@ -285,7 +273,6 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                                     <SidebarItem
                                         key={item.id || iIdx}
                                         item={item}
-                                        depth={0}
                                         isActive={isActive}
                                         onNavigate={handleNavigation}
                                         expandedGroups={expandedGroups}
@@ -299,16 +286,15 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                 })}
 
                 {/* Quick Links Section */}
-                <div className="space-y-1 pt-4 border-t mx-4" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="space-y-1 pt-4 border-t border-gray-200 mt-2">
                     {isOpen && (
-                        <div className="flex items-center justify-between px-1 mb-2">
-                            <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest font-sans">
+                        <div className="sidebar-item justify-between w-full mb-1 cursor-default">
+                            <span className="text-sm font-medium text-gray-900">
                                 Quick Links
-                            </h3>
+                            </span>
                             <button
                                 onClick={() => handleNavigation('/quick-links')}
-                                className="flex items-center gap-1 text-[10px] font-bold hover:text-orange-600 transition-colors"
-                                style={{ color: 'var(--color-primary)' }}
+                                className="flex items-center gap-1 text-[10px] font-bold hover:text-orange-600 transition-colors text-indigo-600"
                             >
                                 <Plus className="w-3 h-3" /> Add
                             </button>
@@ -319,8 +305,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                         {quickLinks.map((link, idx) => (
                             <SidebarItem
                                 key={`ql_${link.id}`}
-                                item={{ ...link, icon: Zap }} // Using Zap icon for all quick links as per snippet logic preference or fallback
-                                depth={0}
+                                item={{ ...link, icon: Zap }} // Using Zap icon for all quick links
                                 isActive={isActive}
                                 onNavigate={handleNavigation}
                                 expandedGroups={expandedGroups}
@@ -333,18 +318,17 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
             </nav>
 
             {/* Footer Actions */}
-            <div className="p-4 border-t bg-main-app" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-main)' }}>
+            <div className="p-4 border-t bg-gray-50 border-gray-200">
                 <div className={`flex items-center gap-3 ${!isOpen && 'justify-center'}`}>
-                    <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-muted shrink-0 border" style={{ borderColor: 'var(--border-color)' }}>
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-500 shrink-0 border border-gray-200">
                         <UserCircle className="w-6 h-6" />
                     </div>
                     {isOpen && (
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold truncate" style={{ color: 'var(--text-main)' }}>{user?.name || 'User'}</p>
+                            <p className="text-sm font-bold truncate text-gray-900">{user?.name || 'User'}</p>
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); logout(); }}
-                                className="text-xs font-medium flex items-center gap-1 mt-0.5 hover:underline"
-                                style={{ color: 'var(--status-error)' }}
+                                className="text-xs font-medium flex items-center gap-1 mt-0.5 hover:underline text-status-error"
                             >
                                 <LogOut className="w-3 h-3" /> Logout
                             </button>

@@ -26,6 +26,7 @@ export function SmartTable({
     data = [],
     columns = [],
     title = "List",
+    filters,
     actionButtons,
     headerControls,
     searchPlaceholder = "Search...",
@@ -98,64 +99,40 @@ export function SmartTable({
     };
 
     return (
-        <div className="flex flex-col h-full bg-main-app p-4 gap-4 overflow-hidden">
+        <div className="flex flex-col h-full bg-gray-50 p-4 gap-4 overflow-hidden">
 
             {/* Table Container (Card) */}
-            <div className="bg-surface rounded-2xl shadow-sm border flex flex-col flex-1 overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col flex-1 overflow-hidden">
 
-                {/* 1. Header Section (Inside Card) */}
-                <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-center gap-4" style={{ borderColor: 'var(--border-color)' }}>
-                    <div>
-                        <h2 className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>{title}</h2>
+                {/* 1. Header Section */}
+                {(title || headerControls || actionButtons) && (
+                    <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        {title && (
+                            <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+                        )}
+                        <div className="flex flex-wrap items-center gap-2 ml-auto sm:ml-0">
+                            {headerControls}
+                            {actionButtons}
+                        </div>
                     </div>
-                    {/* Header Controls (Right Aligned) */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        {headerControls}
-                        {actionButtons}
-                    </div>
-                </div>
+                )}
 
-                {/* 2. Controls Bar (Rows Per Page & Search) */}
-                <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    {/* Left: Row Selector */}
-                    <div className="flex items-center gap-2 text-sm text-muted">
-                        <span>Row Per Page</span>
-                        <select
-                            value={rowsPerPage}
-                            onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                            className="border rounded px-2 py-1 bg-surface focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer text-sm"
-                            style={{ borderColor: 'var(--border-color)' }}
-                        >
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                        </select>
-                        <span>Entries</span>
+                {/* 2. Filters Section */}
+                {filters && (
+                    <div className="p-4 border-b border-gray-200 bg-gray-50/50">
+                        {filters}
                     </div>
-
-                    {/* Right: Search */}
-                    <div className="relative w-full sm:w-auto">
-                        <input
-                            type="text"
-                            placeholder={searchPlaceholder}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-3 pr-8 py-2 border rounded-md text-sm w-full sm:w-64 bg-surface focus:outline-none focus:border-primary transition-colors"
-                            style={{ borderColor: 'var(--border-color)', color: 'var(--text-main)' }}
-                        />
-                        <Search className="absolute right-2.5 top-2.5 w-4 h-4 text-muted" />
-                    </div>
-                </div>
+                )}
 
                 {/* 3. Table Content */}
                 <div className="flex-1 overflow-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="text-xs font-bold uppercase bg-gray-50/50 sticky top-0 z-10 border-y" style={{ color: 'var(--text-main)', backgroundColor: 'var(--main-app)', borderColor: 'var(--border-color)' }}>
+                    <table className="table-standard">
+                        <thead className="table-header sticky top-0 z-10 border-y border-gray-200">
                             <tr>
-                                <th className="p-4 w-10">
+                                <th className="table-th w-10">
                                     <input
                                         type="checkbox"
-                                        className="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
+                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer w-4 h-4"
                                         checked={paginatedData.length > 0 && selectedRows.length === paginatedData.length}
                                         onChange={toggleSelectAll}
                                     />
@@ -163,7 +140,7 @@ export function SmartTable({
                                 {columns.map((col, idx) => (
                                     <th
                                         key={idx}
-                                        className={`p-4 cursor-pointer hover:bg-black/5 transition-colors ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                                        className={`table-th cursor-pointer hover:bg-black/5 transition-colors ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                                         onClick={() => col.sortable && handleSort(col.key)}
                                     >
                                         <div className={`flex items-center gap-1 ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}`}>
@@ -180,26 +157,26 @@ export function SmartTable({
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y" style={{ divideColor: 'var(--border-color)' }}>
+                        <tbody className="divide-y divide-gray-200">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={columns.length + 1} className="p-8 text-center text-muted">Loading data...</td>
+                                    <td colSpan={columns.length + 1} className="p-8 text-center text-gray-500">Loading data...</td>
                                 </tr>
                             ) : paginatedData.length === 0 ? (
                                 <tr>
-                                    <td colSpan={columns.length + 1} className="p-8 text-center text-muted">No records found</td>
+                                    <td colSpan={columns.length + 1} className="h-48 text-center text-gray-500 align-middle">No records found</td>
                                 </tr>
                             ) : (
                                 paginatedData.map((item, rowIdx) => (
                                     <tr
                                         key={item.id || rowIdx}
-                                        className="hover:bg-main-app transition-colors cursor-pointer group"
+                                        className="table-row cursor-pointer group"
                                         onClick={() => onRowClick && onRowClick(item)}
                                     >
-                                        <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                                        <td className="table-td w-10" onClick={(e) => e.stopPropagation()}>
                                             <input
                                                 type="checkbox"
-                                                className="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
+                                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer w-4 h-4"
                                                 checked={selectedRows.includes(item.id)}
                                                 onChange={(e) => toggleSelectRow(item.id, e)}
                                             />
@@ -207,8 +184,7 @@ export function SmartTable({
                                         {columns.map((col, colIdx) => (
                                             <td
                                                 key={colIdx}
-                                                className={`p-4 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
-                                                style={{ color: 'var(--text-main)' }}
+                                                className={`table-td ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                                             >
                                                 {col.render ? col.render(item) : item[col.key]}
                                             </td>
@@ -221,16 +197,29 @@ export function SmartTable({
                 </div>
 
                 {/* Footer / Pagination */}
-                <div className="p-4 border-t flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted font-medium bg-surface" style={{ borderColor: 'var(--border-color)' }}>
-                    <div>
-                        Showing {filteredData.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1} to {Math.min(currentPage * rowsPerPage, filteredData.length)} of {filteredData.length} entries
+                <div className="p-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500 font-medium bg-white">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>Rows:</span>
+                            <select
+                                value={rowsPerPage}
+                                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                                className="border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 cursor-pointer text-xs"
+                            >
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
+                        <span>
+                            Showing {filteredData.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1} to {Math.min(currentPage * rowsPerPage, filteredData.length)} of {filteredData.length} entries
+                        </span>
                     </div>
                     <div className="flex gap-2">
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            className="px-3 py-1.5 border rounded hover:bg-main-app disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white text-gray-700"
-                            style={{ borderColor: 'var(--border-color)' }}
+                            className="px-3 py-1.5 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white text-gray-700"
                         >
                             Previous
                         </button>
@@ -239,10 +228,9 @@ export function SmartTable({
                                 key={i}
                                 onClick={() => setCurrentPage(i + 1)}
                                 className={`w-8 h-8 flex items-center justify-center rounded border transition-colors ${currentPage === i + 1
-                                        ? 'bg-[#EF4444] text-white border-[#EF4444]' // Using exact red/orange from theme or ref match if possible. Ref looks like primary orange.
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
                                     }`}
-                                style={currentPage === i + 1 ? { backgroundColor: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'white' } : { borderColor: 'var(--border-color)' }}
                             >
                                 {i + 1}
                             </button>
@@ -250,8 +238,7 @@ export function SmartTable({
                         <button
                             disabled={currentPage === totalPages || totalPages === 0}
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                            className="px-3 py-1.5 border rounded hover:bg-main-app disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white text-gray-700"
-                            style={{ borderColor: 'var(--border-color)' }}
+                            className="px-3 py-1.5 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white text-gray-700"
                         >
                             Next
                         </button>

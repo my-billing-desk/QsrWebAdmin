@@ -2,52 +2,133 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, Store, ChevronDown, Lightbulb, Bell, Link as LinkIcon, Settings, Grid, LogOut, User, FileText, Monitor, Search, Maximize, MessageSquare, PlusCircle, Box, ShoppingBag, ShoppingCart, FileCheck, Truck, ArrowRightLeft, RotateCcw, Users, File } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { initialMenuGroups } from '../context/QuickLinksContext';
 
-export function Header({ onToggleSidebar }) {
+export function Header({ onToggleSidebar, title, searchData = [] }) {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const profileDropdownRef = useRef(null);
     const addDropdownRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const searchDropdownRef = useRef(null);
+
+    // Flatten menu items for search
+    const allNavItems = React.useMemo(() => {
+        const items = [];
+        const traverse = (groups) => {
+            groups.forEach(group => {
+                if (group.path && group.label) items.push({ label: group.label, path: group.path });
+                if (group.items) traverse(group.items);
+            });
+        };
+        traverse(initialMenuGroups);
+        return items;
+    }, []);
 
     useEffect(() => {
-        function handleClickOutside(event) {
+        const handleKeyDown = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+        };
+
+        const handleClickOutside = (event) => {
             if (showDropdown === 'profile' && profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
                 setShowDropdown(null);
             }
             if (showDropdown === 'add_new' && addDropdownRef.current && !addDropdownRef.current.contains(event.target)) {
                 setShowDropdown(null);
             }
-        }
+            if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target)) {
+                setSearchResults([]);
+                setSearchQuery('');
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
+            document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [showDropdown]);
 
+    // Handle Search
+    const handleSearch = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        // Combine dynamically extracted routes with any passed searchData
+        // Filter out duplicates based on path
+        const allRoutes = [...searchData, ...allNavItems].reduce((acc, current) => {
+            const x = acc.find(item => item.path === current.path);
+            if (!x && current.path) { // Ensure path exists
+                return acc.concat([current]);
+            } else {
+                return acc;
+            }
+        }, []);
+
+        const results = allRoutes.filter(item =>
+            item.label.toLowerCase().includes(query.toLowerCase())
+        );
+        setSearchResults(results);
+    };
+
+    const handleResultClick = (path) => {
+        navigate(path);
+        setSearchQuery('');
+        setSearchResults([]);
+    };
+
     return (
         <header
-            className="h-16 flex items-center justify-between px-6 shrink-0 z-30 bg-header border-b"
-            style={{ borderColor: 'var(--border-color)' }}
+            className="h-16 flex items-center justify-between px-6 shrink-0 z-30 bg-white border-b border-gray-200"
         >
             {/* Left Section: Search */}
-            <div className="flex items-center gap-4 flex-1 max-w-xl">
-                <button onClick={onToggleSidebar} className="text-muted hover:text-gray-900 md:hidden">
+            <div className="flex items-center gap-4 flex-1 max-w-sm">
+                <button onClick={onToggleSidebar} className="text-gray-500 hover:text-gray-900 md:hidden">
                     <Menu className="w-6 h-6" />
                 </button>
-                <div className="relative w-full max-w-md hidden md:block">
+                <div className="relative w-full hidden md:block" ref={searchDropdownRef}>
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 text-muted" />
+                        <Search className="h-4 w-4 text-gray-500" />
                     </div>
                     <input
+                        ref={searchInputRef}
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border rounded-lg leading-5 bg-main-app text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-colors"
-                        style={{ borderColor: 'var(--border-color)' }}
-                        placeholder="Search in QSR..."
+                        value={searchQuery}
+                        onChange={handleSearch}
+                        className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-colors"
+                        placeholder="Search..."
                     />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <span className="bg-blue-50/80 text-blue-400 text-[10px] font-black border border-blue-100 rounded-md px-1.5 py-0.5 tracking-tight">CTRL + /</span>
-                    </div>
+
+                    {/* Search Results Dropdown */}
+                    {searchResults.length > 0 && (
+                        <div className="absolute top-full left-0 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 max-h-64 overflow-y-auto">
+                            {searchResults.map((result, idx) => (
+                                <button
+                                    key={idx}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 group"
+                                    onClick={() => handleResultClick(result.path)}
+                                >
+                                    <span className="p-1 bg-gray-100 rounded text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                        <ArrowRightLeft className="w-3 h-3" />
+                                    </span>
+                                    {result.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -56,20 +137,18 @@ export function Header({ onToggleSidebar }) {
                 {/* Add New Dropdown */}
                 <div className="relative z-50" ref={addDropdownRef}>
                     <button
-                        className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#f9a01b] hover:bg-[#e89112] text-white rounded-xl transition-all font-black text-sm shadow-lg shadow-orange-500/20 active:scale-95 border-2 border-transparent hover:border-orange-300/30"
+                        className="hidden lg:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all font-semibold text-sm shadow-sm active:scale-95"
                         onClick={() => setShowDropdown(showDropdown === 'add_new' ? null : 'add_new')}
                     >
-                        <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-white/50">
-                            <PlusCircle className="w-3 h-3 fill-white" />
-                        </div>
-                        <span className="tracking-tight">Add New</span>
+                        <PlusCircle className="w-4 h-4" />
+                        <span>Add New</span>
                     </button>
 
                     {showDropdown === 'add_new' && (
                         <div
-                            className="absolute right-0 mt-4 w-[680px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 p-8 z-50 animate-in fade-in slide-in-from-top-4 duration-300"
+                            className="absolute right-0 mt-4 w-96 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50"
                         >
-                            <div className="grid grid-cols-6 gap-y-10 gap-x-2">
+                            <div className="grid grid-cols-4 gap-4">
                                 {[
                                     { label: 'Category', icon: Grid, color: 'text-blue-500', bg: 'bg-blue-50', path: '/menu' },
                                     { label: 'Product', icon: Box, color: 'text-orange-500', bg: 'bg-orange-50', path: '/menu' },
@@ -92,10 +171,10 @@ export function Header({ onToggleSidebar }) {
                                             setShowDropdown(null);
                                         }}
                                     >
-                                        <div className={`w-14 h-14 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 group-hover:shadow-lg transition-all shadow-sm border border-transparent`}>
-                                            <item.icon className="w-6 h-6 stroke-[2.5]" />
+                                        <div className={`w-10 h-10 rounded-lg ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-105 transition-all`}>
+                                            <item.icon className="w-5 h-5" />
                                         </div>
-                                        <span className="text-[13px] font-black text-gray-500 tracking-tight">{item.label}</span>
+                                        <span className="text-xs font-medium text-gray-600">{item.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -112,18 +191,18 @@ export function Header({ onToggleSidebar }) {
                 )}
 
                 <div className="flex items-center gap-1">
-                    <button className="p-2 text-muted hover:bg-main-app rounded-lg transition-colors" title="Expand">
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Expand">
                         <Maximize className="w-5 h-5" />
                     </button>
-                    <button className="p-2 text-muted hover:bg-main-app rounded-lg transition-colors relative" title="Messages">
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative" title="Messages">
                         <MessageSquare className="w-5 h-5" />
                         <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
                     </button>
-                    <button className="p-2 text-muted hover:bg-main-app rounded-lg transition-colors relative" title="Notifications">
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative" title="Notifications">
                         <Bell className="w-5 h-5" />
                         <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
-                    <button className="p-2 text-muted hover:bg-main-app rounded-lg transition-colors" title="Settings">
+                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Settings">
                         <Settings className="w-5 h-5" />
                     </button>
                 </div>
@@ -133,24 +212,24 @@ export function Header({ onToggleSidebar }) {
                 {/* Profile Dropdown */}
                 <div className="relative" ref={profileDropdownRef}>
                     <button
-                        className="flex items-center gap-3 hover:bg-main-app p-1.5 rounded-lg transition-colors"
+                        className="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-lg transition-colors"
                         onClick={() => setShowDropdown(showDropdown === 'profile' ? null : 'profile')}
                     >
-                        <div className="w-9 h-9 rounded bg-orange-100 flex items-center justify-center overflow-hidden border border-orange-200 text-orange-600">
+                        <div className="w-9 h-9 rounded bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 text-gray-600">
                             <User className="w-5 h-5" />
                         </div>
                     </button>
 
                     {showDropdown === 'profile' && (
-                        <div className="absolute right-0 mt-2 w-48 bg-surface rounded-xl shadow-xl border py-1 z-50 animate-in fade-in zoom-in-95 duration-100" style={{ borderColor: 'var(--border-color)' }}>
-                            <div className="px-4 py-3 border-b bg-main-app" style={{ borderColor: 'var(--border-color)' }}>
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                                 <p className="text-sm font-semibold text-gray-900">{user?.name || 'Admin'}</p>
-                                <p className="text-xs text-muted truncate">{user?.email || 'admin@qsr.com'}</p>
+                                <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@qsr.com'}</p>
                             </div>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-main-app flex items-center gap-2">
+                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <User className="w-4 h-4" /> Profile
                             </button>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-main-app flex items-center gap-2">
+                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <Settings className="w-4 h-4" /> Settings
                             </button>
                             <div className="h-px bg-gray-100 my-1"></div>

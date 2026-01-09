@@ -15,17 +15,17 @@ export function ReportNotifications() {
     ];
 
     return (
-        <div className="flex flex-col h-full bg-main-app p-6 font-sans gap-6 overflow-y-auto">
+        <div className="flex flex-col h-full bg-gray-50 p-6 font-sans gap-6 overflow-y-auto">
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-main)' }}>Alerts</h1>
-                <div className="text-sm text-muted">Base UI / <span>Alerts</span></div>
+                <div className="text-sm text-gray-500">Base UI / <span>Alerts</span></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* Default Alerts Column */}
-                <div className="bg-surface rounded-xl border p-6" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="bg-white rounded-xl border p-6" style={{ borderColor: 'var(--border-color)' }}>
                     <h3 className="font-bold text-lg mb-6" style={{ color: 'var(--text-main)' }}>Default Alerts</h3>
                     <div className="space-y-4">
                         {variants.map((v) => (
@@ -37,7 +37,7 @@ export function ReportNotifications() {
                 </div>
 
                 {/* Links In Alerts Column */}
-                <div className="bg-surface rounded-xl border p-6" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="bg-white rounded-xl border p-6" style={{ borderColor: 'var(--border-color)' }}>
                     <h3 className="font-bold text-lg mb-6" style={{ color: 'var(--text-main)' }}>Links In Alerts</h3>
                     <div className="space-y-4">
                         {variants.map((v) => (

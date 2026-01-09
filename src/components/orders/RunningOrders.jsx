@@ -92,15 +92,15 @@ export function RunningOrders() {
     });
 
     return (
-        <div className="flex flex-col h-full bg-main-app p-6 gap-6 font-sans">
+        <div className="flex flex-col h-full bg-gray-50 p-6 gap-6 font-sans">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Task Board</h1>
-                    <div className="flex items-center gap-2 text-sm text-muted mt-1">
+                    <h1 className="text-2xl font-bold text-gray-900">Task Board</h1>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                         <span className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                            Total Task : <span className="font-bold text-main">{orders.length}</span>
+                            Total Task : <span className="font-bold text-indigo-600">{orders.length}</span>
                         </span>
                         <span className="w-px h-3 bg-gray-300"></span>
                         <span>Pending : {orders.filter(o => o.status === 'preparing').length}</span>
@@ -114,18 +114,18 @@ export function RunningOrders() {
                     <button className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg text-sm font-medium hover:bg-gray-50 text-gray-700 shadow-sm">
                         <Download className="w-4 h-4" /> Export
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold hover:bg-orange-600 shadow-sm">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-sm">
                         <Plus className="w-4 h-4" /> Add Board
                     </button>
                 </div>
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-surface p-4 rounded-xl border shadow-sm flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                 {/* Priority / Type Tabs */}
                 <div className="flex items-center bg-gray-100/50 p-1 rounded-lg">
                     {['All', 'High', 'Medium', 'Low'].map(p => (
-                        <button key={p} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${p === 'All' ? 'bg-white shadow text-main' : 'text-muted hover:text-main'}`}>
+                        <button key={p} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${p === 'All' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-indigo-600'}`}>
                             {p}
                         </button>
                     ))}
@@ -143,7 +143,7 @@ export function RunningOrders() {
                         Select Status <Filter className="w-3 h-3 opacity-50" />
                     </button>
                     <div className="h-8 w-px bg-gray-200 mx-1"></div>
-                    <button className="flex items-center gap-2 px-3 py-2 border-none text-sm text-muted font-medium hover:text-main">
+                    <button className="flex items-center gap-2 px-3 py-2 border-none text-sm text-gray-500 font-medium hover:text-indigo-600">
                         Sort By : Created Date
                     </button>
                 </div>

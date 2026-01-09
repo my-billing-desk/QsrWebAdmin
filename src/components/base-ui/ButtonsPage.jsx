@@ -14,15 +14,15 @@ export function ButtonsPage() {
     ];
 
     return (
-        <div className="flex flex-col h-full bg-main-app p-6 font-sans gap-6 overflow-y-auto">
+        <div className="flex flex-col h-full bg-gray-50 p-6 font-sans gap-6 overflow-y-auto">
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-main)' }}>Buttons</h1>
-                <div className="text-sm text-muted">Base UI / <span>Buttons</span></div>
+                <div className="text-sm text-gray-500">Base UI / <span>Buttons</span></div>
             </div>
 
             {/* Default Buttons Card */}
-            <div className="bg-surface rounded-xl border p-6" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="bg-white rounded-xl border p-6" style={{ borderColor: 'var(--border-color)' }}>
                 <h3 className="font-bold text-lg mb-6" style={{ color: 'var(--text-main)' }}>Default Buttons</h3>
                 <div className="flex flex-wrap gap-3">
                     {defaultButtons.map((btn) => (

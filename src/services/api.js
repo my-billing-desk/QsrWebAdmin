@@ -99,6 +99,7 @@ export const dashboardService = {
     getCharts: (params) => api.get('/dashboard/charts', { params }),
     getRecentOrders: (params) => api.get('/dashboard/recent-orders', { params }),
     getTopItems: (params) => api.get('/dashboard/top-items', { params }),
+    getSalesBreakdown: (params) => api.get('/dashboard/sales-breakdown', { params }),
     clearData: () => api.post('/dashboard/clear-data'),
 };
 

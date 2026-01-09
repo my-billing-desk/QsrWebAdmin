@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, Plus, FileSpreadsheet, FileText, RotateCcw, Calendar, Filter, Printer } from 'lucide-react';
+import { SmartTable } from '../ui/SmartTable';
 import { inventoryService } from '../../services/api';
 import { getTodayLocal, formatDateDisplay } from '../../utils/dateUtils';
 
@@ -49,6 +50,67 @@ export function StockHistory() {
         });
     };
 
+    const columns = [
+        {
+            key: 'sku',
+            header: 'SKU',
+            render: (item) => <span className="text-gray-600 font-mono text-xs">{item.sku}</span>
+        },
+        {
+            key: 'name',
+            header: 'Product',
+            render: (item) => (
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-orange-50 flex items-center justify-center border border-orange-100 text-[10px] text-orange-400 font-bold uppercase">
+                        {item.name.substring(0, 2)}
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="font-bold text-gray-700">{item.name}</span>
+                        <span className="text-[10px] text-gray-400 uppercase tracking-wider">{item.unit}</span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            key: 'opening',
+            header: 'Initial Qty',
+            align: 'center',
+            render: (item) => <span className="font-medium text-gray-600">{(item.opening || 0).toFixed(2)}</span>
+        },
+        {
+            key: 'purchase',
+            header: 'Added Qty (+)',
+            align: 'center',
+            render: (item) => <span className="font-medium text-green-600">{(item.purchase || 0).toFixed(2)}</span>
+        },
+        {
+            key: 'consumed',
+            header: 'Sold Qty (-)',
+            align: 'center',
+            render: (item) => <span className="font-medium text-red-500">{(item.consumed || 0).toFixed(2)}</span>
+        },
+        {
+            key: 'wastage',
+            header: 'Defective (-)',
+            align: 'center',
+            render: (item) => <span className="font-medium text-orange-500">{(item.wastage || 0).toFixed(2)}</span>
+        },
+        {
+            key: 'closingStock',
+            header: 'Final Qty',
+            align: 'center',
+            render: (item) => <span className="font-bold text-gray-800 bg-orange-50/20 px-2 py-1 rounded">{(item.closingStock || 0).toFixed(2)}</span>
+        }
+    ];
+
+    const actionButtons = (
+        <div className="flex gap-2">
+            <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-red-500 shadow-sm"><FileText className="w-4 h-4" /></button>
+            <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-green-600 shadow-sm"><FileSpreadsheet className="w-4 h-4" /></button>
+            <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><Printer className="w-4 h-4" /></button>
+        </div>
+    );
+
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans p-6 gap-6 overflow-hidden w-full relative">
             {/* 1. Header Section */}
@@ -82,7 +144,6 @@ export function StockHistory() {
                     <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><ChevronDown className="w-4 h-4" /></button>
                 </div>
             </div>
-
 
             {/* 2. Filters Card */}
             <div className="bg-white border rounded-lg shadow-sm p-4">
@@ -135,82 +196,15 @@ export function StockHistory() {
             </div>
 
             {/* 3. Main Content Card - Table */}
-            <div className="bg-white border rounded-lg shadow-sm flex flex-col flex-1 overflow-hidden">
-                <div className="p-4 border-b flex justify-between items-center">
-                    <h2 className="font-bold text-gray-800 text-lg">Stock Summary Report</h2>
-                    <div className="flex gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-red-500 shadow-sm"><FileText className="w-4 h-4" /></button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-green-600 shadow-sm"><FileSpreadsheet className="w-4 h-4" /></button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-white border rounded hover:bg-gray-50 text-gray-600 shadow-sm"><Printer className="w-4 h-4" /></button>
-                    </div>
-                </div>
-
-                <div className="flex-1 overflow-auto">
-                    {error ? (
-                        <div className="flex items-center justify-center h-full text-red-500 p-4 font-medium italic">
-                            {error}
-                        </div>
-                    ) : reportData.length === 0 && !loading ? (
-                        <div className="flex items-center justify-center h-full text-gray-400 p-4 font-medium italic">
-                            No records found for the selected period.
-                        </div>
-                    ) : (
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-gray-50 text-xs font-bold text-gray-800 border-b">
-                                <tr>
-                                    <th className="p-4">SKU</th>
-                                    <th className="p-4">Product</th>
-                                    <th className="p-4 text-center">Initial Qty</th>
-                                    <th className="p-4 text-center text-green-600">Added Qty (+)</th>
-                                    <th className="p-4 text-center text-red-500">Sold Qty (-)</th>
-                                    <th className="p-4 text-center text-orange-600">Defective (-)</th>
-                                    <th className="p-4 text-center font-bold text-orange-600 bg-orange-50/30">Final Qty</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-sm divide-y">
-                                {reportData.map((item) => (
-                                    <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="p-4 text-gray-600 font-mono text-xs">{item.sku}</td>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded bg-orange-50 flex items-center justify-center border border-orange-100 text-[10px] text-orange-400 font-bold uppercase">
-                                                    {item.name.substring(0, 2)}
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-gray-700">{item.name}</span>
-                                                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">{item.unit}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-center font-medium text-gray-600">{(item.opening || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center font-medium text-green-600">{(item.purchase || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center font-medium text-red-500">{(item.consumed || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center font-medium text-orange-500">{(item.wastage || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center font-bold text-gray-800 bg-orange-50/20">{(item.closingStock || 0).toFixed(2)}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
-
-                {/* Pagination */}
-                <div className="p-4 border-t flex justify-between items-center text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                        Row Per Page
-                        <select className="border rounded px-2 py-1 bg-white">
-                            <option>10</option>
-                            <option>25</option>
-                            <option>50</option>
-                        </select>
-                        Entries
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button className="p-1 rounded hover:bg-gray-100 text-gray-500">&lt;</button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-orange-500 text-white rounded-full text-sm font-bold shadow-lg shadow-orange-200">1</button>
-                        <button className="p-1 rounded hover:bg-gray-100 text-gray-500">&gt;</button>
-                    </div>
-                </div>
+            <div className="flex-1 overflow-hidden">
+                <SmartTable
+                    data={reportData}
+                    columns={columns}
+                    title="Stock Summary Report"
+                    actionButtons={actionButtons}
+                    isLoading={loading}
+                    emptyMessage="No records found for the selected period."
+                />
             </div>
         </div>
     );

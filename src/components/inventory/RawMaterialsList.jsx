@@ -36,25 +36,25 @@ export default function RawMaterialsList() {
 
     const columns = [
         { key: 'name', header: 'Name', sortable: true },
-        { key: 'category', header: 'Category', sortable: true, render: (item) => item.category || <span className="text-muted italic">No Category</span> },
+        { key: 'category', header: 'Category', sortable: true, render: (item) => item.category || <span className="text-gray-500 italic">No Category</span> },
         {
             key: 'actions',
             header: 'Action',
             align: 'right',
             render: (item) => (
                 <div className="flex justify-end gap-2">
-                    <button className="p-2 text-muted hover:text-main hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200">
+                    <button className="rounded-lg transition-colors border border-transparent">
                         <FileText className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); navigate(`/inventory/raw-materials/edit/${item.id}`); }}
-                        className="p-2 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-colors border border-transparent hover:border-primary/20"
+                        className="rounded-lg transition-colors border border-transparent"
                     >
                         <Edit className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                        className="p-2 text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                        className="rounded-lg transition-colors border border-transparent"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -75,15 +75,14 @@ export default function RawMaterialsList() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => navigate('/inventory/raw-materials/add')}
-                            className="px-4 py-2 text-white rounded-lg font-medium flex items-center gap-2 shadow-sm transition-colors"
-                            style={{ backgroundColor: 'var(--color-primary)' }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all"
                         >
                             <Plus className="w-4 h-4" /> Create New
                         </button>
-                        <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 font-medium flex items-center gap-2 transition-colors" style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}>
+                        <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all">
                             <Plus className="w-4 h-4" /> Quick Add
                         </button>
-                        <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 font-medium flex items-center gap-2 transition-colors" style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}>
+                        <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all">
                             Action <MoreHorizontal className="w-4 h-4" />
                         </button>
                     </div>

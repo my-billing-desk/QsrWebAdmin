@@ -6,7 +6,7 @@ import { Dashboard } from './components/Dashboard';
 import { MenuManagement } from './components/MenuManagement';
 import { UserManagement } from './components/UserManagement';
 import { RoleManagement } from './components/RoleManagement';
-import { AllOrders } from './components/orders/AllOrders';
+import { OrderHistory } from './components/orders/OrderHistory';
 import { KOT } from './components/orders/KOT';
 import { Settings } from './components/Settings';
 import { QuickLinksProvider } from './context/QuickLinksContext';
@@ -15,7 +15,7 @@ import AggregatorCenter from './components/AggregatorCenter';
 import Marketplace from './components/Marketplace';
 import ConsumerMenu from './components/ConsumerMenu';
 import AggregatorConfig from './components/AggregatorConfig';
-import { ThemeProvider } from './context/ThemeContext';
+
 
 // Inventory Imports (moved from misplaced section)
 // Inventory Imports
@@ -35,7 +35,6 @@ import { ClosingStock } from './components/inventory/ClosingStock';
 import { OpeningStock } from './components/inventory/OpeningStock';
 import { Indent } from './components/inventory/Indent';
 import { StockSummary } from './components/inventory/StockSummary';
-import { OnlineOrders } from './components/orders/OnlineOrders';
 import { RunningOrders } from './components/orders/RunningOrders';
 import { InventoryLayout } from './components/inventory/InventoryLayout';
 import { InventoryDashboard } from './components/inventory/InventoryDashboard';
@@ -61,13 +60,14 @@ import { AreaDeliveryCharges } from './components/configuration/AreaDeliveryChar
 import { FloorPlan } from './components/configuration/FloorPlan';
 import { EmailTemplateSettings } from './components/configuration/EmailTemplateSettings';
 import { DayEndSummary } from './components/reports/DayEndSummary';
+import { BusinessReport } from './components/reports/BusinessReport';
 import { OutletConfiguration } from './components/configuration/OutletConfiguration';
 import { ProfitLoss } from './components/reports/ProfitLoss';
 import { ConfigureProfitLoss } from './components/reports/ConfigureProfitLoss';
 import { MenuOnOff } from './components/menu/MenuOnOff';
 import { SpecialNote } from './components/menu/SpecialNote';
 import { MarketplaceSetting } from './components/configuration/MarketplaceSetting';
-import { ThemeConfiguration } from './components/configuration/ThemeConfiguration';
+
 import { SubscriptionPlans } from './components/configuration/SubscriptionPlans';
 import { ActivityTimeline } from './components/user-logs/ActivityTimeline';
 import LoyaltyDashboard from './components/loyalty/LoyaltyDashboard';
@@ -102,7 +102,7 @@ function MainLayout() {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="flex h-screen bg-main-app font-sans overflow-hidden">
+    <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -135,9 +135,10 @@ function AppRoutes() {
       {/* Main App Routes */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/menu" element={<MenuManagement />} />
-        <Route path="/orders" element={<AllOrders />} />
-        <Route path="/orders/online" element={<OnlineOrders />} />
+        <Route path="/menu" element={<Navigate to="/menu/items" replace />} />
+        <Route path="/menu/items" element={<MenuManagement />} />
+        <Route path="/orders" element={<Navigate to="/orders/history" replace />} />
+        <Route path="/orders/history" element={<OrderHistory />} />
         <Route path="/orders/kot" element={<KOT />} />
         <Route path="/orders/due-payment" element={<PlaceholderPage title="Due Payment Settlement" />} />
         <Route path="/orders/running" element={<RunningOrders />} />
@@ -157,6 +158,7 @@ function AppRoutes() {
         {/* Reports */}
 
         <Route path="/reports/day-end" element={<DayEndSummary />} />
+        <Route path="/reports/business-summary" element={<BusinessReport />} />
         <Route path="/reports/other" element={<PlaceholderPage title="Other Reports" />} />
         <Route path="/reports/delivery" element={<PlaceholderPage title="Delivery Management" />} />
 
@@ -179,7 +181,7 @@ function AppRoutes() {
 
         {/* Config */}
         <Route path="/config/outlet" element={<OutletConfiguration />} />
-        <Route path="/config/theme" element={<ThemeConfiguration />} />
+
         <Route path="/config/sub-order" element={<SubOrderType />} />
         <Route path="/config/delivery" element={<DeliveryDistance />} />
         <Route path="/config/area-delivery" element={<AreaDeliveryCharges />} />
@@ -239,7 +241,7 @@ function AppRoutes() {
         <Route path="/crm/ebill" element={<PlaceholderPage title="Ebill Templates" />} />
 
         {/* Fallback for "Under Development" pages caught by sidebar links */}
-        <Route path="*" element={<div className="flex items-center justify-center h-full text-muted flex-col gap-4"><div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center text-2xl border" style={{ borderColor: 'var(--border-color)' }}>🚧</div><p>Module Under Development</p></div>} />
+        <Route path="*" element={<div className="flex items-center justify-center h-full text-gray-500 flex-col gap-4"><div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-2xl border border-gray-200">🚧</div><p>Module Under Development</p></div>} />
       </Route>
 
       {/* Inventory Routes - Separate Layout */}
@@ -281,15 +283,13 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ThemeProvider>
-          <QuickLinksProvider>
-            <Toaster position="top-right" />
-            <Routes>
-              <Route path="/scan-order" element={<ConsumerMenu />} />
-              <Route path="/*" element={<AppRoutes />} />
-            </Routes>
-          </QuickLinksProvider>
-        </ThemeProvider>
+        <QuickLinksProvider>
+          <Toaster position="top-right" />
+          <Routes>
+            <Route path="/scan-order" element={<ConsumerMenu />} />
+            <Route path="/*" element={<AppRoutes />} />
+          </Routes>
+        </QuickLinksProvider>
       </AuthProvider>
     </BrowserRouter>
   );

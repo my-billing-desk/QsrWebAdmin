@@ -210,7 +210,7 @@ export function MenuChannelDashboard() {
             {/* Header / Tabs - Simplified to just Title */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-100">
-                    <Smartphone className="w-6 h-6 text-primary-500" />
+                    <Smartphone className="w-6 h-6 text-indigo-600-500" />
                     <span>Item Availability Manager</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">Manage item availability for offline store.</p>

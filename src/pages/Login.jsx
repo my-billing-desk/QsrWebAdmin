@@ -58,9 +58,9 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-600 bg-clip-text text-transparent">
                         QSR Admin
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">Sign in to manage your restaurant</p>
@@ -82,7 +82,7 @@ export default function Login() {
                                 type="text"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 placeholder="Enter your username or email"
                             />
                         </div>
@@ -96,7 +96,7 @@ export default function Login() {
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -104,7 +104,7 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-lg shadow-violet-600/20 transition-all active:scale-95"
+                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-md shadow-indigo-600/20 transition-all active:scale-95"
                     >
                         Sign In
                     </button>
@@ -117,7 +117,7 @@ export default function Login() {
                     <button
                         type="button"
                         onClick={handleGoogleLogin}
-                        className="w-full py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
                     >
                         <Mail className="w-5 h-5 text-red-500" />
                         Google
@@ -126,7 +126,7 @@ export default function Login() {
 
                 {availableTenants.length > 0 && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm">
                             <h3 className="text-lg font-bold mb-4">Select Store</h3>
                             <p className="text-sm text-gray-500 mb-4">You have accounts in multiple stores. Please select one to continue.</p>
                             <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -134,7 +134,7 @@ export default function Login() {
                                     <button
                                         key={t.id}
                                         onClick={() => handleTenantSelect(t.id)}
-                                        className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors flex justify-between items-center"
+                                        className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors flex justify-between items-center"
                                     >
                                         <span className="font-medium">{t.name}</span>
                                         <span className="text-xs text-gray-400">{t.subdomain || 'Main'}</span>

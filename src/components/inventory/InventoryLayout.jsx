@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 
 
+import { Header } from '../Header';
+
 export function InventoryLayout() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -98,42 +100,41 @@ export function InventoryLayout() {
 
     ];
 
+    const getTitle = () => {
+        const currentItem = navItems
+            .flatMap(g => g.items)
+            .find(i => i.path === location.pathname);
+        return currentItem ? currentItem.label : 'Inventory';
+    };
+
+    const flattenedSearchItems = navItems.flatMap(group =>
+        group.items.map(item => ({ label: item.label, path: item.path }))
+    );
+
     return (
-        <div className="flex h-screen font-sans overflow-hidden" style={{ backgroundColor: 'var(--bg-main)' }}>
+        <div className="flex h-screen font-sans overflow-hidden bg-gray-50">
             {/* Inventory Sidebar */}
-            <div className="w-72 flex flex-col h-full overflow-y-auto shrink-0 z-30 shadow-sm transition-all border-r" style={{ backgroundColor: 'var(--bg-sidebar)', borderColor: 'var(--border-color)' }}>
+            <div className="w-64 flex flex-col h-full overflow-y-auto shrink-0 z-30 shadow-sm transition-all border-r bg-white border-gray-200">
                 {/* Header */}
-                <div className="h-20 flex items-center px-6 border-b sticky top-0 z-10" style={{ backgroundColor: 'var(--bg-header)', borderColor: 'var(--border-color)' }}>
+                <div className="h-16 flex items-center px-4 border-b border-gray-200 sticky top-0 z-10 bg-white">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: 'var(--color-primary)' }}>
-                            <Archive className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg text-white bg-indigo-600">
+                            <Archive className="w-5 h-5" />
                         </div>
-                        <span className="font-bold text-lg tracking-tight" style={{ color: 'var(--text-main)' }}>Inventory</span>
+                        <span className="font-bold text-lg tracking-tight text-gray-900">Inventory</span>
                     </div>
                 </div>
 
-                <nav className="p-4 space-y-2">
+                <nav className="sidebar-content">
                     {navItems.map((section, idx) => {
                         if (section.group === 'Main') {
                             return section.items.map(item => (
                                 <button
                                     key={item.path}
                                     onClick={() => navigate(item.path)}
-                                    className={`w-full flex items-center px-4 py-3 rounded-xl mb-1 transition-all duration-200 group ${isActive(item.path)
-                                        ? 'shadow-sm font-bold'
-                                        : 'font-medium hover:bg-gray-50'
-                                        }`}
-                                    style={isActive(item.path) ? {
-                                        backgroundColor: 'var(--sidebar-active)',
-                                        color: 'var(--sidebar-active-text)',
-                                        border: '1px solid var(--color-primary)'
-                                    } : {
-                                        color: 'var(--sidebar-text)'
-                                    }}
+                                    className={`w-full ${isActive(item.path) ? 'sidebar-item-active' : 'sidebar-item'}`}
                                 >
-                                    <item.icon className={`w-5 h-5 mr-3 transition-transform group-hover:scale-110`}
-                                        style={{ color: isActive(item.path) ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)' }}
-                                    />
+                                    <item.icon className="sidebar-icon" />
                                     <span className="text-sm">{item.label}</span>
                                 </button>
                             ));
@@ -147,36 +148,25 @@ export function InventoryLayout() {
                             <div key={section.group} className="mb-2">
                                 <button
                                     onClick={() => toggleGroup(section.group)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors hover:bg-gray-50`}
-                                    style={{ color: isExpanded ? 'var(--text-main)' : 'var(--text-muted)' }}
+                                    className={`sidebar-item justify-between w-full group ${isExpanded ? 'bg-gray-50 text-gray-900' : ''}`}
                                 >
-                                    <div className="flex items-center">
-                                        <GroupIcon className={`w-5 h-5 mr-3`} style={{ color: isExpanded ? 'var(--text-main)' : 'var(--text-light)' }} />
-                                        <span className="text-sm font-bold tracking-wide">{section.group}</span>
+                                    <div className="flex items-center w-full">
+                                        <GroupIcon className="sidebar-icon" />
+                                        <span className="text-sm font-medium">{section.group}</span>
                                     </div>
                                     <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-                                        <ChevronDown className="w-4 h-4" style={{ color: 'var(--text-light)' }} />
+                                        <ChevronDown className="w-4 h-4 text-gray-400" />
                                     </div>
                                 </button>
 
                                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-                                    <div className="ml-4 pl-4 border-l-2 space-y-1 py-1" style={{ borderColor: 'var(--border-color)' }}>
+                                    <div className="ml-6 pl-2 border-l-2 space-y-0.5 py-1 border-gray-100">
                                         {section.items.map(item => (
                                             <button
                                                 key={item.path}
                                                 onClick={() => navigate(item.path)}
-                                                className={`w-full flex items-center px-4 py-2.5 rounded-lg text-sm transition-all relative hover:bg-gray-50`}
-                                                style={isActive(item.path) ? {
-                                                    color: 'var(--color-primary)',
-                                                    fontWeight: 'bold',
-                                                    backgroundColor: 'var(--sidebar-active)'
-                                                } : {
-                                                    color: 'var(--text-muted)'
-                                                }}
+                                                className={`w-full flex items-center rounded-lg text-sm transition-all relative py-2 pl-3 ${isActive(item.path) ? 'text-indigo-600 font-bold bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'}`}
                                             >
-                                                {isActive(item.path) && (
-                                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full -ml-[18px]" style={{ backgroundColor: 'var(--color-primary)' }}></div>
-                                                )}
                                                 {item.label}
                                             </button>
                                         ))}
@@ -188,9 +178,16 @@ export function InventoryLayout() {
                 </nav>
             </div>
 
-            {/* Main Content Area for Inventory Sub-routes */}
-            <div className="flex-1 overflow-auto p-6 scroll-smooth" style={{ backgroundColor: 'var(--bg-main)' }}>
-                <Outlet />
+            {/* Main Content Area with Header */}
+            <div className="flex-1 flex flex-col overflow-hidden relative z-10 transition-all duration-300">
+                <Header
+                    title={getTitle()}
+                    onToggleSidebar={() => { }}
+                    searchData={flattenedSearchItems}
+                />
+                <main className="flex-1 overflow-auto p-6 scroll-smooth bg-gray-50">
+                    <Outlet />
+                </main>
             </div>
         </div>
     );

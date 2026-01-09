@@ -18,17 +18,17 @@ export function KanbanBoard({ columns, data, onStatusChange }) {
     return (
         <div className="flex gap-6 overflow-x-auto pb-4 h-full">
             {columns.map(col => (
-                <div key={col.id} className="min-w-[300px] flex flex-col bg-gray-50/50 rounded-xl h-full" style={{ backgroundColor: 'var(--bg-main)' }}>
+                <div key={col.id} className="min-w-[300px] flex flex-col bg-gray-50/50 rounded-xl h-full" style={{ backgroundColor: 'var(--bg-gray-50)' }}>
                     {/* Column Header */}
                     <div className="p-4 flex items-center justify-between border-b border-transparent">
                         <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${col.color}`}></div>
                             <h3 className="font-bold text-lg" style={{ color: 'var(--text-main)' }}>{col.title}</h3>
-                            <span className="bg-white px-2 py-0.5 rounded-full text-xs font-bold text-muted border shadow-sm" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
+                            <span className="bg-white px-2 py-0.5 rounded-full text-xs font-bold text-gray-500 border shadow-sm" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-white)' }}>
                                 {String(getColumnData(col.id).length).padStart(2, '0')}
                             </span>
                         </div>
-                        <button className="text-muted hover:text-main">
+                        <button className="text-gray-500 hover:text-main">
                             <MoreVertical className="w-4 h-4" />
                         </button>
                     </div>
@@ -51,7 +51,7 @@ function KanbanCard({ item }) {
     const typeLabel = item.type === 'dine-in' ? 'Dine In' : item.type === 'delivery' ? 'Delivery' : 'Take Away';
 
     return (
-        <div className="bg-surface p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow group cursor-pointer" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="bg-white p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow group cursor-pointer" style={{ borderColor: 'var(--border-color)' }}>
 
             {/* Top Badges */}
             <div className="flex justify-between items-start mb-3">
@@ -63,7 +63,7 @@ function KanbanCard({ item }) {
                         #{item.subType || 'High'} {/* Using 'High' as visual placeholder if no subtype */}
                     </span>
                 </div>
-                <button className="text-muted opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
                     <MoreVertical className="w-4 h-4" />
                 </button>
             </div>
@@ -86,7 +86,7 @@ function KanbanCard({ item }) {
 
             {/* Footer Info */}
             <div className="flex items-center justify-between pt-3 border-t border-dashed" style={{ borderColor: 'var(--border-color)' }}>
-                <div className="flex items-center gap-1.5 text-xs text-muted font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>{item.date || 'Due: Today'}</span>
                 </div>
@@ -95,7 +95,7 @@ function KanbanCard({ item }) {
                     {/* Avatars Stack */}
                     <div className="flex -space-x-2">
                         {[1, 2].map(i => (
-                            <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-[8px] font-bold text-muted overflow-hidden">
+                            <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-[8px] font-bold text-gray-500 overflow-hidden">
                                 {/* Placeholder Avatar */}
                                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.id}${i}`} alt="avatar" />
                             </div>
@@ -106,11 +106,11 @@ function KanbanCard({ item }) {
                     </div>
 
                     {/* Comments Indicator */}
-                    <div className="flex items-center gap-1 text-xs text-muted">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
                         <MessageSquare className="w-3.5 h-3.5" />
                         <span>{item.itemsCount || 2}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-muted">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
                         <Paperclip className="w-3.5 h-3.5" />
                         <span>1</span>
                     </div>

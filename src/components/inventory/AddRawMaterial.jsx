@@ -70,7 +70,7 @@ export default function AddRawMaterial() {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/inventory/raw-materials')}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
+                        className="rounded-lg transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
@@ -84,7 +84,7 @@ export default function AddRawMaterial() {
                 <div className="flex gap-3">
                     <button
                         onClick={handleSave}
-                        className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all"
+                        className="btn-primary"
                     >
                         <Save className="w-4 h-4" /> Save Material
                     </button>
@@ -135,19 +135,19 @@ export default function AddRawMaterial() {
                         </Field>
 
                         {/* Conversion Logic */}
-                        <div className="md:col-span-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl p-5 flex flex-col md:flex-row items-center gap-4 text-sm text-gray-700 dark:text-gray-300">
-                            <Info className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
+                        <div className="md:col-span-2 bg-[#4F46E5]/5 border border-[#4F46E5]/20 rounded-xl p-5 flex flex-col md:flex-row items-center gap-4 text-sm text-gray-700 dark:text-gray-300">
+                            <Info className="w-5 h-5 text-[#4F46E5] shrink-0" />
                             <div className="flex-1">
                                 <p className="mb-2"><strong>Conversion Formula:</strong> How much consumption unit is in one purchase unit?</p>
                                 <div className="flex items-center gap-3 flex-wrap">
                                     <span className="text-gray-500 dark:text-gray-400">1 {formData.purchaseUnit || '(Purchase Unit)'} =</span>
                                     <input
                                         type="number"
-                                        className="w-24 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-center font-bold outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                        className="w-24 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-center font-bold outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                         value={formData.conversionFactor}
                                         onChange={e => setFormData({ ...formData, conversionFactor: e.target.value })}
                                     />
-                                    <span className="font-bold text-[var(--color-primary)]">{formData.consumptionUnit || '(Cons. Unit)'}</span>
+                                    <span className="font-bold text-[#4F46E5]">{formData.consumptionUnit || '(Cons. Unit)'}</span>
                                 </div>
                             </div>
                         </div>
@@ -183,11 +183,11 @@ export default function AddRawMaterial() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Field label="Tax Type">
                             <div className="flex gap-4 p-1">
-                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'GST' ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'GST' ? 'bg-[#4F46E5]/10 border-[#4F46E5] text-[#4F46E5] font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                                     <input type="radio" name="taxType" checked={formData.taxType === 'GST'} onChange={() => setFormData({ ...formData, taxType: 'GST' })} className="hidden" />
                                     GST
                                 </label>
-                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'VAT' ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                                <label className={`flex-1 py-2 px-4 rounded-lg border cursor-pointer text-center transition-all ${formData.taxType === 'VAT' ? 'bg-[#4F46E5]/10 border-[#4F46E5] text-[#4F46E5] font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                                     <input type="radio" name="taxType" checked={formData.taxType === 'VAT'} onChange={() => setFormData({ ...formData, taxType: 'VAT' })} className="hidden" />
                                     VAT
                                 </label>
@@ -242,14 +242,14 @@ export default function AddRawMaterial() {
                         </Field>
                         <div className="md:col-span-2 pt-4 flex gap-6">
                             <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex-1">
-                                <input type="checkbox" checked={formData.allowDecimalQty} onChange={e => setFormData({ ...formData, allowDecimalQty: e.target.checked })} className="w-5 h-5 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]" />
+                                <input type="checkbox" checked={formData.allowDecimalQty} onChange={e => setFormData({ ...formData, allowDecimalQty: e.target.checked })} className="w-5 h-5 rounded text-[#4F46E5] focus:ring-[#4F46E5]" />
                                 <div>
                                     <div className="font-semibold text-gray-800">Allow Decimals</div>
                                     <div className="text-xs text-gray-400">Can be consumed in fractions</div>
                                 </div>
                             </label>
                             <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex-1">
-                                <input type="checkbox" checked={formData.inExpiry} onChange={e => setFormData({ ...formData, inExpiry: e.target.checked })} className="w-5 h-5 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]" />
+                                <input type="checkbox" checked={formData.inExpiry} onChange={e => setFormData({ ...formData, inExpiry: e.target.checked })} className="w-5 h-5 rounded text-[#4F46E5] focus:ring-[#4F46E5]" />
                                 <div>
                                     <div className="font-semibold text-gray-800">Has Expiry</div>
                                     <div className="text-xs text-gray-400">Track expiration dates</div>
@@ -272,7 +272,7 @@ export default function AddRawMaterial() {
 // Subcomponents
 function Section({ title, icon: Icon, children }) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="card-standard">
             {title && (
                 <div className="px-6 py-4 border-b border-gray-50 dark:border-gray-700/50 flex items-center gap-2">
                     {Icon && <Icon className="w-4 h-4 text-gray-400" />}
@@ -286,12 +286,16 @@ function Section({ title, icon: Icon, children }) {
     );
 }
 
+const Label = ({ children, required }) => (
+    <label className="form-label">
+        {children} {required && <span className="text-red-500">*</span>}
+    </label>
+);
+
 function Field({ label, required, children }) {
     return (
         <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {label} {required && <span className="text-[var(--status-error)]">*</span>}
-            </label>
+            <Label required={required}>{label}</Label>
             {children}
         </div>
     );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Download, FileText, Printer, Clock } from 'lucide-react';
+import { SmartTable } from '../ui/SmartTable';
 import { inventoryService } from '../../services/api';
 import { getTodayLocal } from '../../utils/dateUtils';
 
@@ -68,6 +69,60 @@ export function StockSummary() {
 
     const [selectedItemForDetails, setSelectedItemForDetails] = useState(null);
 
+    const columns = [
+        {
+            key: 'name',
+            header: 'Item Details',
+            render: (row) => (
+                <div className="flex flex-col">
+                    <span className="text-gray-700 dark:text-gray-200 font-bold">{row.name}</span>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">{row.unit}</span>
+                </div>
+            )
+        },
+        { key: 'opening', header: 'Opening', align: 'center', render: (row) => <span className="text-gray-500 dark:text-gray-400">{(row.opening || 0).toFixed(2)}</span> },
+        { key: 'purchase', header: 'Purchase', align: 'center', render: (row) => <span className="text-emerald-600 font-bold">{(row.purchase || 0).toFixed(2)}</span> },
+        { key: 'totalInput', header: 'Total In', align: 'center', render: (row) => <span className="text-gray-500 dark:text-gray-400">{(row.totalInput || 0).toFixed(2)}</span> },
+        {
+            key: 'consumed',
+            header: 'Consumed',
+            align: 'center',
+            render: (row) => (
+                <span
+                    className="text-red-600 font-bold cursor-pointer hover:bg-red-50 rounded-lg transition-colors underline decoration-dotted underline-offset-4 px-2 py-1"
+                    onClick={() => setSelectedItemForDetails(row)}
+                >
+                    {(row.consumed || 0).toFixed(2)}
+                </span>
+            )
+        },
+        { key: 'wastage', header: 'Wastage', align: 'center', render: (row) => <span className="text-gray-500 dark:text-gray-400">{(row.wastage || 0).toFixed(2)}</span> },
+        { key: 'totalOutput', header: 'Total Out', align: 'center', render: (row) => <span className="text-gray-500 dark:text-gray-400">{(row.totalOutput || 0).toFixed(2)}</span> },
+        { key: 'closingStock', header: 'Closing', align: 'center', render: (row) => <span className="font-extrabold text-gray-800 dark:text-white">{(row.closingStock || 0).toFixed(2)}</span> },
+        { key: 'closingSummary', header: 'Actual', align: 'center', render: (row) => <span className="text-gray-500 dark:text-gray-400">{(row.closingSummary || 0).toFixed(2)}</span> },
+        {
+            key: 'difference',
+            header: 'Diff',
+            align: 'center',
+            render: (row) => (
+                <span className={`font-bold ${(row.difference || 0) < 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {(row.difference || 0).toFixed(2)}
+                </span>
+            )
+        }
+    ];
+
+    const actionButtons = (
+        <div className="flex gap-2">
+            <button onClick={handleSearch} className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2">
+                <Search className="w-4 h-4" /> Generate Report
+            </button>
+            <button onClick={handleClear} className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                Clear
+            </button>
+        </div>
+    );
+
     // ... existing hook ...
 
     return (
@@ -97,7 +152,7 @@ export function StockSummary() {
                             type="text"
                             value={filters.rawMaterial}
                             onChange={(e) => setFilters(prev => ({ ...prev, rawMaterial: e.target.value }))}
-                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                             placeholder="Search item..."
                         />
                     </div>
@@ -106,7 +161,7 @@ export function StockSummary() {
                         <select
                             value={filters.category}
                             onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         >
                             {categories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -119,88 +174,29 @@ export function StockSummary() {
                                 type="date"
                                 value={filters.fromDate}
                                 onChange={(e) => setFilters(prev => ({ ...prev, fromDate: e.target.value }))}
-                                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                             />
                             <span className="text-gray-400 dark:text-gray-500">-</span>
                             <input
                                 type="date"
                                 value={filters.toDate}
                                 onChange={(e) => setFilters(prev => ({ ...prev, toDate: e.target.value }))}
-                                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                             />
-                        </div>
-                    </div>
-                    <div className="space-y-1 col-span-2">
-                        {/* Spacer or additional filter, simplified to button here */}
-                        <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase opacity-0">Action</label>
-                        <div className="flex gap-2">
-                            <button onClick={handleSearch} className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors font-medium flex items-center gap-2 w-full justify-center">
-                                <Search className="w-4 h-4" /> Generate Report
-                            </button>
-                            <button onClick={handleClear} className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                Clear
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Modern Table Area */}
-            <div className="flex-1 overflow-auto p-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold">
-                            <tr>
-                                <th className="p-4 sticky left-0 bg-gray-50 dark:bg-gray-700/50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Item Details</th>
-                                <th className="p-4 text-center">Opening</th>
-                                <th className="p-4 text-center text-[var(--status-success)]">Purchase</th>
-                                <th className="p-4 text-center">Total In</th>
-                                <th className="p-4 text-center text-[var(--status-error)]">Consumed</th>
-                                <th className="p-4 text-center">Wastage</th>
-                                <th className="p-4 text-center">Total Out</th>
-                                <th className="p-4 text-center font-extrabold text-gray-700 dark:text-gray-200">Closing</th>
-                                <th className="p-4 text-center">Actual</th>
-                                <th className="p-4 text-center">Diff</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {loading ? (
-                                <tr><td colSpan="10" className="p-12 text-center text-gray-400 dark:text-gray-500">Loading inventory data...</td></tr>
-                            ) : summary.length === 0 ? (
-                                <tr><td colSpan="10" className="p-12 text-center text-gray-400 dark:text-gray-500">Specify filters to generate report</td></tr>
-                            ) : (
-                                summary.map((row) => (
-                                    <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td className="p-4 sticky left-0 bg-white dark:bg-gray-800 z-10 font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                                            <div className="flex flex-col">
-                                                <span className="text-gray-700 dark:text-gray-200 font-bold">{row.name}</span>
-                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">{row.unit}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-center text-gray-500 dark:text-gray-400">{(row.opening || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center text-[var(--status-success)] font-bold">{(row.purchase || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center text-gray-500 dark:text-gray-400">{(row.totalInput || 0).toFixed(2)}</td>
-
-                                        <td
-                                            className="p-4 text-center text-[var(--status-error)] font-bold cursor-pointer hover:bg-[var(--status-error)]/10 rounded-lg transition-colors underline decoration-dotted underline-offset-4"
-                                            onClick={() => setSelectedItemForDetails(row)}
-                                        >
-                                            {(row.consumed || 0).toFixed(2)}
-                                        </td>
-
-                                        <td className="p-4 text-center text-gray-500 dark:text-gray-400">{(row.wastage || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center text-gray-500 dark:text-gray-400">{(row.totalOutput || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center font-extrabold text-gray-800 dark:text-white">{(row.closingStock || 0).toFixed(2)}</td>
-                                        <td className="p-4 text-center text-gray-500 dark:text-gray-400">{(row.closingSummary || 0).toFixed(2)}</td>
-                                        <td className={`p-4 text-center font-bold ${(row.difference || 0) < 0 ? 'text-[var(--status-error)]' : 'text-gray-400 dark:text-gray-500'}`}>
-                                            {(row.difference || 0).toFixed(2)}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+            <div className="flex-1 overflow-hidden p-6">
+                <SmartTable
+                    data={summary}
+                    columns={columns}
+                    title="Stock Inventory"
+                    isLoading={loading}
+                    emptyMessage="Specify filters to generate report"
+                />
             </div>
 
             {/* Modal Re-implementation with new styles */}
@@ -211,7 +207,7 @@ export function StockSummary() {
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">Consumption Details</h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Breakdown for <span className="text-[var(--color-primary)] font-bold">{selectedItemForDetails.name}</span></p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Breakdown for <span className="text-indigo-600 font-bold">{selectedItemForDetails.name}</span></p>
                             </div>
                             <button onClick={() => setSelectedItemForDetails(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-400 dark:text-gray-500 transition-colors">
                                 ✕
@@ -220,26 +216,26 @@ export function StockSummary() {
 
                         <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-gray-900/50">
                             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                                <table className="w-full text-left">
-                                    <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold">
+                                <table className="table-standard">
+                                    <thead className="table-header">
                                         <tr>
-                                            <th className="p-4">Date</th>
-                                            <th className="p-4">Item</th>
-                                            <th className="p-4 text-right">Qty</th>
-                                            <th className="p-4">Invoice</th>
+                                            <th className="table-th">Date</th>
+                                            <th className="table-th">Item</th>
+                                            <th className="table-th text-right">Qty</th>
+                                            <th className="table-th">Invoice</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                         {/* Simplified Mock Rows */}
-                                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                            <td className="p-4">
+                                        <tr className="table-row">
+                                            <td className="table-td">
                                                 <div className="font-bold text-gray-700 dark:text-gray-200">24 Dec, 2025</div>
                                                 <div className="text-xs text-gray-400 dark:text-gray-500">15:06 PM</div>
                                             </td>
-                                            <td className="p-4 text-gray-700 dark:text-gray-300">Classic Veg Burger</td>
-                                            <td className="p-4 text-right font-bold text-[var(--status-error)]">1.00</td>
-                                            <td className="p-4">
-                                                <span className="px-2 py-1 rounded bg-[var(--status-success)]/10 text-[var(--status-success)] text-xs font-bold">#2644</span>
+                                            <td className="table-td text-gray-700 dark:text-gray-300">Classic Veg Burger</td>
+                                            <td className="table-td text-right font-bold text-red-600">1.00</td>
+                                            <td className="table-td">
+                                                <span className="px-2 py-1 rounded bg-emerald-50 text-emerald-600 text-xs font-bold">#2644</span>
                                             </td>
                                         </tr>
                                     </tbody>

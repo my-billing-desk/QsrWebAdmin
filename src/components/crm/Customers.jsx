@@ -149,14 +149,14 @@ export function Customers() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">
-                                    <th className="px-6 py-4">Customer</th>
-                                    <th className="px-6 py-4">Contact</th>
-                                    <th className="px-6 py-4">Total Spend</th>
-                                    <th className="px-6 py-4">Orders</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
+                        <table className="table-standard">
+                            <thead className="table-header">
+                                <tr>
+                                    <th className="table-th">Customer</th>
+                                    <th className="table-th">Contact</th>
+                                    <th className="table-th">Total Spend</th>
+                                    <th className="table-th">Orders</th>
+                                    <th className="table-th text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -167,11 +167,11 @@ export function Customers() {
                                             setSelectedCustomer(customer);
                                             fetchCustomerDetail(customer.id);
                                         }}
-                                        className={`hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer
+                                        className={`table-row cursor-pointer
                                             ${selectedCustomer?.id === customer.id ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}
                                         `}
                                     >
-                                        <td className="px-6 py-4">
+                                        <td className="table-td">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
                                                     {customer.name.charAt(0)}
@@ -182,7 +182,7 @@ export function Customers() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="table-td">
                                             <div className="space-y-1">
                                                 <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
                                                     <Phone className="w-3 h-3" /> {customer.phone}
@@ -194,16 +194,16 @@ export function Customers() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="table-td">
                                             <p className="text-sm font-bold text-gray-900 dark:text-white">₹{parseFloat(customer.totalSpend).toLocaleString()}</p>
                                             <p className="text-[10px] text-gray-400">Last: {customer.lastVisit ? format(new Date(customer.lastVisit), 'dd MMM') : 'Never'}</p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="table-td">
                                             <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-bold text-gray-600 dark:text-gray-300">
                                                 {customer.totalOrders} Orders
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="table-td text-right">
                                             <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-all">
                                                 <MoreVertical className="w-4 h-4 text-gray-400" />
                                             </button>

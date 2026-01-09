@@ -86,10 +86,10 @@ export function Wastage() {
                     <div className="text-sm text-gray-500">Track and manage inventory wastage</div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => { setFormData(initialFormState()); setView('add'); }} className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 font-medium shadow-sm">
+                    <button onClick={() => { setFormData(initialFormState()); setView('add'); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all">
                         <Plus className="w-4 h-4" /> Record Wastage
                     </button>
-                    <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-50 font-medium shadow-sm">
+                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all">
                         <Download className="w-4 h-4" /> Export
                     </button>
                 </div>
@@ -117,8 +117,8 @@ export function Wastage() {
                 </div>
 
                 <div className="flex gap-2 ml-auto">
-                    <button className="px-6 py-2 bg-red-50 border border-red-200 text-red-600 rounded font-bold hover:bg-red-100 transition-colors">Search</button>
-                    <button className="px-6 py-2 bg-white border border-gray-300 text-gray-600 rounded font-bold hover:bg-gray-50 transition-colors">Clear</button>
+                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all">Search</button>
+                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">Clear</button>
                 </div>
             </div>
 
@@ -166,9 +166,9 @@ export function Wastage() {
                         {/* Modal Header */}
                         <div className="flex justify-between items-center p-5 border-b shrink-0">
                             <h2 className="text-xl font-bold text-gray-800">Record Wastage</h2>
-                            <button onClick={() => setView('list')} className="text-gray-400 hover:text-red-500 transition-colors">
-                                <span className="bg-white rounded-full p-1 border border-transparent hover:border-red-500 flex items-center justify-center">
-                                    <div className="bg-red-500 text-white rounded-full p-0.5">
+                            <button onClick={() => setView('list')} className="transition-colors">
+                                <span className="rounded-full border border-transparent flex items-center justify-center">
+                                    <div className="rounded-full">
                                         <X className="w-4 h-4" />
                                     </div>
                                 </span>
@@ -183,12 +183,12 @@ export function Wastage() {
                                     <div className="space-y-1.5">
                                         <label className="text-sm font-semibold text-gray-700">Wastage Type <span className="text-red-500">*</span></label>
                                         <div className="flex gap-4 p-3 bg-gray-50 rounded border border-gray-200">
-                                            <label className="flex items-center gap-2 cursor-pointer hover:text-orange-600 transition-colors">
-                                                <input type="radio" checked={formData.type === 'Raw Material'} onChange={() => setFormData({ ...formData, type: 'Raw Material', items: [] })} className="accent-orange-500 w-4 h-4" />
+                                            <label className="flex items-center gap-2 cursor-pointer hover:text-indigo-600 transition-colors">
+                                                <input type="radio" checked={formData.type === 'Raw Material'} onChange={() => setFormData({ ...formData, type: 'Raw Material', items: [] })} className="accent-indigo-600 w-4 h-4" />
                                                 <span className="text-sm font-bold text-gray-700">Raw Material</span>
                                             </label>
-                                            <label className="flex items-center gap-2 cursor-pointer hover:text-orange-600 transition-colors">
-                                                <input type="radio" checked={formData.type === 'Item'} onChange={() => setFormData({ ...formData, type: 'Item', items: [] })} className="accent-orange-500 w-4 h-4" />
+                                            <label className="flex items-center gap-2 cursor-pointer hover:text-indigo-600 transition-colors">
+                                                <input type="radio" checked={formData.type === 'Item'} onChange={() => setFormData({ ...formData, type: 'Item', items: [] })} className="accent-indigo-600 w-4 h-4" />
                                                 <span className="text-sm font-bold text-gray-700">Processed Item</span>
                                             </label>
                                         </div>
@@ -201,7 +201,7 @@ export function Wastage() {
                                                 type="date"
                                                 value={formData.date}
                                                 onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                                className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-600"
+                                                className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 text-gray-600"
                                             />
                                             <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none" />
                                         </div>
@@ -230,7 +230,7 @@ export function Wastage() {
                                                         <select
                                                             value={item.rawMaterialId}
                                                             onChange={e => updateItem(idx, 'rawMaterialId', e.target.value)}
-                                                            className="w-full p-2 border border-blue-100 rounded focus:border-orange-500 outline-none bg-transparent"
+                                                            className="w-full p-2 border border-blue-100 rounded focus:border-indigo-500 outline-none bg-transparent"
                                                         >
                                                             <option value="">Select Material</option>
                                                             {rawMaterials.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
@@ -238,14 +238,14 @@ export function Wastage() {
                                                     </td>
                                                     <td className="p-3">
                                                         <div className="flex items-center border rounded-md overflow-hidden">
-                                                            <button onClick={() => updateItem(idx, 'quantity', Math.max(0, (parseFloat(item.quantity) || 0) - 1))} className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border-r">-</button>
+                                                            <button onClick={() => updateItem(idx, 'quantity', Math.max(0, (parseFloat(item.quantity) || 0) - 1))} className="border-r">-</button>
                                                             <input
                                                                 type="number"
                                                                 value={item.quantity}
                                                                 onChange={e => updateItem(idx, 'quantity', e.target.value)}
                                                                 className="w-full text-center outline-none py-1"
                                                             />
-                                                            <button onClick={() => updateItem(idx, 'quantity', (parseFloat(item.quantity) || 0) + 1)} className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border-l">+</button>
+                                                            <button onClick={() => updateItem(idx, 'quantity', (parseFloat(item.quantity) || 0) + 1)} className="border-l">+</button>
                                                         </div>
                                                     </td>
                                                     <td className="p-3">
@@ -262,13 +262,13 @@ export function Wastage() {
                                                         ₹ {item.amount || 0}
                                                     </td>
                                                     <td className="p-3 text-center">
-                                                        <button onClick={() => removeItem(idx)} className="text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                        <button onClick={() => removeItem(idx)} className=""><Trash2 className="w-3.5 h-3.5" /></button>
                                                     </td>
                                                 </tr>
                                             ))}
                                             <tr>
                                                 <td colSpan="6" className="p-2 text-center">
-                                                    <button onClick={addItem} className="text-orange-500 hover:text-orange-600 font-medium text-sm flex items-center justify-center gap-1 w-full dashed-border">
+                                                    <button onClick={addItem} className="px-3 py-1.5 border border-dashed border-gray-300 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-50 flex items-center justify-center gap-1 mx-auto transition-all">
                                                         <Plus className="w-3 h-3" /> Add Item
                                                     </button>
                                                 </td>
@@ -293,8 +293,8 @@ export function Wastage() {
 
                         {/* Modal Footer */}
                         <div className="p-5 border-t shrink-0 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setView('list')} className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-md font-bold hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleSave} className="px-6 py-2 bg-red-600 text-white rounded-md font-bold hover:bg-red-700 shadow-md transition-colors">Save Details</button>
+                            <button onClick={() => setView('list')} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">Cancel</button>
+                            <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-all">Save Details</button>
                         </div>
                     </div>
                 </div>

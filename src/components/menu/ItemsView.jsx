@@ -83,6 +83,7 @@ export function ItemsView() {
     const [editingItem, setEditingItem] = useState(null);
     const [showAreaPriceModal, setShowAreaPriceModal] = useState(false);
     const [areaPriceItem, setAreaPriceItem] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     // Dnd Sensors (Use activationConstraint to allow clicks)
     const sensors = useSensors(
@@ -185,10 +186,80 @@ export function ItemsView() {
         return matchesCategory && matchesSearch;
     });
 
+    const [activeDropdown, setActiveDropdown] = useState(null); // 'action', 'quickAction', etc.
+    const [actionSearch, setActionSearch] = useState('');
+    const [quickActionSearch, setQuickActionSearch] = useState('');
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.action-dropdown-container')) {
+                setActiveDropdown(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const actionItems = [
+        { label: 'Available', onClick: () => console.log('Available') },
+        { label: 'Update Online Availability', onClick: () => console.log('Update Online Availability') },
+        { label: 'Active/Inactive Areas', onClick: () => console.log('Active/Inactive Areas') },
+        { label: 'Mark As Veg', onClick: () => console.log('Mark As Veg') },
+        { label: 'Mark As Non Veg', onClick: () => console.log('Mark As Non Veg') },
+        { label: 'Mark As Egg Item', onClick: () => console.log('Mark As Egg Item') },
+        { label: 'Remove Items', onClick: () => console.log('Remove Items') },
+        { label: 'Update Favorite Item', onClick: () => console.log('Update Favorite Item') },
+        { label: 'Update Ignore Tax', onClick: () => console.log('Update Ignore Tax') },
+        { label: 'Update Ignore Discount', onClick: () => console.log('Update Ignore Discount') },
+        { label: 'Update Ignore Packing Charge (Online)', onClick: () => console.log('Update Ignore Packing Charge') },
+        { label: 'Update Swiggy recommended', onClick: () => console.log('Update Swiggy recommended') },
+        { label: 'Disable Swiggy POP Items', onClick: () => console.log('Disable Swiggy POP Items') },
+        { label: 'Update in Captain', onClick: () => console.log('Update in Captain') },
+        { label: 'Update Quantity Popup', onClick: () => console.log('Update Quantity Popup') },
+        { label: 'Update in Kiosk', onClick: () => console.log('Update in Kiosk') },
+        { label: 'Update Dinein QR', onClick: () => console.log('Update Dinein QR') },
+        { label: 'Update Pickup QR', onClick: () => console.log('Update Pickup QR') },
+        { label: 'Mark Out of Stock', onClick: () => console.log('Mark Out of Stock') },
+        { label: 'Mark In Stock', onClick: () => console.log('Mark In Stock') },
+        { label: 'Mark Do Not Track', onClick: () => console.log('Mark Do Not Track') },
+        { label: 'Update MRP tag', onClick: () => console.log('Update MRP tag') },
+        { label: 'Remove Nutrition Data', onClick: () => console.log('Remove Nutrition Data') },
+        { label: 'Remove Image(s)', onClick: () => console.log('Remove Image(s)') },
+        { label: 'Remove Serve(s)', onClick: () => console.log('Remove Serve(s)') },
+        { label: 'Update Dine In Order Type', onClick: () => console.log('Update Dine In Order Type') },
+        { label: 'Update Delivery Order Type', onClick: () => console.log('Update Delivery Order Type') },
+        { label: 'Update Pick Up Order Type', onClick: () => console.log('Update Pick Up Order Type') },
+        { label: 'Update service/goods tag', onClick: () => console.log('Update service/goods tag') },
+        { label: 'Create Self Item Recipe', onClick: () => console.log('Create Self Item Recipe') },
+        { label: 'Update Image', onClick: () => console.log('Update Image') },
+        { label: 'Apply Zomato Tags', onClick: () => console.log('Apply Zomato Tags') },
+        { label: 'Assign Addon Group(s)', onClick: () => console.log('Assign Addon Group(s)') },
+        { label: 'Update Open Item', onClick: () => console.log('Update Open Item') },
+        { label: 'Update Item Timings', onClick: () => console.log('Update Item Timings') },
+        { label: 'Remove Variation(s)', onClick: () => console.log('Remove Variation(s)') },
+    ];
+
+    const quickActionItems = [
+        { label: 'Generate Barcode', onClick: () => console.log('Generate Barcode') },
+        { label: 'Update Base Menu', onClick: () => console.log('Update Base Menu') },
+        { label: 'Update Item Rank/Order', onClick: () => console.log('Update Item Rank/Order') },
+        { label: 'Area-wise bulk sheet', onClick: () => console.log('Area-wise bulk sheet') },
+        { label: 'Update Item Packing Charge', onClick: () => console.log('Update Item Packing Charge') },
+        { label: 'Update Nutrition Data', onClick: () => console.log('Update Nutrition Data') },
+        { label: 'Recently Deleted', onClick: () => console.log('Recently Deleted') },
+        { label: 'Update Kiosk Item Price/Status', onClick: () => console.log('Update Kiosk Item Price/Status') },
+        { label: 'Increase/Reduce Price', onClick: () => console.log('Increase/Reduce Price') },
+        { label: 'Download Base Menu [Backup]', onClick: () => console.log('Download Base Menu') },
+        { label: 'Replace Item Variation(s)', onClick: () => console.log('Replace Item Variation(s)') },
+    ];
+
+    const filteredActions = actionItems.filter(item => item.label.toLowerCase().includes(actionSearch.toLowerCase()));
+    const filteredQuickActions = quickActionItems.filter(item => item.label.toLowerCase().includes(quickActionSearch.toLowerCase()));
+
     return (
         <div className="flex flex-1 overflow-hidden h-[calc(100vh-140px)] bg-gray-50 dark:bg-gray-900">
             {/* Sidebar Categories */}
-            <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0 transition-all duration-300">
+            <div className={`${isSidebarOpen ? 'w-64 border-r' : 'w-0 border-none'} bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col shrink-0 transition-all duration-300 overflow-hidden`}>
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                     <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm mb-3">Categories</h3>
                     <div className="flex items-center justify-between">
@@ -252,50 +323,103 @@ export function ItemsView() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                 {/* Toolbar */}
-                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex flex-wrap gap-3 items-center justify-between shrink-0 z-10">
-                    <div className="flex items-center gap-2 flex-grow max-w-2xl">
-                        <button className="p-2 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 text-gray-500">
-                            <ArrowLeft className="w-4 h-4" />
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between shrink-0 z-10 gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                        <button
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className="p-2 border border-gray-200 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 text-gray-500"
+                        >
+                            {isSidebarOpen ? <ArrowLeft className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4 rotate-180" />}
                         </button>
+
                         <div className="relative">
                             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-9 pr-3 py-1.5 border rounded text-sm w-48 focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all dark:bg-gray-800 dark:border-gray-700"
+                                className="pl-9 pr-3 py-1.5 border rounded text-sm w-64 focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all dark:bg-gray-800 dark:border-gray-700"
                                 placeholder="Search items..."
                             />
                         </div>
-                        <button className="px-3 py-1.5 border rounded text-sm flex items-center gap-1 text-gray-600 hover:bg-gray-50">
-                            Action <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <button className="px-3 py-1.5 border rounded text-sm flex items-center gap-1 text-gray-600 hover:bg-gray-50">
-                            Quick Actions <ChevronDown className="w-3 h-3" />
-                        </button>
-                        <button className="px-4 py-1.5 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700">
+
+                        {/* Action Dropdown */}
+                        <div className="relative action-dropdown-container">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'action' ? null : 'action')}
+                                className="px-3 py-1.5 border rounded text-sm flex items-center gap-1 text-gray-600 hover:bg-gray-50 whitespace-nowrap"
+                            >
+                                Action <ChevronDown className="w-3 h-3" />
+                            </button>
+                            {activeDropdown === 'action' && (
+                                <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50 max-h-96 overflow-y-auto">
+                                    <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+                                        <input
+                                            type="text"
+                                            value={actionSearch}
+                                            onChange={(e) => setActionSearch(e.target.value)}
+                                            placeholder="Search..."
+                                            className="w-full px-2 py-1 text-xs border rounded bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    {filteredActions.map((item, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => { item.onClick(); setActiveDropdown(null); }}
+                                            className="w-full text-left px-4 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Quick Actions Dropdown */}
+                        <div className="relative action-dropdown-container">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'quickAction' ? null : 'quickAction')}
+                                className="px-3 py-1.5 border rounded text-sm flex items-center gap-1 text-gray-600 hover:bg-gray-50 whitespace-nowrap"
+                            >
+                                Quick Actions <ChevronDown className="w-3 h-3" />
+                            </button>
+                            {activeDropdown === 'quickAction' && (
+                                <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50 max-h-96 overflow-y-auto">
+                                    <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+                                        <input
+                                            type="text"
+                                            value={quickActionSearch}
+                                            onChange={(e) => setQuickActionSearch(e.target.value)}
+                                            placeholder="Search..."
+                                            className="w-full px-2 py-1 text-xs border rounded bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    {filteredQuickActions.map((item, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => { item.onClick(); setActiveDropdown(null); }}
+                                            className="w-full text-left px-4 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <button className="px-4 py-1.5 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700 whitespace-nowrap">
                             Save
                         </button>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-4 bg-gray-200 rounded-full relative cursor-pointer">
-                                <div className="w-4 h-4 bg-white rounded-full shadow-sm absolute left-0 top-0 border border-gray-200"></div>
-                            </div>
-                            <span className="text-sm text-gray-600">Rank wise</span>
-                        </div>
-
                         <button
                             onClick={() => setView('add')}
-                            className="px-4 py-1.5 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700 flex items-center gap-1 shadow-sm"
+                            className="px-4 py-1.5 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700 flex items-center gap-1 shadow-sm whitespace-nowrap"
                         >
                             <Plus className="w-4 h-4" /> Add Items
                         </button>
-
-                        <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-full border border-gray-200">
-                            <span className="text-xs font-medium px-2 text-gray-600">Available</span>
-                            <div className="w-4 h-4 rounded-full bg-green-500 shadow-sm"></div>
-                        </div>
                     </div>
                 </div>
 

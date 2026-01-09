@@ -1,15 +1,15 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-const getVariantStyle = (variant) => {
+const getVariantClasses = (variant) => {
     switch (variant) {
-        case 'primary': return { backgroundColor: 'var(--color-primary)' };
-        case 'blue': return { backgroundColor: '#3b82f6' };
-        case 'green': return { backgroundColor: '#10b981' };
-        case 'purple': return { backgroundColor: '#8b5cf6' };
-        case 'pink': return { backgroundColor: '#ec4899' };
-        case 'orange': return { backgroundColor: '#f97316' };
-        default: return { backgroundColor: '#64748b' };
+        case 'primary': return { bg: 'bg-indigo-600', text: 'text-indigo-600', bgSoft: 'bg-indigo-50' };
+        case 'blue': return { bg: 'bg-blue-500', text: 'text-blue-500', bgSoft: 'bg-blue-50' };
+        case 'green': return { bg: 'bg-emerald-500', text: 'text-emerald-500', bgSoft: 'bg-emerald-50' };
+        case 'purple': return { bg: 'bg-purple-500', text: 'text-purple-500', bgSoft: 'bg-purple-50' };
+        case 'pink': return { bg: 'bg-pink-500', text: 'text-pink-500', bgSoft: 'bg-pink-50' };
+        case 'orange': return { bg: 'bg-orange-500', text: 'text-orange-500', bgSoft: 'bg-orange-50' };
+        default: return { bg: 'bg-gray-500', text: 'text-gray-500', bgSoft: 'bg-gray-50' };
     }
 };
 
@@ -25,29 +25,24 @@ function MoreVertical({ className }) {
 }
 
 export function StatsCard({ icon: Icon, label, value, subValue, variant = 'primary', showMenu = false }) {
-    const variantStyles = getVariantStyle(variant);
+    const styles = getVariantClasses(variant);
 
     return (
-        <div className="bg-surface p-5 rounded-xl border shadow-sm relative h-full flex flex-col justify-between" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative h-full flex flex-col justify-between">
             <div className="flex justify-between items-start mb-2">
                 <div className="flex flex-col">
-                    <span className="text-muted text-sm font-medium mb-1">{label}</span>
-                    <h3 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>{value}</h3>
+                    <span className="text-gray-500 text-sm font-medium mb-1">{label}</span>
+                    <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
                 </div>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${variant === 'primary' ? 'text-white' : ''}`}
-                    style={{
-                        backgroundColor: variant === 'primary' ? 'var(--color-primary)' : `${variantStyles.backgroundColor}20`,
-                        color: variant === 'primary' ? 'white' : variantStyles.backgroundColor
-                    }}
-                >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${variant === 'primary' ? 'bg-indigo-600 text-white' : `${styles.bgSoft} ${styles.text}`}`}>
                     <Icon className="w-5 h-5" />
                 </div>
             </div>
 
             <div className="flex items-center justify-between mt-2">
-                {subValue && <span className="text-sm font-medium text-muted">{subValue}</span>}
+                {subValue && <span className="text-sm font-medium text-gray-500">{subValue}</span>}
                 {showMenu && (
-                    <button className="text-muted hover:text-main">
+                    <button className="text-gray-500 hover:text-indigo-600">
                         <MoreVertical className="w-4 h-4" />
                     </button>
                 )}

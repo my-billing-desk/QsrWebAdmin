@@ -147,9 +147,27 @@ export function ProfitLoss() {
     return (
         <div className="flex flex-col h-full bg-white font-sans overflow-hidden w-full relative">
             {/* 1. Header Section */}
-            <div className="p-4 border-b flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                    <h1 className="text-lg font-bold text-gray-800">Cash Profit & Loss</h1>
+            <div className="p-4 border-b flex flex-col gap-4">
+                <div className="flex justify-between items-start">
+                    <h1 className="text-xl font-extrabold text-gray-800 w-24 leading-tight tracking-tight">
+                        Cash<br />Profit<br />&<br />Loss
+                    </h1>
+
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => navigate('/reports/profit-loss/configure')} className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Configure P&L</button>
+                        <button onClick={handleRefresh} className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Refresh Data</button>
+                        <button className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Freeze P&L</button>
+                        <button className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Unfreeze P&L</button>
+                        <button className="px-4 py-1.5 border border-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
+                            <Download className="w-4 h-4" /> Download
+                        </button>
+                        <button className="px-4 py-1.5 border border-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
+                            <Printer className="w-4 h-4" /> Print
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4 pl-28">
                     <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-md">
                         {reportData.map(m => (
                             <button
@@ -173,18 +191,6 @@ export function ProfitLoss() {
                             Last Refreshed: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                         </span>
                     </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => navigate('/reports/profit-loss/configure')} className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Configure P&L</button>
-                    <button onClick={handleRefresh} className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Refresh Data</button>
-                    <button className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Freeze P&L</button>
-                    <button className="px-4 py-1.5 border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors">Unfreeze P&L</button>
-                    <button className="px-4 py-1.5 border border-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
-                        <Download className="w-4 h-4" /> Download
-                    </button>
-                    <button className="px-4 py-1.5 border border-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
-                        <Printer className="w-4 h-4" /> Print
-                    </button>
                 </div>
             </div>
 

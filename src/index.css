@@ -4,263 +4,72 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-    :root {
-        /* === GLOBAL THEME VARIABLES === */
-        --bg-main: #F3F4F6;
-        --bg-surface: #FFFFFF;
-        --bg-sidebar: #FFFFFF;
-        --bg-header: #FFFFFF;
+@layer components {
 
-        --text-main: #1F2937;
-        --text-muted: #6B7280;
-        --text-light: #9CA3AF;
-
-        --color-primary: #F97316;
-        --color-primary-hover: #EA580C;
-        --color-secondary: #64748B;
-
-        --status-success: #10B981;
-        --status-warning: #F59E0B;
-        --status-error: #EF4444;
-        --status-info: #3B82F6;
-
-        --border-color: #F3F4F6;
-
-        /* Data Visualization */
-        --chart-1: #F97316;
-        --chart-2: #3B82F6;
-        --chart-3: #10B981;
-        --chart-4: #8B5CF6;
-        --chart-5: #EC4899;
-
-        /* POS Button Variations */
-        --pos-btn-pay: var(--status-success);
-        --pos-btn-hold: var(--status-warning);
-        --pos-btn-save: var(--color-secondary);
-        --pos-btn-cancel: var(--status-error);
-        --pos-btn-text: #FFFFFF;
-
-        /* Sidebar specific */
-        --sidebar-active: #FEF3F2;
-        --sidebar-active-text: #F97316;
-        --sidebar-text: #4B5563;
-        --sidebar-hover-bg: #F9FAFB;
-
-        /* Typography */
-        --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-    body {
-        @apply antialiased;
-        font-family: var(--font-family);
-        background-color: var(--bg-main);
-        color: var(--text-main);
-    }
-}
-
-/* Override Tailwind color classes to use our variables */
-@layer utilities {
-
-    /* Background overrides */
-    .bg-white {
-        background-color: var(--bg-surface) !important;
-    }
-
-    .bg-gray-50 {
-        background-color: var(--bg-main) !important;
-    }
-
-    .bg-gray-100 {
-        background-color: var(--bg-main) !important;
-    }
-
-    /* Primary Colors (mapped to brand/action) */
-    .bg-red-600,
-    .bg-emerald-600,
-    .bg-primary-600 {
-        background-color: var(--color-primary) !important;
-    }
-
-    .bg-red-700,
-    .bg-emerald-700,
-    .bg-primary-700 {
-        background-color: var(--color-primary-hover) !important;
-    }
-
-    .text-red-600,
-    .text-emerald-600,
-    .text-primary-600 {
-        color: var(--color-primary) !important;
-    }
-
-    .border-red-500,
-    .border-emerald-500,
-    .border-primary-500 {
-        border-color: var(--color-primary) !important;
-    }
-
-    /* Status Overrides */
-    .bg-green-600 {
-        background-color: var(--status-success) !important;
-    }
-
-    .text-green-600 {
-        color: var(--status-success) !important;
-    }
-
-    .bg-yellow-500,
-    .bg-orange-500 {
-        background-color: var(--status-warning) !important;
-    }
-
-    .text-yellow-600,
-    .text-orange-600 {
-        color: var(--status-warning) !important;
-    }
-
-    .bg-red-500 {
-        background-color: var(--status-error) !important;
-    }
-
-    /* Text colors */
-    .text-gray-500 {
-        color: var(--text-muted) !important;
-    }
-
-    .text-gray-600 {
-        color: var(--text-muted) !important;
-    }
-
-    .text-gray-700 {
-        color: var(--text-main) !important;
-    }
-
-    .text-gray-900 {
-        color: var(--text-main) !important;
-    }
-
-    /* === SEMANTIC UTILITIES === */
-
-    /* Layout Backgrounds */
-    .bg-main-app {
-        background-color: var(--bg-main);
-    }
-
-    .bg-surface {
-        background-color: var(--bg-surface);
-    }
-
-    .bg-header {
-        background-color: var(--bg-header);
-    }
-
-    .bg-sidebar {
-        background-color: var(--bg-sidebar);
-    }
-
-    /* Sidebar Styles */
+    /* Sidebar Item Styles */
     .sidebar-item {
-        color: var(--sidebar-text);
-        border-right-width: 4px;
-        border-right-color: transparent;
-    }
-
-    .sidebar-item:hover {
-        background-color: var(--sidebar-hover-bg);
-        color: var(--text-main);
+        @apply flex items-center px-3 py-2 text-gray-600 transition-colors duration-200 hover:text-gray-900 hover:bg-gray-50 rounded-lg mx-2 mb-1;
     }
 
     .sidebar-item-active {
-        background-color: var(--sidebar-active) !important;
-        color: var(--sidebar-active-text) !important;
-        border-right-color: var(--color-primary) !important;
-        font-weight: 600;
+        @apply flex items-center px-3 py-2 bg-indigo-50 text-indigo-600 font-semibold rounded-lg mx-2 mb-1;
     }
 
     .sidebar-icon {
-        color: var(--text-light);
-        /* Gray 400 */
+        @apply w-5 h-5 mr-3 transition-colors;
     }
 
-    .sidebar-item:hover .sidebar-icon {
-        color: var(--text-muted);
-        /* Gray 500/600 */
+    /* Shared Sidebar Container */
+    .sidebar-content {
+        @apply p-4 space-y-2;
     }
 
-    .sidebar-item-active .sidebar-icon {
-        color: var(--sidebar-active-text) !important;
+    /* Standard Button Styles */
+    .btn-primary {
+        @apply px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-all flex items-center justify-center gap-2;
     }
 
-    /* Badges */
-    .badge-primary {
-        background-color: var(--color-primary);
-        color: #ffffff;
+    .btn-secondary {
+        @apply px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 shadow-sm transition-all flex items-center justify-center gap-2;
     }
 
-    .badge-trial {
-        background-color: var(--sidebar-active);
-        /* Light orange background */
-        color: var(--color-primary);
-        border: 1px solid var(--color-primary);
+    .btn-icon {
+        @apply p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500;
     }
 
-    /* Text & Accents */
-    .text-primary {
-        color: var(--color-primary) !important;
+    /* Standard Input Styles */
+    .input-field {
+        @apply w-full p-2 border border-blue-200/50 rounded-lg bg-blue-50/10 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm text-gray-800 placeholder-gray-400;
     }
 
-    .text-secondary {
-        color: var(--text-muted) !important;
+    /* Form Label Styles */
+    .form-label {
+        @apply block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-1.5 pl-1;
     }
 
-    .text-muted {
-        color: var(--text-light) !important;
+    /* Card Styles */
+    .card-standard {
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden;
     }
 
-    .border-primary {
-        border-color: var(--color-primary) !important;
+    /* Standard Table Styles */
+    .table-standard {
+        @apply w-full text-left border-collapse;
     }
 
-    /* Hover Interactions */
-    .hover-text-primary:hover {
-        color: var(--color-primary) !important;
+    .table-header {
+        @apply bg-gray-50 text-xs font-bold text-gray-800 border-b uppercase;
     }
 
-    .hover-bg-primary:hover {
-        background-color: var(--color-primary) !important;
-        color: white !important;
+    .table-th {
+        @apply p-4;
     }
 
-    .hover-bg-subtle:hover {
-        background-color: var(--bg-main) !important;
+    .table-row {
+        @apply hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0;
     }
 
-    /* Icons */
-    .icon-primary {
-        color: var(--color-primary);
+    .table-td {
+        @apply p-4 text-sm text-gray-700;
     }
-
-    .icon-muted {
-        color: var(--text-light);
-    }
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
 }
