@@ -47,7 +47,11 @@ export function CategoriesView() {
 
     // Dnd Sensors
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -75,7 +79,7 @@ export function CategoriesView() {
             const res = await menuService.getItems();
             const items = res.data;
             // Check for items linked to this category. Assuming item.categoryId or item.Category.id
-            const linkedItems = items.filter(i => i.categoryId === id || (i.Category && i.Category.id === id));
+            const linkedItems = items.filter(i => i.categoryId == id || (i.Category && i.Category.id == id));
 
             if (linkedItems.length > 0) {
                 setBlockingItems(linkedItems);
@@ -96,10 +100,16 @@ export function CategoriesView() {
 
     const confirmDelete = async () => {
         if (categoryToDelete) {
-            await menuService.deleteCategory(categoryToDelete);
-            loadData();
-            setDeleteModalOpen(false);
-            setCategoryToDelete(null);
+            try {
+                await menuService.deleteCategory(categoryToDelete);
+                await loadData();
+                setDeleteModalOpen(false);
+                setCategoryToDelete(null);
+            } catch (error) {
+                console.error("Failed to delete category:", error);
+                alert("Failed to delete category. " + (error.response?.data?.error || error.message));
+                setDeleteModalOpen(false);
+            }
         }
     };
 
