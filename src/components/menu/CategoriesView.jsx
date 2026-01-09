@@ -41,6 +41,9 @@ export function CategoriesView() {
     const [newCat, setNewCat] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
+
     // Dnd Sensors
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -65,10 +68,17 @@ export function CategoriesView() {
         loadData();
     };
 
-    const handleDelete = async (id) => {
-        if (confirm('Delete category?')) {
-            await menuService.deleteCategory(id);
+    const handleDelete = (id) => {
+        setCategoryToDelete(id);
+        setDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (categoryToDelete) {
+            await menuService.deleteCategory(categoryToDelete);
             loadData();
+            setDeleteModalOpen(false);
+            setCategoryToDelete(null);
         }
     };
 
@@ -154,6 +164,34 @@ export function CategoriesView() {
                     </table>
                 </DndContext>
             </div>
+
+            {/* Confirmation Modal */}
+            {deleteModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="mb-4">
+                            <h3 className="text-lg font-bold text-gray-900">Delete Category?</h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                Are you sure you want to delete this category? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setDeleteModalOpen(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
