@@ -108,6 +108,8 @@ export const orderService = {
     create: (data) => api.post('/orders', data),
     update: (id, data) => api.put(`/orders/${id}`, data),
     updateStatus: (id, status) => api.put(`/orders/${id}`, { status }),
+    sendDeleteOTP: () => api.post('/orders/send-delete-otp'),
+    deleteBulk: (ids, otp) => api.post('/orders/delete-bulk', { ids, otp }),
 };
 
 export const groupService = {
@@ -198,12 +200,12 @@ export const financialService = {
     createExpense: (data) => api.post('/financial/expenses', data),
     deleteExpense: (id) => api.delete(`/financial/expenses/${id}`),
     deleteExpensesByDate: (date) => api.delete('/financial/expenses', { params: { date } }),
-
     getExpenseCategories: () => api.get('/financial/expense-categories'),
     getExpenseMaster: () => api.get('/financial/expense-master'),
     createExpenseCategory: (data) => api.post('/financial/expense-categories', data),
     updateExpenseCategory: (id, data) => api.put(`/financial/expense-categories/${id}`, data),
     deleteExpenseCategory: (id) => api.delete(`/financial/expense-categories/${id}`),
+
 
     // Withdrawals
     getWithdrawals: (params) => api.get('/financial/withdrawals', { params }),

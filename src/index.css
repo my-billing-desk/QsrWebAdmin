@@ -8,11 +8,11 @@
 
     /* Sidebar Item Styles */
     .sidebar-item {
-        @apply flex items-center px-3 py-2 text-gray-600 transition-colors duration-200 hover:text-gray-900 hover:bg-gray-50 rounded-lg mx-2 mb-1;
+        @apply flex items-center px-3 py-1.5 text-gray-600 transition-colors duration-200 hover:text-gray-900 hover:bg-gray-50 rounded-lg mb-0.5;
     }
 
     .sidebar-item-active {
-        @apply flex items-center px-3 py-2 bg-indigo-50 text-indigo-600 font-semibold rounded-lg mx-2 mb-1;
+        @apply flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 font-semibold rounded-lg mb-0.5;
     }
 
     .sidebar-icon {
@@ -21,7 +21,7 @@
 
     /* Shared Sidebar Container */
     .sidebar-content {
-        @apply p-4 space-y-2;
+        @apply p-2 space-y-1;
     }
 
     /* Standard Button Styles */
@@ -58,11 +58,11 @@
     }
 
     .table-header {
-        @apply bg-gray-50 text-xs font-bold text-gray-800 border-b uppercase;
+        @apply bg-gray-50 text-xs text-gray-800 border-b;
     }
 
     .table-th {
-        @apply p-4;
+        @apply p-1.5;
     }
 
     .table-row {
@@ -70,6 +70,6 @@
     }
 
     .table-td {
-        @apply p-4 text-sm text-gray-700;
+        @apply p-1.5 text-sm text-gray-700;
     }
 }

@@ -97,6 +97,7 @@ export function Expenses() {
         }
     };
 
+
     const handleAddExpenseClick = () => {
         setIsEditing(false);
         setIsAddExpenseFlow(true);
@@ -527,7 +528,6 @@ export function Expenses() {
                         </div>
                     </div>
                 )}
-
                 {activeTab === 'expense_master' && <ExpenseCategory />}
                 {activeTab === 'withdrawal_listing' && <WithdrawalListing />}
                 {activeTab === 'withdrawal_master' && <WithdrawalMaster />}

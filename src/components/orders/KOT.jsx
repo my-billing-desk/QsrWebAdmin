@@ -1,64 +1,119 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Calendar, Download, Eye, RotateCcw, Filter, Printer } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Calendar, Download, Eye, RotateCcw, Filter, Printer, ChevronDown } from 'lucide-react';
 import { SmartTable } from '../ui/SmartTable';
+import { orderService } from '../../services/api';
+import { getDateTimeLocalInput } from '../../utils/dateUtils';
+import { OrderViewModal } from '../ui/OrderViewModal';
+import toast from 'react-hot-toast';
 
 export function KOT() {
     const [kots, setKots] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [showAllFilters, setShowAllFilters] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showViewModal, setShowViewModal] = useState(false);
+
+    // Filter State
     const [filters, setFilters] = useState({
-        startDate: '2025-12-13 01:30:00',
-        endDate: '2025-12-14 01:30:00',
+        startDate: getDateTimeLocalInput(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)), // 7 days ago
+        endDate: getDateTimeLocalInput(),
         kotId: '',
+        orderNumber: '',
         customerName: '',
-        customerPhone: '',
-        tableNo: '',
         orderType: 'All',
         status: 'All'
     });
 
-    useEffect(() => {
+    const [appliedFilters, setAppliedFilters] = useState(filters);
+
+    const fetchKots = useCallback(async () => {
         setLoading(true);
-        // Mock data loading with delay
-        setTimeout(() => {
-            setKots([
-                {
-                    id: 2,
-                    orderNumber: '102',
-                    type: 'Dine In',
-                    subType: 'Table 1',
-                    customerName: '-',
-                    assignTo: 'Waiter A',
-                    items: [{ itemName: 'Blue Curco Mojito' }, { itemName: 'Lemon Mint Mojito' }, { itemName: 'Oreo Shake' }, { itemName: 'Spicy Paneer Wrap' }],
-                    status: 'Used In Bill',
-                    createdAt: '2025-12-13T14:41:48'
-                },
-                {
-                    id: 1,
-                    orderNumber: '101',
-                    type: 'Take Away',
-                    subType: '-',
-                    customerName: 'John Doe',
-                    assignTo: '-',
-                    items: [{ itemName: 'Aloo Tikki Burger Combos' }],
-                    status: 'Used In Bill',
-                    createdAt: '2025-12-13T14:30:49'
-                }
-            ]);
+        try {
+            const params = {
+                startDate: appliedFilters.startDate,
+                endDate: appliedFilters.endDate,
+                orderNumber: appliedFilters.orderNumber,
+                customerName: appliedFilters.customerName,
+                type: appliedFilters.orderType !== 'All' ? appliedFilters.orderType : undefined,
+                status: appliedFilters.status !== 'All' ? appliedFilters.status : undefined,
+            };
+
+            const response = await orderService.getAll(params);
+
+            // Map orders to KOT view
+            const mapped = response.data.map(order => ({
+                id: order.id,
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                type: order.type === 'dine-in' ? 'Dine In' : order.type === 'takeaway' ? 'Take Away' : 'Delivery',
+                subType: order.tableNumber ? `Table ${order.tableNumber}` : '-',
+                customerName: order.customerName || '-',
+                assignTo: '-', // Could be waiter if we had that field
+                items: order.items || [],
+                status: order.status === 'completed' ? 'Used In Bill' : order.status,
+                createdAt: order.createdAt
+            }));
+
+            // Filter by KOT ID (Order ID) if provided (since we don't have a separate KOT ID)
+            const finalData = appliedFilters.kotId
+                ? mapped.filter(k => k.id.toString().includes(appliedFilters.kotId))
+                : mapped;
+
+            setKots(finalData);
+        } catch (error) {
+            console.error('Fetch KOT Error:', error);
+            toast.error("Failed to load KOT data");
+        } finally {
             setLoading(false);
-        }, 500);
-    }, []);
+        }
+    }, [appliedFilters]);
+
+    useEffect(() => {
+        fetchKots();
+    }, [fetchKots]);
+
+    const handleSearch = () => {
+        setAppliedFilters(filters);
+    };
+
+    const handleReset = () => {
+        const reset = {
+            startDate: getDateTimeLocalInput(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
+            endDate: getDateTimeLocalInput(),
+            kotId: '',
+            orderNumber: '',
+            customerName: '',
+            orderType: 'All',
+            status: 'All'
+        };
+        setFilters(reset);
+        setAppliedFilters(reset);
+    };
 
     const columns = [
         {
             key: 'id',
             header: 'KOT ID',
-            render: (row) => <span className="font-medium text-gray-900">{row.id}</span>
+            render: (row) => (
+                <button
+                    onClick={() => { setSelectedOrder(row); setShowViewModal(true); }}
+                    className="text-indigo-600 font-bold hover:underline"
+                >
+                    {row.id}
+                </button>
+            )
         },
         {
             key: 'orderNumber',
             header: 'Order No.',
-            render: (row) => <span className="font-medium text-blue-600">{row.orderNumber}</span>
+            render: (row) => (
+                <button
+                    onClick={() => { setSelectedOrder(row); setShowViewModal(true); }}
+                    className="font-medium text-blue-600 hover:underline"
+                >
+                    {row.orderNumber}
+                </button>
+            )
         },
         {
             key: 'type',
@@ -85,7 +140,7 @@ export function KOT() {
             header: 'Items',
             render: (row) => (
                 <div className="text-sm font-medium text-gray-800 line-clamp-2" title={row.items?.map(i => i.itemName).join(', ')}>
-                    {row.items?.map(i => i.itemName).join(', ')}
+                    {row.items?.length > 0 ? row.items.map(i => i.itemName).join(', ') : 'No items'}
                 </div>
             )
         },
@@ -93,7 +148,10 @@ export function KOT() {
             key: 'status',
             header: 'Status',
             render: (row) => (
-                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+                <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${row.status === 'Used In Bill'
+                    ? 'bg-green-100 text-green-700 border-green-200'
+                    : 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                    }`}>
                     {row.status}
                 </span>
             )
@@ -103,28 +161,37 @@ export function KOT() {
             header: 'Created',
             render: (row) => (
                 <div className="text-xs text-gray-500">
-                    {new Date(row.createdAt).toLocaleString()}
+                    <div>{new Date(row.createdAt).toLocaleDateString()}</div>
+                    <div>{new Date(row.createdAt).toLocaleTimeString()}</div>
                 </div>
             )
         },
         {
             key: 'action',
             header: 'Action',
-            render: () => (
-                <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500 transition-colors">
-                    <Printer className="w-4 h-4" />
-                </button>
+            render: (row) => (
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => { setSelectedOrder(row); setShowViewModal(true); }}
+                        className="p-1.5 hover:bg-gray-100 rounded text-gray-500 transition-colors"
+                        title="View Details"
+                    >
+                        <Eye className="w-4 h-4" />
+                    </button>
+                    <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500 transition-colors">
+                        <Printer className="w-4 h-4" />
+                    </button>
+                </div>
             )
         }
     ];
 
     const filterForm = (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-white rounded-lg">
-            {/* Always Visible */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-2 bg-white rounded-lg">
             <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-gray-600">Start Date</label>
                 <input
-                    type="text"
+                    type="datetime-local"
                     className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-red-500"
                     value={filters.startDate}
                     onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
@@ -133,55 +200,64 @@ export function KOT() {
             <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-gray-600">End Date</label>
                 <input
-                    type="text"
+                    type="datetime-local"
                     className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-red-500"
                     value={filters.endDate}
                     onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                 />
             </div>
 
-            {/* Collapsible */}
             {showAllFilters && (
                 <>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-gray-600">KOT ID</label>
-                        <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
+                        <input
+                            type="text"
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                            value={filters.kotId}
+                            onChange={(e) => setFilters({ ...filters, kotId: e.target.value })}
+                        />
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-gray-600">Order No.</label>
-                        <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
+                        <input
+                            type="text"
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                            value={filters.orderNumber}
+                            onChange={(e) => setFilters({ ...filters, orderNumber: e.target.value })}
+                        />
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-gray-600">Customer Name</label>
-                        <input type="text" className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500" />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-gray-600">Order Type</label>
-                        <select className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-red-500">
-                            <option>All</option>
-                        </select>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-gray-600">KOT Status</label>
-                        <select className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:border-red-500">
-                            <option>All</option>
-                        </select>
+                        <input
+                            type="text"
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                            value={filters.customerName}
+                            onChange={(e) => setFilters({ ...filters, customerName: e.target.value })}
+                        />
                     </div>
                 </>
             )}
 
-            {/* Actions */}
-            <div className="flex flex-col gap-1 justify-end">
-                <button className="w-full py-1.5 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700 shadow-sm transition-colors">
+            <div className="flex gap-2 justify-end items-end md:col-start-4 md:col-span-2">
+                <button
+                    onClick={handleSearch}
+                    className="flex-1 py-1.5 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700 shadow-sm transition-colors"
+                >
                     Search
                 </button>
-            </div>
-            <div className="flex flex-col gap-1 justify-end">
+                <button
+                    onClick={handleReset}
+                    className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded text-xs font-bold hover:bg-gray-50 transition-colors"
+                >
+                    Reset
+                </button>
                 <button
                     onClick={() => setShowAllFilters(!showAllFilters)}
-                    className="w-full py-1.5 border border-gray-300 text-gray-600 rounded text-xs font-bold hover:bg-gray-50 transition-colors"
+                    className="p-1.5 border border-gray-300 text-gray-600 rounded hover:bg-gray-50 transition-colors"
+                    title={showAllFilters ? 'Hide Filters' : 'More Filters'}
                 >
-                    {showAllFilters ? 'Hide All' : 'Show All'}
+                    <Filter className="w-4 h-4" />
                 </button>
             </div>
         </div>
@@ -189,39 +265,41 @@ export function KOT() {
 
     return (
         <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
-            <div className="flex-1 overflow-hidden p-4">
+            <div className="flex-1 overflow-hidden p-1">
                 <SmartTable
                     data={kots}
                     columns={columns}
-                    title="KOT"
+                    title=""
                     isLoading={loading}
                     emptyMessage="No KOTs Found"
                     filters={filterForm}
                     actionButtons={
-                        <div className="flex gap-2">
-                            <button className="relative pb-2 border-b-2 border-red-600 text-red-600 font-bold text-sm">
+                        <div className="flex gap-1 items-center">
+                            <button className="px-3 py-1 bg-white border-b-2 border-red-600 text-red-600 font-bold text-xs">
                                 KOT
                             </button>
-                            <button className="relative pb-2 border-b-2 border-transparent text-gray-500 font-medium text-sm hover:text-gray-700">
+                            <button className="px-3 py-1 text-gray-500 font-medium text-xs hover:text-gray-700">
                                 Consolidated KOT
                             </button>
-                            <button className="relative pb-2 border-b-2 border-transparent text-gray-500 font-medium text-sm hover:text-gray-700">
+                            <button className="px-3 py-1 text-gray-500 font-medium text-xs hover:text-gray-700">
                                 Item Wise KOT
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded text-gray-600 text-sm hover:bg-gray-50 bg-white shadow-sm ml-4">
-                                Action
+                            <div className="w-px h-4 bg-gray-200 mx-2" />
+                            <button className="flex items-center gap-1.5 px-3 py-1 border border-gray-300 rounded text-gray-600 text-xs hover:bg-gray-50 bg-white">
+                                Action <ChevronDown className="w-3 h-3" />
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded text-gray-600 text-sm hover:bg-gray-50 bg-white shadow-sm">
-                                <Download className="w-4 h-4" /> Export Excel
+                            <button className="flex items-center gap-1.5 px-3 py-1 border border-gray-300 rounded text-gray-600 text-xs hover:bg-gray-50 bg-white shadow-sm">
+                                <Download className="w-3 h-3" /> Export Excel
                             </button>
                         </div>
                     }
                 />
             </div>
-            {/* FAB */}
-            <div className="fixed bottom-6 right-6 w-12 h-12 bg-red-800 rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer hover:bg-red-900 z-50">
-                <div className="font-bold text-lg">💬</div>
-            </div>
+            <OrderViewModal
+                order={selectedOrder}
+                isOpen={showViewModal}
+                onClose={() => setShowViewModal(false)}
+            />
         </div>
     );
 }

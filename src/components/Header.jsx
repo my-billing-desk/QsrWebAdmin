@@ -90,6 +90,35 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
         setSearchResults([]);
     };
 
+    const toggleFullScreen = () => {
+        const doc = document;
+        const docElm = document.documentElement;
+
+        const isFullScreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+
+        if (!isFullScreen) {
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen();
+            } else if (docElm.mozRequestFullScreen) {
+                docElm.mozRequestFullScreen();
+            } else if (docElm.webkitRequestFullScreen) {
+                docElm.webkitRequestFullScreen();
+            } else if (docElm.msRequestFullscreen) {
+                docElm.msRequestFullscreen();
+            }
+        } else {
+            if (doc.exitFullscreen) {
+                doc.exitFullscreen();
+            } else if (doc.mozCancelFullScreen) {
+                doc.mozCancelFullScreen();
+            } else if (doc.webkitExitFullscreen) {
+                doc.webkitExitFullscreen();
+            } else if (doc.msExitFullscreen) {
+                doc.msExitFullscreen();
+            }
+        }
+    };
+
     return (
         <header
             className="h-16 flex items-center justify-between px-6 shrink-0 z-30 bg-white border-b border-gray-200"
@@ -108,7 +137,7 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                         type="text"
                         value={searchQuery}
                         onChange={handleSearch}
-                        className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-colors"
+                        className="block w-full pl-10 pr-4 py-2 border border-blue-200/50 rounded-lg bg-blue-50/10 focus:ring-2 focus:ring-[#444ce7] focus:border-[#444ce7] outline-none transition-all text-sm text-gray-800 placeholder-gray-400"
                         placeholder="Search..."
                     />
 
@@ -137,7 +166,7 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                 {/* Add New Dropdown */}
                 <div className="relative z-50" ref={addDropdownRef}>
                     <button
-                        className="hidden lg:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all font-semibold text-sm shadow-sm active:scale-95"
+                        className="hidden lg:flex items-center gap-2 px-4 py-2 bg-[#444ce7] hover:bg-[#3538cd] text-white rounded-lg transition-all text-sm shadow-sm active:scale-95"
                         onClick={() => setShowDropdown(showDropdown === 'add_new' ? null : 'add_new')}
                     >
                         <PlusCircle className="w-4 h-4" />
@@ -191,16 +220,40 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                 )}
 
                 <div className="flex items-center gap-1">
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Expand">
+                    <button
+                        onClick={toggleFullScreen}
+                        className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
+                        title="Expand"
+                    >
                         <Maximize className="w-5 h-5" />
                     </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative" title="Notifications">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors" title="Settings">
-                        <Settings className="w-5 h-5" />
-                    </button>
+                    <div className="relative" ref={null /* Ref for notification if needed */}>
+                        <button
+                            className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors relative"
+                            title="Notifications"
+                            onClick={() => setShowDropdown(showDropdown === 'notifications' ? null : 'notifications')}
+                        >
+                            <Bell className="w-5 h-5" />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                        </button>
+
+                        {showDropdown === 'notifications' && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                                <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+                                    <span className="font-semibold text-sm">Notifications</span>
+                                    <span className="text-[10px] text-[#444ce7] cursor-pointer hover:underline">Mark all as read</span>
+                                </div>
+                                <div className="max-h-72 overflow-y-auto">
+                                    <div className="p-4 text-center text-gray-500 text-xs">
+                                        No new notifications
+                                    </div>
+                                </div>
+                                <div className="px-4 py-2 border-t border-gray-100 text-center">
+                                    <button className="text-[10px] text-gray-500 hover:text-gray-700">View all notifications</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="h-8 w-px bg-gray-200 mx-1"></div>
@@ -220,7 +273,7 @@ export function Header({ onToggleSidebar, title, searchData = [] }) {
                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
                             <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                                 <p className="text-sm font-semibold text-gray-900">{user?.name || 'Admin'}</p>
-                                <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@qsr.com'}</p>
+                                <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@aksha.com'}</p>
                             </div>
                             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <User className="w-4 h-4" /> Profile

@@ -133,7 +133,7 @@ export function Dashboard() {
                         <select
                             value={dateFilter}
                             onChange={(e) => setDateFilter(e.target.value)}
-                            className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer hover:bg-gray-100 transition-colors"
+                            className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#444ce7] focus:border-transparent cursor-pointer hover:bg-gray-100 transition-colors"
                         >
                             <option>Today</option>
                             <option>Yesterday</option>
@@ -150,21 +150,21 @@ export function Dashboard() {
                                 type="date"
                                 value={customRange.start}
                                 onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
-                                className="border border-gray-200 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="border border-gray-200 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#444ce7]"
                             />
                             <span className="text-gray-400">-</span>
                             <input
                                 type="date"
                                 value={customRange.end}
                                 onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
-                                className="border border-gray-200 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="border border-gray-200 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#444ce7]"
                             />
                         </div>
                     )}
 
                     <button
                         onClick={loadData}
-                        className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
+                        className="p-2 text-gray-500 hover:text-[#444ce7] hover:bg-indigo-50 rounded-md transition-colors"
                         title="Refresh Data"
                     >
                         <RefreshCcw className="w-4 h-4" />
@@ -174,9 +174,9 @@ export function Dashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Sales */}
-                <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-orange-200 transition-transform hover:scale-[1.02]">
+                <div className="bg-gradient-to-r from-indigo-500 to-[#444ce7] rounded-xl p-5 text-white flex justify-between items-center shadow-lg shadow-indigo-100 transition-transform hover:scale-[1.02]">
                     <div>
-                        <div className="text-orange-100 text-sm font-medium mb-1">Total Sales</div>
+                        <div className="text-indigo-100 text-sm font-medium mb-1">Total Sales</div>
                         <div className="text-2xl font-bold mb-1">₹{stats.totalIncome.toLocaleString()}</div>
                         <div className="text-sm font-medium opacity-90">{stats.totalOrders} Orders</div>
                     </div>
@@ -239,7 +239,7 @@ export function Dashboard() {
                                     cursor={{ fill: '#F3F4F6' }}
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                                 />
-                                <Bar dataKey="revenue" fill="#F97316" radius={[4, 4, 0, 0]} barSize={30} />
+                                <Bar dataKey="revenue" fill="#444ce7" radius={[4, 4, 0, 0]} barSize={30} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -282,7 +282,7 @@ export function Dashboard() {
                 <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-bold text-gray-800">Recent Transactions</h3>
-                        <button className="text-sm text-orange-500 font-semibold hover:text-orange-600">View All</button>
+                        <button className="text-sm text-[#444ce7] font-semibold hover:text-[#3538cd]">View All</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">

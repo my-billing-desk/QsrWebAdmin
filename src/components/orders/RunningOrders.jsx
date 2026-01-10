@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Calendar, Filter, Download, LayoutGrid, List, Utensils, RefreshCw, Clock } from 'lucide-react';
+import { Search, Plus, Calendar, Filter, Download, LayoutGrid, List, Utensils, RefreshCw, Clock, Eye } from 'lucide-react';
 import { orderService, outletService, configService } from '../../services/api';
-import { KanbanBoard } from '../ui/KanbanBoard';
+import { RunningOrderBoard } from '../ui/RunningOrderBoard';
 import { formatDateLocal } from '../../utils/dateUtils';
+import { OrderViewModal } from '../ui/OrderViewModal';
 
 export function RunningOrders() {
     const [orders, setOrders] = useState([]);
@@ -11,6 +12,9 @@ export function RunningOrders() {
     const [viewMode, setViewMode] = useState('orders'); // 'orders' | 'tables'
     const [ordersView, setOrdersView] = useState('kanban'); // 'kanban' | 'list'
     const [enableTablesConfig, setEnableTablesConfig] = useState(false);
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showViewModal, setShowViewModal] = useState(false);
 
     // Filters
     const [selectedFilter, setSelectedFilter] = useState('all');
@@ -28,7 +32,14 @@ export function RunningOrders() {
         fetchData();
         // Poll for updates every 30s
         const interval = setInterval(fetchData, 30000);
-        return () => clearInterval(interval);
+
+        // Update current time every second for timers
+        const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
+
+        return () => {
+            clearInterval(interval);
+            clearInterval(timeInterval);
+        };
     }, []);
 
     const checkConfig = async () => {
@@ -77,6 +88,7 @@ export function RunningOrders() {
                     originalStatus: order.status,
                     title: order.customerName || (order.tableNumber ? `Table ${order.tableNumber}` : `Guest`),
                     type: order.type, // dine-in, takeaway, delivery
+                    isOnline: order.source !== 'POS',
                     subType: order.orderNumber,
                     tableNumber: order.tableNumber,
                     itemsCount: order.items?.length || 0,
@@ -85,7 +97,8 @@ export function RunningOrders() {
                     items: order.items,
                     progress: calculateProgress(kanbanStatus),
                     progressColor: getProgressColor(kanbanStatus),
-                    date: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    date: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    onView: (o) => { setSelectedOrder(order); setShowViewModal(true); }
                 };
             });
 
@@ -143,11 +156,22 @@ export function RunningOrders() {
     };
 
     const formatDuration = (dateString) => {
-        const diff = new Date().getTime() - new Date(dateString).getTime();
-        const minutes = Math.floor(diff / 60000);
-        if (minutes < 60) return `${minutes}m`;
+        const diff = currentTime.getTime() - new Date(dateString).getTime();
+        const seconds = Math.floor(diff / 1000);
+        if (seconds < 60) return `${seconds}s ago`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ${seconds % 60}s ago`;
         const hours = Math.floor(minutes / 60);
-        return `${hours}h ${minutes % 60}m`;
+        return `${hours}h ${minutes % 60}m ago`;
+    };
+
+    const getTimeLeft = (dateString) => {
+        const target = new Date(new Date(dateString).getTime() + 40 * 60 * 1000); // 40 mins target
+        const diff = target.getTime() - currentTime.getTime();
+        if (diff <= 0) return 'DISPATCH OVERDUE';
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        return `${minutes}m ${seconds}s left to dispatch`;
     };
 
     const filteredOrders = orders.filter(o => {
@@ -224,10 +248,11 @@ export function RunningOrders() {
 
                     <div className="flex-1 overflow-hidden min-h-0">
                         {ordersView === 'kanban' ? (
-                            <KanbanBoard
+                            <RunningOrderBoard
                                 columns={columns}
                                 data={filteredOrders}
                                 onStatusChange={updateOrderStatus}
+                                currentTime={currentTime}
                             />
                         ) : (
                             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full">
@@ -258,7 +283,12 @@ export function RunningOrders() {
                                                     <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                                                         <td className="px-4 py-3">
                                                             <div className="font-bold text-gray-900">{order.title}</div>
-                                                            <div className="text-[11px] text-gray-500 font-mono">#{order.subType}</div>
+                                                            <button
+                                                                onClick={() => { setSelectedOrder(order); setShowViewModal(true); }}
+                                                                className="text-[11px] text-indigo-600 font-mono hover:underline block"
+                                                            >
+                                                                #{order.subType}
+                                                            </button>
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${order.type === 'dine-in' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
@@ -266,9 +296,16 @@ export function RunningOrders() {
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-3 text-gray-600">
-                                                            <div className="flex items-center gap-1.5">
-                                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                                {formatDuration(order.createdAt)}
+                                                            <div className="flex flex-col">
+                                                                <div className="flex items-center gap-1.5 text-[11px] font-medium">
+                                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                                    {formatDuration(order.createdAt)}
+                                                                </div>
+                                                                {order.isOnline && (
+                                                                    <div className={`text-[10px] font-bold mt-0.5 tracking-tight ${getTimeLeft(order.createdAt).includes('OVERDUE') ? 'text-red-500 animate-pulse' : 'text-indigo-500'}`}>
+                                                                        {getTimeLeft(order.createdAt)}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-3 font-bold text-gray-900">₹{order.totalAmount}</td>
@@ -278,17 +315,26 @@ export function RunningOrders() {
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-3 text-right">
-                                                            <select
-                                                                value={order.originalStatus}
-                                                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                                                className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-bold bg-white hover:border-indigo-300 transition-colors cursor-pointer outline-none"
-                                                            >
-                                                                <option value="placed">Placed</option>
-                                                                <option value="preparing">Preparing</option>
-                                                                <option value="served">Served</option>
-                                                                <option value="completed">Completed</option>
-                                                                <option value="cancelled">Cancelled</option>
-                                                            </select>
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <button
+                                                                    onClick={() => { setSelectedOrder(order); setShowViewModal(true); }}
+                                                                    className="p-1.5 border rounded hover:bg-gray-100 text-gray-500 transition-colors"
+                                                                    title="View Details"
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </button>
+                                                                <select
+                                                                    value={order.originalStatus}
+                                                                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                                    className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-bold bg-white hover:border-indigo-300 transition-colors cursor-pointer outline-none"
+                                                                >
+                                                                    <option value="placed">Placed</option>
+                                                                    <option value="preparing">Preparing</option>
+                                                                    <option value="served">Served</option>
+                                                                    <option value="completed">Completed</option>
+                                                                    <option value="cancelled">Cancelled</option>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -349,6 +395,12 @@ export function RunningOrders() {
                 </div>
             )
             }
+
+            <OrderViewModal
+                order={selectedOrder}
+                isOpen={showViewModal}
+                onClose={() => setShowViewModal(false)}
+            />
         </div >
     );
 }

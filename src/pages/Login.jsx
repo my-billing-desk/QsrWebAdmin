@@ -61,7 +61,7 @@ export default function Login() {
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-600 bg-clip-text text-transparent">
-                        QSR Admin
+                        Aksha POS Admin
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">Sign in to manage your restaurant</p>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, Edit, Calendar } from 'lucide-react';
+import { Search, ChevronDown, Edit, Calendar, X } from 'lucide-react';
 import { financialService } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -9,8 +9,8 @@ export function ExpenseCategory() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [newCategory, setNewCategory] = useState({ title: '', status: true });
     const [filters, setFilters] = useState({
-        startDate: '2025-12-01',
-        endDate: '2026-01-04',
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
         title: ''
     });
 
@@ -24,7 +24,7 @@ export function ExpenseCategory() {
             const res = await financialService.getExpenseMaster();
             setCategories(res.data.data);
         } catch (error) {
-            console.error('Error fetching master:', error);
+            console.error('Error fetching expense master:', error);
             toast.error('Failed to load expense master');
         } finally {
             setLoading(false);
@@ -70,6 +70,9 @@ export function ExpenseCategory() {
                     className="px-4 py-2 bg-red-600 text-white rounded font-bold shadow-sm hover:bg-red-700 text-sm"
                 >
                     Add Expense Master
+                </button>
+                <button className="px-4 py-2 bg-red-600 text-white rounded font-bold shadow-sm hover:bg-red-700 text-sm">
+                    Import Expense Master
                 </button>
                 <button className="px-3 py-2 bg-white border rounded text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
                     Action <ChevronDown className="w-4 h-4" />
@@ -132,7 +135,7 @@ export function ExpenseCategory() {
                         <thead className="bg-blue-50/50 text-xs font-bold text-gray-800 border-b">
                             <tr>
                                 <th className="p-4 w-10 text-center"><input type="checkbox" className="rounded border-gray-300" /></th>
-                                <th className="p-4">Reason / Title</th>
+                                <th className="p-4">Title</th>
                                 <th className="p-4 text-center">Status</th>
                                 <th className="p-4 text-center">Usage Count</th>
                                 <th className="p-4">Last Reported Date</th>
@@ -141,10 +144,10 @@ export function ExpenseCategory() {
                         </thead>
                         <tbody className="text-sm divide-y">
                             {filteredCategories.length === 0 ? (
-                                <tr><td colSpan="5" className="p-4 text-center text-gray-500">No categories found</td></tr>
+                                <tr><td colSpan="6" className="p-4 text-center text-gray-500">No categories found</td></tr>
                             ) : (
-                                filteredCategories.map((cat, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50">
+                                filteredCategories.map((cat) => (
+                                    <tr key={cat.id} className="hover:bg-gray-50">
                                         <td className="p-4 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
                                         <td className="p-4 font-medium text-gray-800">{cat.title}</td>
                                         <td className="p-4 text-center">
@@ -157,11 +160,11 @@ export function ExpenseCategory() {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
-                                                {cat.usageCount} times
+                                                {cat.usageCount || 0} times
                                             </span>
                                         </td>
                                         <td className="p-4 text-gray-600">
-                                            {cat.lastUsed ? new Date(cat.lastUsed).toLocaleDateString() : 'Never'}
+                                            {cat.lastReportedDate ? new Date(cat.lastReportedDate).toLocaleDateString() : 'Never'}
                                         </td>
                                         <td className="p-4 text-right">
                                             <button className="p-1.5 border rounded hover:bg-gray-50 text-gray-500">
@@ -176,7 +179,7 @@ export function ExpenseCategory() {
                 )}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination Placeholder */}
             <div className="flex justify-between items-center text-sm text-gray-600">
                 <div className="font-bold">
                     Showing 1 to {filteredCategories.length} of {filteredCategories.length} records
@@ -200,7 +203,7 @@ export function ExpenseCategory() {
                             <input
                                 type="text"
                                 autoFocus
-                                placeholder="Enter reason (e.g. Rent, Electricity)"
+                                placeholder="Enter title (e.g. Electricity)"
                                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
                                 value={newCategory.title}
                                 onChange={(e) => setNewCategory({ ...newCategory, title: e.target.value })}

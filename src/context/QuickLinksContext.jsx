@@ -3,7 +3,7 @@ import {
     LayoutDashboard, Layers, UtensilsCrossed, FileText, Archive, Truck, Bell, Settings,
     Calculator, Users, Box, Landmark, Share2, BarChart3, MessageSquare, Zap, UserCircle,
     CreditCard, FileSpreadsheet, Ticket, ShieldCheck,
-    Gift, Percent, Wallet, ShoppingCart, RotateCcw, BarChart2 // Added missing icons
+    Gift, Percent, Wallet, ShoppingCart, RotateCcw, BarChart2, ArrowRightLeft
 } from 'lucide-react';
 
 const QuickLinksContext = createContext();
@@ -17,19 +17,18 @@ export const initialMenuGroups = [
             { id: 'running_orders', path: '/orders/running', label: 'Running Orders', icon: ShoppingCart },
             { id: 'kot_orders', path: '/orders/kot', label: 'KOT', icon: FileSpreadsheet },
             { id: 'order_history', path: '/orders/history', label: 'Order History', icon: Archive },
-            { id: 'due_settlement', path: '/orders/due-payment', label: 'Due Settlement', icon: Calculator },
+        ]
+    },
+    {
+        id: 'group_inventory',
+        items: [
+            { id: 'inventory_main', path: '/inventory', label: 'Inventory', icon: Archive }
         ]
     },
     {
         id: 'group_menu',
-        title: 'Menu Management',
         items: [
-            { id: 'menu_items', path: '/menu/items', label: 'Items', icon: UtensilsCrossed },
-            { id: 'menu_cats', path: '/menu/categories', label: 'Categories', icon: Layers },
-            { id: 'menu_taxes', path: '/menu/taxes', label: 'Taxes', icon: Percent },
-            { id: 'menu_on_off', path: '/menu/on-off', label: 'Menu On/Off', icon: Zap },
-            { id: 'menu_special', path: '/menu/special-note', label: 'Special Note', icon: MessageSquare },
-            { id: 'inventory_main', path: '/inventory', label: 'Inventory', icon: Archive },
+            { id: 'menu_items', path: '/menu', label: 'Menu Management', icon: UtensilsCrossed }
         ]
     },
     {
@@ -47,7 +46,6 @@ export const initialMenuGroups = [
         items: [
             { id: 'profit_loss', path: '/reports/profit-loss', label: 'Profit & Loss', icon: Landmark },
             { id: 'expenses', path: '/financial/expenses', label: 'Expenses', icon: Wallet },
-            { id: 'expense_cat', path: '/financial/expense-category', label: 'Expense Category', icon: Layers },
         ]
     },
     {

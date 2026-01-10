@@ -78,7 +78,6 @@ import { GiftCards } from './components/promo/GiftCards';
 import { DiscountPlan } from './components/promo/DiscountPlan';
 import { Discount } from './components/promo/Discount';
 import { Expenses } from './components/financial/Expenses';
-import { ExpenseCategory } from './components/financial/ExpenseCategory';
 import { StockHistory } from './components/reports/StockHistory';
 import { Toaster } from 'react-hot-toast';
 
@@ -142,7 +141,6 @@ function AppRoutes() {
         <Route path="/orders" element={<Navigate to="/orders/history" replace />} />
         <Route path="/orders/history" element={<OrderHistory />} />
         <Route path="/orders/kot" element={<KOT />} />
-        <Route path="/orders/due-payment" element={<PlaceholderPage title="Due Payment Settlement" />} />
         <Route path="/orders/running" element={<RunningOrders />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/roles" element={<RoleManagement />} />
@@ -175,7 +173,6 @@ function AppRoutes() {
 
         {/* Financial */}
         <Route path="/financial/expenses" element={<Expenses />} />
-        <Route path="/financial/expense-category" element={<ExpenseCategory />} />
 
 
         {/* Reports */}

@@ -197,7 +197,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
 
                     {isOpen && (
                         <div className="flex flex-col overflow-hidden">
-                            <span className="font-bold text-gray-900 text-lg leading-tight truncate">SmartQSR</span>
+                            <span className="font-bold text-gray-900 text-lg leading-tight truncate">Aksha POS</span>
                             <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider truncate">
                                 {user?.tenantName || 'Admin Panel'}
                             </span>
@@ -317,25 +317,6 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                 </div>
             </nav>
 
-            {/* Footer Actions */}
-            <div className="p-4 border-t bg-gray-50 border-gray-200">
-                <div className={`flex items-center gap-3 ${!isOpen && 'justify-center'}`}>
-                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-500 shrink-0 border border-gray-200">
-                        <UserCircle className="w-6 h-6" />
-                    </div>
-                    {isOpen && (
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold truncate text-gray-900">{user?.name || 'User'}</p>
-                            <button
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); logout(); }}
-                                className="text-xs font-medium flex items-center gap-1 mt-0.5 hover:underline text-status-error"
-                            >
-                                <LogOut className="w-3 h-3" /> Logout
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
         </div>
     );
 }
