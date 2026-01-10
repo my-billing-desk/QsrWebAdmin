@@ -5,144 +5,120 @@ export function OrderViewModal({ order, isOpen, onClose }) {
     if (!isOpen || !order) return null;
 
     const items = order.items || [];
-    const subTotal = order.totalAmount - (order.taxAmount || 0);
+
+    const InfoItem = ({ label, value, className = "" }) => (
+        <div className={`flex border-b border-gray-100 last:border-0 ${className}`}>
+            <span className="w-1/3 py-2 px-3 text-[11px] font-bold text-gray-900 border-r border-gray-100 bg-gray-50/50">{label}:</span>
+            <span className="w-2/3 py-2 px-3 text-[11px] text-gray-700">{value || '-'}</span>
+        </div>
+    );
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all">
+            <div className="bg-white rounded shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-200">
                 {/* Header */}
-                <div className="p-4 border-b flex justify-between items-center bg-gray-50/50">
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 leading-none">Order Details</h2>
-                        <p className="text-sm text-gray-500 mt-1.5 flex items-center gap-2">
-                            <span className="font-mono text-indigo-600 font-bold">#{order.orderNumber}</span>
-                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span>{new Date(order.createdAt).toLocaleString()}</span>
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors" title="Print Invoice">
-                            <Printer className="w-5 h-5" />
-                        </button>
-                        <button onClick={onClose} className="p-2 hover:bg-red-50 hover:text-red-500 rounded-lg text-gray-400 transition-colors">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
+                <div className="px-4 py-2 border-b flex justify-between items-center bg-white">
+                    <h2 className="text-base font-bold text-gray-800">Order Details</h2>
+                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                        <X className="w-5 h-5 text-gray-500" />
+                    </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Customer & Order Info */}
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Customer Information</h3>
-                            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border shadow-sm text-gray-400">
-                                        <User className="w-4 h-4" />
-                                    </div>
-                                    <span className="font-semibold text-gray-700">{order.customerName || 'Walk-in Guest'}</span>
-                                </div>
-                                {order.customerPhone && (
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border shadow-sm text-gray-400">
-                                            <Phone className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-sm text-gray-600 font-medium">{order.customerPhone}</span>
-                                    </div>
-                                )}
-                                {order.deliveryAddress && (
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border shadow-sm text-gray-400">
-                                            <MapPin className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-sm text-gray-600 font-medium">{order.deliveryAddress}</span>
-                                    </div>
-                                )}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {/* 3-Column Grid for Metadata */}
+                    <div className="border border-gray-100 rounded overflow-hidden">
+                        <div className="grid grid-cols-3">
+                            {/* Column 1 */}
+                            <div className="border-r border-gray-100 last:border-r-0">
+                                <InfoItem label="Order No." value={order.orderNumber} />
+                                <InfoItem label="Customer Phone" value={order.customerPhone} />
+                                <InfoItem label="No. of Persons" value={order.noOfPersons} />
+                                <InfoItem label="Total Tax" value={`₹ ${parseFloat(order.taxAmount || 0).toFixed(2)}`} />
+                                <InfoItem label="Settlement Amount" value={`₹ ${parseFloat(order.settlementAmount || 0).toFixed(2)}`} />
+                                <InfoItem label="Paid" value={order.paidAmount ? `₹ ${order.paidAmount}` : '-'} />
+                                <InfoItem label="Tip" value={order.tipAmount ? `₹ ${order.tipAmount}` : '-'} />
+                                <InfoItem label="Settlement Counter" value={order.settlementCounter} />
                             </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Order Status</h3>
-                            <div className="bg-gray-50 rounded-xl p-4 space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">Order Type</span>
-                                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${order.type === 'dine-in' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
-                                        }`}>
-                                        {order.type}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">Source</span>
-                                    <span className="text-sm font-bold text-gray-700">{order.source || 'POS'}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">Current Status</span>
-                                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${order.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                        {order.status}
-                                    </span>
-                                </div>
+                            {/* Column 2 */}
+                            <div className="border-r border-gray-100 last:border-r-0">
+                                <InfoItem label="Billing User" value={order.createdBy || order.userName || 'admin'} />
+                                <InfoItem label="Customer Address" value={order.deliveryAddress} />
+                                <InfoItem label="Order Type" value={order.type} />
+                                <InfoItem label="Total Discount" value={`₹ (${parseFloat(order.discountAmount || 0).toFixed(2)})`} />
+                                <InfoItem label="Order Status" value={order.status} />
+                                <InfoItem label="Payment Type" value={order.paymentMode || order.paymentType || 'Other [UPI]'} />
+                                <InfoItem label="Sub Order Type" value={order.subOrderType || order.type} />
+                                <InfoItem label="Settled By" value={order.settledBy} />
+                            </div>
+                            {/* Column 3 */}
+                            <div className="last:border-r-0">
+                                <InfoItem label="Customer Name" value={order.customerName} />
+                                <InfoItem label="Customer Locality" value={order.locality} />
+                                <InfoItem label="Assign to" value={order.assignTo || '-'} />
+                                <InfoItem label="Grand Total" value={`₹ ${parseFloat(order.totalAmount || 0).toFixed(2)}`} />
+                                <InfoItem label="Printed" value={order.isKotPrinted ? `Yes (1 time(s)) (${new Date(order.updatedAt).toLocaleString()})` : 'No'} />
+                                <InfoItem label="Coupon Code" value={order.couponCode} />
+                                <InfoItem label="Sequence Name" value={order.sequenceName} />
                             </div>
                         </div>
                     </div>
 
-                    {/* Order Items */}
-                    <div className="space-y-3">
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Order Items ({items.length})</h3>
-                        <div className="border rounded-xl overflow-hidden">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-gray-50 border-b text-gray-500 uppercase text-[10px] font-bold">
+                    {/* Order Items Section */}
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-bold text-gray-800">Order Items</h3>
+                        <div className="border border-gray-200 rounded overflow-hidden">
+                            <table className="w-full text-[11px] text-left">
+                                <thead className="bg-[#ebf3ff] text-gray-800 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-4 py-3">Item Name</th>
-                                        <th className="px-4 py-3 text-center">Qty</th>
-                                        <th className="px-4 py-3 text-right">Price</th>
-                                        <th className="px-4 py-3 text-right">Total</th>
+                                        <th className="px-3 py-2 font-bold w-1/3">Item Name</th>
+                                        <th className="px-3 py-2 font-bold">Special Note</th>
+                                        <th className="px-3 py-2 font-bold text-center">Quantity</th>
+                                        <th className="px-3 py-2 font-bold text-right">Unit Price (₹)</th>
+                                        <th className="px-3 py-2 font-bold text-right">Total Price (₹)</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y">
+                                <tbody className="divide-y divide-gray-100">
                                     {items.map((item, idx) => (
                                         <tr key={item.id || idx} className="hover:bg-gray-50/50 transition-colors">
-                                            <td className="px-4 py-3 font-medium text-gray-900">
+                                            <td className="px-3 py-2 font-medium">
                                                 {item.itemName}
                                                 {item.variantName && <span className="text-[10px] text-gray-400 ml-1">({item.variantName})</span>}
-                                                {item.addons?.length > 0 && (
-                                                    <div className="text-[10px] text-gray-400 font-normal mt-0.5">
-                                                        Add-ons: {item.addons.map(a => a.name).join(', ')}
-                                                    </div>
-                                                )}
                                             </td>
-                                            <td className="px-4 py-3 text-center font-bold text-gray-700">x{item.quantity}</td>
-                                            <td className="px-4 py-3 text-right text-gray-600">₹{item.price.toFixed(2)}</td>
-                                            <td className="px-4 py-3 text-right font-bold text-gray-900">₹{item.total.toFixed(2)}</td>
+                                            <td className="px-3 py-2 text-gray-500 italic">
+                                                {item.specialNote || '--'}
+                                            </td>
+                                            <td className="px-3 py-2 text-center">{item.quantity}</td>
+                                            <td className="px-3 py-2 text-right">{parseFloat(item.price).toFixed(2)}</td>
+                                            <td className="px-3 py-2 text-right">{parseFloat(item.total).toFixed(2)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-
-                    {/* Summary */}
-                    <div className="flex justify-end pt-4">
-                        <div className="w-1/2 space-y-3">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Subtotal</span>
-                                <span className="text-gray-900 font-medium">₹{subTotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Tax</span>
-                                <span className="text-gray-900 font-medium">₹{(order.taxAmount || 0).toFixed(2)}</span>
-                            </div>
-                            {order.discountAmount > 0 && (
-                                <div className="flex justify-between text-sm text-green-600">
-                                    <span>Discount</span>
-                                    <span>-₹{order.discountAmount.toFixed(2)}</span>
-                                </div>
-                            )}
-                            <div className="pt-3 border-t flex justify-between">
-                                <span className="text-base font-bold text-gray-900">Grand Total</span>
-                                <div className="text-right">
-                                    <span className="text-xl font-black text-indigo-600">₹{order.totalAmount?.toFixed(2)}</span>
-                                    <p className="text-[10px] text-gray-400 font-medium">Inclusive of all taxes</p>
+                            {/* Summary Right Aligned */}
+                            <div className="border-t border-gray-200 bg-white">
+                                <div className="flex justify-end p-2 px-4">
+                                    <div className="w-64 space-y-1 text-[11px]">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Delivery Charge</span>
+                                            <span className="font-medium">{parseFloat(order.deliveryCharge || 0).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Container Charge</span>
+                                            <span className="font-medium">{parseFloat(order.containerCharge || 0).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Service Charge</span>
+                                            <span className="font-medium">{parseFloat(order.serviceCharge || 0).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Round Off</span>
+                                            <span className="font-medium">{parseFloat(order.roundOff || 0).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between pt-1 border-t border-gray-100">
+                                            <span className="font-bold text-gray-900">Grand Total</span>
+                                            <span className="font-bold text-gray-900">{parseFloat(order.totalAmount || 0).toFixed(2)}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -150,12 +126,12 @@ export function OrderViewModal({ order, isOpen, onClose }) {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-4 bg-gray-50 border-t flex justify-end gap-3">
-                    <button onClick={onClose} className="px-6 py-2 border rounded-xl text-sm font-bold text-gray-600 hover:bg-white transition-all active:scale-95 shadow-sm">
+                <div className="px-4 py-2 bg-gray-50 border-t flex justify-end gap-2">
+                    <button onClick={onClose} className="px-4 py-1.5 border border-gray-300 rounded text-xs font-bold text-gray-600 hover:bg-white transition-all bg-gray-100">
                         Close
                     </button>
-                    <button className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-md shadow-indigo-200 flex items-center gap-2">
-                        <Printer className="w-4 h-4" /> Print Receipt
+                    <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-1.5">
+                        <Printer className="w-3.5 h-3.5" /> Print Receipt
                     </button>
                 </div>
             </div>
