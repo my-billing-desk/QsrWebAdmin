@@ -17,17 +17,7 @@ export const initialMenuGroups = [
             { id: 'running_orders', path: '/orders/running', label: 'Running Orders', icon: ShoppingCart },
             { id: 'kot_orders', path: '/orders/kot', label: 'KOT', icon: FileSpreadsheet },
             { id: 'order_history', path: '/orders/history', label: 'Order History', icon: Archive },
-        ]
-    },
-    {
-        id: 'group_inventory',
-        items: [
-            { id: 'inventory_main', path: '/inventory', label: 'Inventory', icon: Archive }
-        ]
-    },
-    {
-        id: 'group_menu',
-        items: [
+            { id: 'inventory_main', path: '/inventory', label: 'Inventory', icon: Archive },
             { id: 'menu_items', path: '/menu', label: 'Menu Management', icon: UtensilsCrossed }
         ]
     },
@@ -53,9 +43,6 @@ export const initialMenuGroups = [
         title: 'Reports',
         items: [
             { id: 'day_end', path: '/reports/day-end', label: 'Day End Summary', icon: FileText },
-            { id: 'business_summary', path: '/reports/business-summary', label: 'Business Report', icon: BarChart2 },
-            { id: 'menu_stock_history', path: '/reports/stock-history', label: 'Stock History', icon: FileSpreadsheet },
-            { id: 'del_mgmt', path: '/reports/delivery', label: 'Delivery Management', icon: Truck },
         ]
     },
     {

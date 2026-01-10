@@ -27,36 +27,29 @@ const SidebarItem = ({ item, isActive, onNavigate, expandedGroups, toggleGroup, 
                     if (item.forceExpanded) return;
                     hasSubItems ? toggleGroup(item.id) : onNavigate(item.path);
                 }}
-                className={`w-full justify-between group relative
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group relative mb-0.5
                     ${active && !hasSubItems
-                        ? 'sidebar-item-active'
-                        : 'sidebar-item'
+                        ? 'bg-blue-50 text-blue-600'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }
                     ${item.forceExpanded ? 'cursor-default' : 'cursor-pointer'}
                 `}
                 title={!isSidebarOpen ? item.label : ''}
             >
-                <div className={`flex items-center w-full overflow-hidden`}>
+                <div className="flex items-center min-w-0">
                     {Icon && (
-                        <Icon className={`sidebar-icon`} />
+                        <Icon className={`w-4.5 h-4.5 shrink-0 ${active && !hasSubItems ? 'text-blue-600' : 'text-gray-400 opacity-70 group-hover:opacity-100'}`} />
                     )}
 
                     {isSidebarOpen && (
-                        <>
-                            <span className={`truncate text-sm flex-1 text-left tracking-wide ${active ? 'font-semibold' : 'font-medium'}`}>
-                                {item.label}
-                            </span>
-                            {item.badge && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded badge-primary font-bold ml-2 shadow-sm">
-                                    {item.badge}
-                                </span>
-                            )}
-                        </>
+                        <span className={`ml-3 truncate text-sm tracking-wide ${active ? 'font-bold' : 'font-medium'}`}>
+                            {item.label}
+                        </span>
                     )}
                 </div>
                 {hasSubItems && isSidebarOpen && !item.forceExpanded && (
-                    <div className="ml-2 shrink-0 transition-transform duration-200">
-                        {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                    <div className="ml-2 shrink-0">
+                        <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                     </div>
                 )}
             </button>
@@ -188,18 +181,17 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
         >
 
             {/* Header / Logo Area */}
-            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-4' : 'justify-center'} border-b border-gray-200`}>
+            <div className={`h-16 shrink-0 flex items-center ${isOpen ? 'px-4' : 'justify-center'} border-b border-gray-100`}>
                 <div className={`flex items-center w-full ${isOpen ? 'gap-3' : 'justify-center'}`}>
-                    {/* Logo - retained SmartHR style but adaptable */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-md bg-indigo-600`}>
-                        <Store className="w-5 h-5" />
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm bg-blue-600`}>
+                        <Store className="w-5.5 h-5.5" />
                     </div>
 
                     {isOpen && (
                         <div className="flex flex-col overflow-hidden">
-                            <span className="font-bold text-gray-900 text-lg leading-tight truncate">Aksha POS</span>
-                            <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider truncate">
-                                {user?.tenantName || 'Admin Panel'}
+                            <h1 className="font-extrabold text-gray-900 text-[15px] leading-tight truncate">Aksha POS</h1>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter truncate">
+                                ADMIN PANEL
                             </span>
                         </div>
                     )}
@@ -207,7 +199,7 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
             </div>
 
             {/* Scrollable Nav */}
-            <nav className="flex-1 overflow-y-auto sidebar-content scrollbar-hide">
+            <nav className="flex-1 overflow-y-auto sidebar-content scrollbar-hide py-4 px-2">
                 {menuLayout.map((group, idx) => {
                     // Filter items based on user role
                     const permissionMap = {
@@ -255,14 +247,14 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                             {group.title && isOpen && (
                                 <button
                                     onClick={() => group.id && toggleMainGroup(group.id)}
-                                    className={`sidebar-item justify-between w-full group mb-1 ${isMainExpanded ? 'bg-gray-50 text-gray-900' : 'text-gray-600'}`}
+                                    className="w-full flex items-center justify-between px-3 py-2 text-gray-900 hover:bg-gray-50 rounded-lg group mb-1 transition-colors"
                                 >
-                                    <span className="text-sm font-medium">
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-gray-900 group-hover:text-gray-900">
                                         {group.title}
                                     </span>
                                     {group.id && (
                                         <div className="text-gray-400">
-                                            {isMainExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMainExpanded ? 'rotate-180' : ''}`} />
                                         </div>
                                     )}
                                 </button>
@@ -286,10 +278,10 @@ export function Sidebar({ activeTab, onTabChange, isOpen = true, onToggleSidebar
                 })}
 
                 {/* Quick Links Section */}
-                <div className="space-y-1 pt-4 border-t border-gray-200 mt-2">
+                <div className="space-y-1 pt-6 border-t border-gray-100 mt-4 px-2">
                     {isOpen && (
-                        <div className="sidebar-item justify-between w-full mb-1 cursor-default">
-                            <span className="text-sm font-medium text-gray-900">
+                        <div className="flex items-center justify-between px-3 py-2 mb-1 cursor-default">
+                            <span className="text-[11px] font-black uppercase tracking-widest text-gray-900">
                                 Quick Links
                             </span>
                             <button
