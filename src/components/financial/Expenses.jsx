@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, Plus, FileSpreadsheet, FileText, RotateCcw, Eye, Edit, Trash2, X, Calendar, ArrowLeft } from 'lucide-react';
+import { Search, ChevronDown, Plus, FileText, RotateCcw, Eye, Edit, Trash2, X, Calendar, ArrowLeft } from 'lucide-react';
 import { ExpenseCategory } from './ExpenseCategory';
 import { WithdrawalListing } from './WithdrawalListing';
 import { WithdrawalMaster } from './WithdrawalMaster';
 import { CashTopUpListing } from './CashTopUpListing';
 import { CashTopUpMaster } from './CashTopUpMaster';
 import { financialService } from '../../services/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 import toast from 'react-hot-toast';
 
 export function Expenses() {
@@ -220,12 +220,6 @@ export function Expenses() {
             toast.error('Failed to save expenses');
         }
     };
-
-    // Chart Data Preparation
-    const chartData = expenses.slice(0, 10).map(e => ({
-        name: e.reason,
-        amount: parseFloat(e.amount)
-    }));
 
     const grandTotal = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
 
@@ -472,27 +466,8 @@ export function Expenses() {
                             </div>
                         )}
 
-                        {/* Chart Placeholder */}
-                        <div className="bg-white p-6 rounded-lg shadow-sm border min-h-[200px] flex flex-col justify-center">
-                            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
-                                    <FileSpreadsheet className="w-4 h-4" />
-                                </div>
-                                Top 10 Expenses(View Chart) <ChevronDown className="w-4 h-4" />
-                            </h3>
-                            {/* Simple Bar Chart Visualization */}
-                            <div className="h-32 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={chartData}>
-                                        <Tooltip />
-                                        <Bar dataKey="amount" fill="#38bdf8" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
-
                         {/* Table */}
-                        <div className="bg-white border rounded-lg shadow-sm flex-1 overflow-auto">
+                        <div className="bg-white border rounded-lg shadow-sm flex-1 overflow-auto min-h-0">
                             {loading ? (
                                 <div className="p-8 text-center text-gray-500">Loading...</div>
                             ) : (

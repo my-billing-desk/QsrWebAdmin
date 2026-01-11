@@ -7,7 +7,7 @@ import {
 export function InventoryComponents({ activeView }) {
     switch (activeView) {
         case 'inventory_item': return <InventoryItemMaster />;
-        case 'stock_purchase': return <PurchaseEntry />;
+        case 'stock_purchase': return <StockPurchaseOld />;
         case 'available_stock': return <StockStatus />;
         default: return <InventoryItemMaster />;
     }
@@ -88,8 +88,8 @@ export function InventoryItemMaster() {
     );
 }
 
-// --- 2. Purchase Entry ---
-export function PurchaseEntry() {
+// --- 2. Stock Purchase ---
+export function StockPurchaseOld() {
     return (
         <div className="p-6 h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">

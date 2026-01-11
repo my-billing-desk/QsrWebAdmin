@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Download, FileText, ChevronRight } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { inventoryService } from '../../services/api';
 import { getTodayLocal } from '../../utils/dateUtils';
 
 export function InventoryReports() {
-    const [activeReport, setActiveReport] = useState('All');
+    const { reportId } = useParams();
+    const navigate = useNavigate();
+    const [activeReport, setActiveReport] = useState("All");
     const [reportData, setReportData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -98,6 +101,14 @@ export function InventoryReports() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (reportId) {
+            setActiveReport(reportId);
+        } else {
+            setActiveReport('All');
+        }
+    }, [reportId]);
 
     useEffect(() => {
         if (activeReport !== 'All') {
@@ -538,7 +549,7 @@ export function InventoryReports() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {reports.map(report => (
                         <div key={report.id}
-                            onClick={() => { setActiveReport(report.id); setReportData([]); }}
+                            onClick={() => navigate(`/inventory/reports/${report.id}`)}
                             className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
                             <div className="flex items-start justify-between">
                                 <div className="p-3 bg-red-50 rounded-lg group-hover:bg-red-100 transition-colors">
@@ -563,7 +574,7 @@ export function InventoryReports() {
         <div className="flex flex-col h-full bg-gray-50 font-sans">
             <div className="bg-white p-6 shadow-sm border-b border-gray-200 flex items-center justify-between">
                 <div className="flex items-center">
-                    <button onClick={() => setActiveReport('All')} className="text-gray-500 hover:text-gray-700 text-sm font-medium">
+                    <button onClick={() => navigate('/inventory/reports')} className="text-gray-500 hover:text-gray-700 text-sm font-medium">
                         Inventory Reports
                     </button>
                     <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />

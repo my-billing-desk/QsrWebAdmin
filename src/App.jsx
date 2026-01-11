@@ -24,7 +24,7 @@ import RawMaterialsList from './components/inventory/RawMaterialsList';
 import RecipeList from './components/inventory/RecipeList';
 import AddRecipe from './components/inventory/AddRecipe';
 import { Preferences } from './components/inventory/Preferences';
-import { PurchaseEntry } from './components/inventory/PurchaseEntry';
+import { StockPurchase } from './components/inventory/StockPurchase';
 import { PurchaseOrder } from './components/inventory/PurchaseOrder';
 import { PurchaseReturn } from './components/inventory/PurchaseReturn';
 import { StockTransfer } from './components/inventory/StockTransfer';
@@ -260,7 +260,7 @@ function AppRoutes() {
         <Route path="recipes/edit/:id" element={<AddRecipe />} />
 
         <Route path="preferences" element={<Preferences />} />
-        <Route path="purchase" element={<PurchaseEntry />} />
+        <Route path="purchase" element={<StockPurchase />} />
         <Route path="purchase-order" element={<PurchaseOrder />} />
         <Route path="purchase-return" element={<PurchaseReturn />} />
         <Route path="transfer" element={<StockTransfer />} />
@@ -271,7 +271,7 @@ function AppRoutes() {
         <Route path="stock/opening" element={<OpeningStock />} />
         <Route path="indent" element={<Indent />} />
         <Route path="reports" element={<InventoryReports />} />
-        <Route path="reports/stock-history" element={<StockHistory />} />
+        <Route path="reports/:reportId" element={<InventoryReports />} />
         <Route path="consumption-summary" element={<StockSummary />} />
         <Route path="settings" element={<InventorySettings />} />
       </Route>

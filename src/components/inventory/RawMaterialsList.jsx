@@ -43,18 +43,18 @@ export default function RawMaterialsList() {
             align: 'right',
             render: (item) => (
                 <div className="flex justify-end gap-2">
-                    <button className="rounded-lg transition-colors border border-transparent">
+                    <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-blue-600">
                         <FileText className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); navigate(`/inventory/raw-materials/edit/${item.id}`); }}
-                        className="rounded-lg transition-colors border border-transparent"
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-blue-600"
                     >
                         <Edit className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                        className="rounded-lg transition-colors border border-transparent"
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-red-600"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -75,14 +75,14 @@ export default function RawMaterialsList() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => navigate('/inventory/raw-materials/add')}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all"
+                            className="btn-primary"
                         >
                             <Plus className="w-4 h-4" /> Create New
                         </button>
-                        <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all">
+                        <button className="btn-secondary">
                             <Plus className="w-4 h-4" /> Quick Add
                         </button>
-                        <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all">
+                        <button className="btn-secondary">
                             Action <MoreHorizontal className="w-4 h-4" />
                         </button>
                     </div>

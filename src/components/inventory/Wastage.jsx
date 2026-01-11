@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Download, Search, Filter, Calendar, X, ChevronDown, List } from 'lucide-react';
+import { Plus, Trash2, Edit2, Download, Search, Filter, Calendar, X, ChevronDown, List, Upload } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { inventoryService } from '../../services/api';
 import { getTodayLocal } from '../../utils/dateUtils';
+import toast from 'react-hot-toast';
 
 export function Wastage() {
     const [view, setView] = useState('list');
     const [wastages, setWastages] = useState([]);
     const [rawMaterials, setRawMaterials] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
+    const [focusedIndex, setFocusedIndex] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         loadData();
     }, []);
 
     const loadData = async () => {
+        setIsLoading(true);
         try {
             const [matRes, wastRes] = await Promise.all([
                 inventoryService.getRawMaterials(),
@@ -23,6 +29,9 @@ export function Wastage() {
             setWastages(wastRes.data || []);
         } catch (error) {
             console.error(error);
+            toast.error("Failed to load data");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -40,17 +49,23 @@ export function Wastage() {
         if (field === 'rawMaterialId') {
             const mat = rawMaterials.find(m => m.id == value);
             if (mat) {
+                newItems[index].name = mat.name;
                 newItems[index].unit = mat.consumptionUnit;
-                newItems[index].avgPrice = mat.purchasePrice || 0; // Assuming purchasePrice as avg for now
+                newItems[index].avgPrice = mat.purchasePrice || 0;
+                newItems[index].tax1 = mat.tax1 || 0;
+                newItems[index].tax2 = mat.tax2 || 0;
             }
         }
 
         // Calculations
-        if (field === 'quantity' || field === 'rawMaterialId') {
-            const qty = parseFloat(newItems[index].quantity) || 0;
-            const price = parseFloat(newItems[index].avgPrice) || 0;
-            newItems[index].amount = (qty * price).toFixed(2);
-        }
+        const qty = parseFloat(newItems[index].quantity) || 0;
+        const price = parseFloat(newItems[index].avgPrice) || 0;
+        const tax1 = parseFloat(newItems[index].tax1) || 0;
+        const tax2 = parseFloat(newItems[index].tax2) || 0;
+
+        const baseAmount = qty * price;
+        const taxAmount = baseAmount * ((tax1 + tax2) / 100);
+        newItems[index].amount = (baseAmount + taxAmount).toFixed(2);
 
         setFormData({ ...formData, items: newItems });
     };
@@ -62,242 +77,310 @@ export function Wastage() {
 
     const handleSave = async () => {
         try {
-            const total = formData.items.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0);
-            await inventoryService.createWastage({ ...formData, totalAmount: total });
-            alert('Wastage record saved!');
+            // Create new raw materials if any
+            const updatedItems = [...formData.items];
+            for (let i = 0; i < updatedItems.length; i++) {
+                const item = updatedItems[i];
+                if (!item.rawMaterialId && item.name?.trim()) {
+                    const existingMat = rawMaterials.find(rm => rm.name.toLowerCase() === item.name.toLowerCase());
+                    if (existingMat) {
+                        updatedItems[i].rawMaterialId = existingMat.id;
+                        updatedItems[i].name = existingMat.name;
+                        updatedItems[i].unit = existingMat.consumptionUnit;
+                    } else {
+                        const res = await inventoryService.createRawMaterial({
+                            name: item.name,
+                            consumptionUnit: 'Piece',
+                            purchaseUnit: 'Piece',
+                            category: 'Uncategorized'
+                        });
+                        updatedItems[i].rawMaterialId = res.data.id;
+                        updatedItems[i].name = res.data.name;
+                        updatedItems[i].unit = res.data.consumptionUnit;
+                    }
+                }
+            }
+
+            const total = updatedItems.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0);
+            await inventoryService.createWastage({ ...formData, items: updatedItems, totalAmount: total });
+            toast.success('Wastage record saved!');
             setView('list');
             loadData();
         } catch (error) {
             console.error(error);
-            alert('Error saving wastage: ' + error.message);
+            toast.error('Error saving wastage: ' + (error.response?.data?.error || error.message));
         }
     };
 
-    const calculateTotal = () => {
-        return formData.items.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0).toFixed(2);
-    };
-
     return (
-        <div className="flex flex-col h-full p-6 bg-gray-50 font-sans relative">
+        <div className="flex flex-col h-full bg-gray-50 p-6">
             {/* List View */}
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Wastage List</h1>
-                    <div className="text-sm text-gray-500">Track and manage inventory wastage</div>
+                    <h1 className="text-xl font-bold text-gray-800">Wastage List</h1>
+                    <div className="text-sm text-gray-500 mt-1">Track and manage inventory wastage</div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => { setFormData(initialFormState()); setView('add'); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all">
+                    <button onClick={() => { setFormData(initialFormState()); setView('add'); }} className="btn-primary">
                         <Plus className="w-4 h-4" /> Record Wastage
                     </button>
-                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all">
+                    <button className="btn-secondary">
                         <Download className="w-4 h-4" /> Export
                     </button>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end">
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">Start Date</label>
-                    <div className="relative">
-                        <input type="date" className="p-2 pl-9 border rounded text-sm bg-gray-50 text-gray-600" />
-                        <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end">
+                <div className="space-y-1">
+                    <label className="form-label">Wastage Type</label>
+                    <select className="input-field">
+                        <option>All Types</option>
+                        <option>Raw Material</option>
+                        <option>Item</option>
+                    </select>
+                </div>
+                <div className="space-y-1">
+                    <label className="form-label">Date Range</label>
+                    <div className="flex items-center gap-2">
+                        <input type="date" className="input-field" />
+                        <span className="text-gray-400 font-medium">to</span>
+                        <input type="date" className="input-field" />
                     </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">End Date</label>
-                    <div className="relative">
-                        <input type="date" className="p-2 pl-9 border rounded text-sm bg-gray-50 text-gray-600" />
-                        <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                    </div>
-                </div>
-                <div className="flex flex-col gap-1 min-w-[150px]">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">Type</label>
-                    <select className="p-2 border rounded text-sm bg-gray-50 text-gray-600"><option>All</option></select>
-                </div>
-
-                <div className="flex gap-2 ml-auto">
-                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all">Search</button>
-                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">Clear</button>
-                </div>
+                <button className="btn-secondary self-end"><Filter className="w-4 h-4" /> Filter</button>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex-1">
-                <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase text-gray-700">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
+                <table className="table-standard">
+                    <thead className="table-header">
                         <tr>
-                            <th className="p-4">Date</th>
-                            <th className="p-4">Type</th>
-                            <th className="p-4">Items</th>
-                            <th className="p-4 text-right">Total Amount</th>
-                            <th className="p-4 text-center">Status</th>
+                            <th className="table-th">Date</th>
+                            <th className="table-th">Type</th>
+                            <th className="table-th">Items</th>
+                            <th className="table-th text-right">Total Amount</th>
+                            <th className="table-th text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y text-sm">
-                        {wastages.map(w => (
-                            <tr key={w.id} className="hover:bg-gray-50">
-                                <td className="p-4 text-gray-600 font-medium">{new Date(w.date).toLocaleDateString()}</td>
-                                <td className="p-4"><span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold border border-gray-200">{w.type}</span></td>
-                                <td className="p-4 text-gray-500">{w.WastageItems?.length} items</td>
-                                <td className="p-4 text-right font-bold text-gray-800">₹ {w.totalAmount}</td>
-                                <td className="p-4 text-center"><span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">Recorded</span></td>
-                            </tr>
-                        ))}
-                        {wastages.length === 0 && (
+                    <tbody className="divide-y divide-gray-100">
+                        {isLoading ? (
+                            <tr><td colSpan="5" className="p-8 text-center text-gray-500">Loading...</td></tr>
+                        ) : wastages.length === 0 ? (
                             <tr>
                                 <td colSpan="5" className="p-12 text-center text-gray-500">
-                                    <div className="flex flex-col items-center">
-                                        <div className="bg-gray-50 p-4 rounded-full mb-3"><Search className="w-6 h-6 text-gray-300" /></div>
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="p-3 bg-gray-50 rounded-full text-gray-400"><Search className="w-6 h-6" /></div>
                                         <span className="font-bold text-gray-400">No Wastage Records Found</span>
-                                        <p className="text-xs mt-1 text-gray-400">Add a new record to get started.</p>
+                                        <p className="text-xs text-gray-400">Add a new record to get started.</p>
                                     </div>
                                 </td>
                             </tr>
+                        ) : (
+                            wastages.map(w => (
+                                <tr key={w.id} className="table-row">
+                                    <td className="table-td text-gray-600 font-medium whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            {new Date(w.date).toLocaleDateString()}
+                                        </div>
+                                    </td>
+                                    <td className="table-td">
+                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded text-xs font-bold border border-blue-100">{w.type}</span>
+                                    </td>
+                                    <td className="table-td text-gray-500">{w.WastageItems?.length || 0} items</td>
+                                    <td className="table-td text-right font-bold text-gray-800">₹ {parseFloat(w.totalAmount || 0).toFixed(2)}</td>
+                                    <td className="table-td text-center">
+                                        <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-bold">Recorded</span>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Add Wastage Modal Overlay */}
-            {view === 'add' && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans">
-                    <div className="bg-white rounded-lg w-full max-w-6xl shadow-2xl animate-in fade-in zoom-in duration-200 h-[90vh] flex flex-col">
-                        {/* Modal Header */}
-                        <div className="flex justify-between items-center p-5 border-b shrink-0">
-                            <h2 className="text-xl font-bold text-gray-800">Record Wastage</h2>
-                            <button onClick={() => setView('list')} className="transition-colors">
-                                <span className="rounded-full border border-transparent flex items-center justify-center">
-                                    <div className="rounded-full">
-                                        <X className="w-4 h-4" />
-                                    </div>
-                                </span>
+            {view === 'add' && createPortal(
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+                    <div className="bg-white rounded-xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-800">Record Wastage</h2>
+                                <p className="text-sm text-gray-500 mt-1">Log damaged or expired stock</p>
+                            </div>
+                            <button onClick={() => setView('list')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <X className="w-5 h-5 text-gray-500" />
                             </button>
                         </div>
 
-                        {/* Modal Body */}
-                        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                            <div className="space-y-8">
-                                {/* Top Form */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-6 overflow-y-auto flex-1 bg-gray-50">
+                            <div className="max-w-4xl mx-auto space-y-6">
+                                <div className="card-standard p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
-                                        <label className="text-sm font-semibold text-gray-700">Wastage Type <span className="text-red-500">*</span></label>
-                                        <div className="flex gap-4 p-3 bg-gray-50 rounded border border-gray-200">
-                                            <label className="flex items-center gap-2 cursor-pointer hover:text-indigo-600 transition-colors">
-                                                <input type="radio" checked={formData.type === 'Raw Material'} onChange={() => setFormData({ ...formData, type: 'Raw Material', items: [] })} className="accent-indigo-600 w-4 h-4" />
-                                                <span className="text-sm font-bold text-gray-700">Raw Material</span>
-                                            </label>
-                                            <label className="flex items-center gap-2 cursor-pointer hover:text-indigo-600 transition-colors">
-                                                <input type="radio" checked={formData.type === 'Item'} onChange={() => setFormData({ ...formData, type: 'Item', items: [] })} className="accent-indigo-600 w-4 h-4" />
-                                                <span className="text-sm font-bold text-gray-700">Processed Item</span>
-                                            </label>
+                                        <label className="form-label">Wastage Type <span className="text-red-500">*</span></label>
+                                        <div className="flex gap-4 p-1 bg-gray-100 rounded-lg border border-gray-200">
+                                            <button
+                                                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${formData.type === 'Raw Material' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                                onClick={() => setFormData({ ...formData, type: 'Raw Material', items: [] })}
+                                            >
+                                                Raw Material
+                                            </button>
+                                            <button
+                                                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${formData.type === 'Item' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                                onClick={() => setFormData({ ...formData, type: 'Item', items: [] })}
+                                            >
+                                                Processed Item
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5 relative">
-                                        <label className="text-sm font-semibold text-gray-700">Wastage Date <span className="text-red-500">*</span></label>
+                                    <div className="space-y-1.5">
+                                        <label className="form-label">Wastage Date <span className="text-red-500">*</span></label>
                                         <div className="relative">
                                             <input
                                                 type="date"
                                                 value={formData.date}
                                                 onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                                className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 text-gray-600"
+                                                className="input-field"
                                             />
-                                            <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none" />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Items Table */}
-                                <div className="border rounded-md overflow-hidden">
-                                    <table className="w-full text-left text-sm">
-                                        <thead className="bg-gray-100 text-gray-700 font-bold border-b">
-                                            <tr>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider">
-                                                    {formData.type === 'Raw Material' ? 'Raw Material' : 'Item'}
-                                                </th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider w-32">Quantity</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider w-24">Unit</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider w-32">Avg Price</th>
-                                                <th className="p-3 font-semibold text-xs uppercase tracking-wider w-32">Amount</th>
-                                                <th className="p-3 w-10 text-center"><Trash2 className="w-4 h-4 mx-auto text-gray-500" /></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y text-gray-600 bg-white">
-                                            {formData.items.map((item, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-50/50">
-                                                    <td className="p-3">
-                                                        <select
-                                                            value={item.rawMaterialId}
-                                                            onChange={e => updateItem(idx, 'rawMaterialId', e.target.value)}
-                                                            className="w-full p-2 border border-blue-100 rounded focus:border-indigo-500 outline-none bg-transparent"
-                                                        >
-                                                            <option value="">Select Material</option>
-                                                            {rawMaterials.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                                        </select>
-                                                    </td>
-                                                    <td className="p-3">
-                                                        <div className="flex items-center border rounded-md overflow-hidden">
-                                                            <button onClick={() => updateItem(idx, 'quantity', Math.max(0, (parseFloat(item.quantity) || 0) - 1))} className="border-r">-</button>
+                                <div className="card-standard p-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-sm font-bold text-gray-800">Wastage Items</h3>
+                                        <button onClick={addItem} className="btn-secondary text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
+                                            <Plus className="w-4 h-4" /> Add Item
+                                        </button>
+                                    </div>
+
+                                    <div className="overflow-x-auto border border-gray-200 rounded-lg min-h-[300px]">
+                                        <table className="table-standard">
+                                            <thead className="table-header">
+                                                <tr>
+                                                    <th className="px-4 py-3 w-[300px]">
+                                                        {formData.type === 'Raw Material' ? 'Raw Material' : 'Item'}
+                                                    </th>
+                                                    <th className="px-4 py-3 w-32 text-center">Quantity</th>
+                                                    <th className="px-4 py-3 w-32">Unit</th>
+                                                    <th className="px-4 py-3 w-32 text-right">Avg Price</th>
+                                                    <th className="px-4 py-3 w-32 text-right">Amount</th>
+                                                    <th className="px-4 py-3 w-16 text-center"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 bg-white">
+                                                {formData.items.map((item, idx) => (
+                                                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                                        <td className="p-4 relative">
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    className="input-field"
+                                                                    placeholder="Select Material"
+                                                                    value={focusedIndex === idx ? searchQuery : (item.name || '')}
+                                                                    onFocus={() => {
+                                                                        setFocusedIndex(idx);
+                                                                        setSearchQuery(item.name || '');
+                                                                    }}
+                                                                    onChange={e => {
+                                                                        const val = e.target.value;
+                                                                        setSearchQuery(val);
+                                                                        const newItems = [...formData.items];
+                                                                        newItems[idx].name = val;
+                                                                        newItems[idx].rawMaterialId = '';
+                                                                        setFormData({ ...formData, items: newItems });
+                                                                    }}
+                                                                />
+                                                                {focusedIndex === idx && (
+                                                                    <>
+                                                                        <div className="fixed inset-0 z-[105]" onClick={() => setFocusedIndex(null)}></div>
+                                                                        <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-[110] mt-1 max-h-48 overflow-y-auto">
+                                                                            {rawMaterials.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 ? (
+                                                                                rawMaterials
+                                                                                    .filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                                                                                    .map(m => (
+                                                                                        <button
+                                                                                            key={m.id}
+                                                                                            onClick={() => {
+                                                                                                updateItem(idx, 'rawMaterialId', m.id);
+                                                                                                setFocusedIndex(null);
+                                                                                            }}
+                                                                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-50 last:border-0"
+                                                                                        >
+                                                                                            {m.name}
+                                                                                        </button>
+                                                                                    ))
+                                                                            ) : (
+                                                                                <div className="p-3 text-xs text-gray-500 text-center">No matches</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white w-28 mx-auto">
+                                                                <button onClick={() => updateItem(idx, 'quantity', Math.max(0, (parseFloat(item.quantity) || 0) - 1))} className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-500 font-bold border-r border-gray-200">-</button>
+                                                                <input
+                                                                    type="number"
+                                                                    value={item.quantity}
+                                                                    onChange={e => updateItem(idx, 'quantity', e.target.value)}
+                                                                    className="w-full text-center outline-none py-1.5 text-sm font-bold no-spinner"
+                                                                />
+                                                                <button onClick={() => updateItem(idx, 'quantity', (parseFloat(item.quantity) || 0) + 1)} className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-500 font-bold border-l border-gray-200">+</button>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            {!item.rawMaterialId ? (
+                                                                <select
+                                                                    className="input-field"
+                                                                    value={item.unit}
+                                                                    onChange={e => updateItem(idx, 'unit', e.target.value)}
+                                                                >
+                                                                    <option value="">Unit</option>
+                                                                    <option value="kg">kg</option>
+                                                                    <option value="g">g</option>
+                                                                    <option value="l">l</option>
+                                                                    <option value="ml">ml</option>
+                                                                    <option value="pcs">pcs</option>
+                                                                </select>
+                                                            ) : (
+                                                                <div className="text-sm font-medium text-gray-500">{item.unit || '-'}</div>
+                                                            )}
+                                                        </td>
+                                                        <td className="p-4">
                                                             <input
                                                                 type="number"
-                                                                value={item.quantity}
-                                                                onChange={e => updateItem(idx, 'quantity', e.target.value)}
-                                                                className="w-full text-center outline-none py-1"
+                                                                value={item.avgPrice}
+                                                                onChange={e => updateItem(idx, 'avgPrice', e.target.value)}
+                                                                className="input-field text-right"
                                                             />
-                                                            <button onClick={() => updateItem(idx, 'quantity', (parseFloat(item.quantity) || 0) + 1)} className="border-l">+</button>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-3">
-                                                        <input
-                                                            value={item.unit}
-                                                            readOnly
-                                                            className="w-full p-1.5 border-none bg-transparent text-gray-500"
-                                                        />
-                                                    </td>
-                                                    <td className="p-3">
-                                                        <span className="text-gray-500">₹ {item.avgPrice || 0}</span>
-                                                    </td>
-                                                    <td className="p-3 font-semibold text-gray-800">
-                                                        ₹ {item.amount || 0}
-                                                    </td>
-                                                    <td className="p-3 text-center">
-                                                        <button onClick={() => removeItem(idx)} className=""><Trash2 className="w-3.5 h-3.5" /></button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                            <tr>
-                                                <td colSpan="6" className="p-2 text-center">
-                                                    <button onClick={addItem} className="px-3 py-1.5 border border-dashed border-gray-300 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-50 flex items-center justify-center gap-1 mx-auto transition-all">
-                                                        <Plus className="w-3 h-3" /> Add Item
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {/* Summary */}
-                                <div className="flex justify-end">
-                                    <div className="w-full md:w-1/3">
-                                        <div className="border rounded-md divide-y text-sm">
-                                            <div className="flex justify-between p-3 bg-gray-50 font-bold">
-                                                <span className="text-gray-700">Total Wastage Value</span>
-                                                <span className="text-red-600">₹ {calculateTotal()}</span>
-                                            </div>
-                                        </div>
+                                                        </td>
+                                                        <td className="p-4 text-right font-bold text-gray-800">
+                                                            ₹ {item.amount}
+                                                        </td>
+                                                        <td className="p-4 text-center">
+                                                            <button onClick={() => removeItem(idx)} className="text-gray-400 hover:text-red-500 transition-colors">
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Modal Footer */}
-                        <div className="p-5 border-t shrink-0 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setView('list')} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">Cancel</button>
-                            <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-all">Save Details</button>
+                        <div className="px-6 py-4 border-t border-gray-100 bg-white flex justify-end gap-3 shrink-0">
+                            <button onClick={() => setView('list')} className="btn-secondary">Cancel</button>
+                            <button onClick={handleSave} className="btn-primary min-w-[140px]">Record Wastage</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
@@ -307,6 +390,8 @@ function initialFormState() {
     return {
         date: getTodayLocal(),
         type: 'Raw Material',
-        items: [{ rawMaterialId: '', quantity: '', unit: '', avgPrice: 0, amount: 0, description: '' }]
+        items: [{ rawMaterialId: '', name: '', quantity: 1, unit: '', avgPrice: 0, tax1: 0, tax2: 0, amount: 0, description: '' }]
     };
 }
+
+export default Wastage;

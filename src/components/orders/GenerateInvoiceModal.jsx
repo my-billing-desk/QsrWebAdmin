@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Search, RotateCcw } from 'lucide-react';
-import { orderService } from '../../services/api';
+import { X, Search } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 export function GenerateInvoiceModal({ onClose }) {
     const [filters, setFilters] = useState({
@@ -25,8 +25,8 @@ export function GenerateInvoiceModal({ onClose }) {
         setResults(null);
     };
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    const modalContent = (
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-4xl rounded-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden m-4">
 
                 {/* Header */}
@@ -129,4 +129,6 @@ export function GenerateInvoiceModal({ onClose }) {
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }

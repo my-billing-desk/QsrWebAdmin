@@ -51,62 +51,65 @@ export function AvailableStock() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col h-full bg-gray-50">
             {/* Header */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
-                <h1 className="text-xl font-bold text-gray-800 dark:text-white">Available Stock</h1>
+            <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+                <div>
+                    <h1 className="text-xl font-bold text-gray-800">Available Stock</h1>
+                    <p className="text-sm text-gray-500 mt-1">Real-time inventory levels</p>
+                </div>
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50">
-                        <FileText className="w-4 h-4" /> Files
+                    <button className="btn-secondary">
+                        <FileText className="w-4 h-4" /> Export
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 font-medium">
+                    <button className="btn-primary">
                         <Plus className="w-4 h-4" /> Add Stock
                     </button>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div className="bg-white p-4 shadow-sm border-b border-gray-200">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Raw Material</label>
+                        <label className="form-label">Raw Material</label>
                         <input
                             type="text"
                             value={filters.rawMaterial}
                             onChange={(e) => setFilters(prev => ({ ...prev, rawMaterial: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-sm"
+                            className="input-field"
                             placeholder="Search Material"
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Category</label>
+                        <label className="form-label">Category</label>
                         <select
                             value={filters.category}
                             onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-sm"
+                            className="input-field"
                         >
                             {categories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Date</label>
+                        <label className="form-label">Date</label>
                         <input
                             type="date"
                             value={filters.date}
                             onChange={(e) => setFilters(prev => ({ ...prev, date: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-sm"
+                            className="input-field"
                         />
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={handleLoad}
-                            className="flex-1 px-4 py-2 bg-white border border-red-200 text-red-600 font-medium rounded hover:bg-red-50 transition-colors"
+                            className="flex-1 btn-primary bg-blue-600 hover:bg-blue-700 text-white"
                         >
                             Load
                         </button>
                         <button
                             onClick={handleClear}
-                            className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-600 font-medium rounded hover:bg-gray-50 transition-colors"
+                            className="flex-1 btn-secondary"
                         >
                             Clear
                         </button>
@@ -119,36 +122,35 @@ export function AvailableStock() {
                 {!hasLoaded ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                         <div className="mb-6 opacity-80">
-                            {/* Placeholder Illustration mimicking the screenshot */}
-                            <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 relative">
-                                <div className="absolute inset-0 bg-red-50 rounded-full animate-pulse opacity-50"></div>
-                                <Search className="w-12 h-12 text-gray-300" />
+                            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="w-10 h-10 text-gray-400" />
                             </div>
                         </div>
-                        <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300">Available Stock Report Not Found</h3>
+                        <h3 className="text-lg font-medium text-gray-600">Available Stock Report Not Found</h3>
+                        <p className="text-gray-400 text-sm mt-2">Apply filters and click Load to view data</p>
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold border-b border-gray-200 dark:border-gray-600">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <table className="table-standard">
+                            <thead className="table-header">
                                 <tr>
-                                    <th className="p-4">Raw Material</th>
-                                    <th className="p-4">Category</th>
-                                    <th className="p-4 text-right">Current Stock</th>
-                                    <th className="p-4 text-right">Unit Price</th>
-                                    <th className="p-4 text-right">Stock Value</th>
+                                    <th className="table-th">Raw Material</th>
+                                    <th className="table-th">Category</th>
+                                    <th className="table-th text-right">Current Stock</th>
+                                    <th className="table-th text-right">Unit Price</th>
+                                    <th className="table-th text-right">Stock Value</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                            <tbody className="divide-y divide-gray-100">
                                 {materials.length > 0 ? materials.map(item => (
-                                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                        <td className="p-4 font-medium text-gray-900 dark:text-white">{item.name}</td>
-                                        <td className="p-4 text-gray-500">{item.category || '-'}</td>
-                                        <td className="p-4 text-right font-medium text-blue-600">
+                                    <tr key={item.id} className="table-row">
+                                        <td className="table-td font-medium text-gray-900">{item.name}</td>
+                                        <td className="table-td text-gray-500">{item.category || '-'}</td>
+                                        <td className="table-td text-right font-medium text-blue-600">
                                             {item.currentStock} {item.consumptionUnit}
                                         </td>
-                                        <td className="p-4 text-right">₹ {item.purchasePrice} / {item.purchaseUnit}</td>
-                                        <td className="p-4 text-right font-bold">
+                                        <td className="table-td text-right">₹ {item.purchasePrice} / {item.purchaseUnit}</td>
+                                        <td className="table-td text-right font-bold text-gray-800">
                                             ₹ {((item.currentStock / item.conversionFactor) * item.purchasePrice).toFixed(2)}
                                         </td>
                                     </tr>
@@ -165,3 +167,5 @@ export function AvailableStock() {
         </div>
     );
 }
+
+export default AvailableStock;

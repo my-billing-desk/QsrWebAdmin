@@ -67,7 +67,6 @@ export function InventoryLayout() {
             group: 'Consumption',
             icon: BarChart3,
             items: [
-                { label: 'Sales', path: '/inventory/reports' }, // Placeholder for Sales reports
                 { label: 'Transfer', path: '/inventory/transfer' },
                 { label: 'Wastage', path: '/inventory/wastage' },
             ]
@@ -83,8 +82,21 @@ export function InventoryLayout() {
             group: 'Reports',
             icon: FileText,
             items: [
-                { label: 'Inventory Reports', path: '/inventory/reports' },
+                { label: 'Current Stock', path: '/inventory/reports/current-stock' },
                 { label: 'Stock History', path: '/inventory/reports/stock-history' },
+                { label: 'Consumption Summary', path: '/inventory/reports/consumption-summary' },
+                { label: 'Orderwise Consumption', path: '/inventory/reports/order-consumption' },
+                { label: 'Daily Consumption', path: '/inventory/reports/daily-consumption' },
+                { label: 'Material Purchase', path: '/inventory/reports/material-purchase' },
+                { label: 'Opening - Closing Stock', path: '/inventory/reports/opening-closing' },
+                { label: 'Recipe Costing', path: '/inventory/reports/recipe-costing' },
+                { label: 'Transfer Payment', path: '/inventory/reports/transfer-payment' },
+                { label: 'Supplier Payment', path: '/inventory/reports/supplier-payment' },
+                { label: 'Material Transfer', path: '/inventory/reports/material-transfer' },
+                { label: 'PO Variance', path: '/inventory/reports/po-variance' },
+                { label: 'Purchase-Sales Return', path: '/inventory/reports/purchase-sales-return' },
+                { label: 'Sales/Transfer Variance', path: '/inventory/reports/sales-transfer-variance' },
+                { label: 'PO Received', path: '/inventory/reports/po-received' },
             ]
         },
         {

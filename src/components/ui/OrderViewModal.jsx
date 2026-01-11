@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Printer, Download, Clock, User, Phone, MapPin } from 'lucide-react';
+import { X, Printer } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 export function OrderViewModal({ order, isOpen, onClose }) {
     if (!isOpen || !order) return null;
@@ -13,7 +13,7 @@ export function OrderViewModal({ order, isOpen, onClose }) {
         </div>
     );
 
-    return (
+    const modalContent = (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all">
             <div className="bg-white rounded shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-200">
                 {/* Header */}
@@ -137,4 +137,6 @@ export function OrderViewModal({ order, isOpen, onClose }) {
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }
