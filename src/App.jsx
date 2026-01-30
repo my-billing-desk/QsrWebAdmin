@@ -6,6 +6,7 @@ import { Dashboard } from './components/Dashboard';
 import { MenuManagement } from './components/MenuManagement';
 import { UserManagement } from './components/UserManagement';
 import { RoleManagement } from './components/RoleManagement';
+import { FranchiseManagement } from './components/FranchiseManagement';
 import { OrderHistory } from './components/orders/OrderHistory';
 import { KOT } from './components/orders/KOT';
 import { Settings } from './components/Settings';
@@ -145,6 +146,7 @@ function AppRoutes() {
         <Route path="/users" element={<UserManagement />} />
         <Route path="/roles" element={<RoleManagement />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/franchise" element={<FranchiseManagement />} />
 
         {/* New Modules */}
         <Route path="/reports/profit-loss" element={<ProfitLoss />} />

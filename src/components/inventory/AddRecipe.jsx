@@ -44,11 +44,22 @@ export default function AddRecipe() {
 
     const loadInitialData = async () => {
         try {
-            const [itemsRes, materialsRes] = await Promise.all([
+            const [itemsRes, materialsRes, recipesRes] = await Promise.all([
                 menuService.getItems(),
-                inventoryService.getRawMaterials()
+                inventoryService.getRawMaterials(),
+                inventoryService.getRecipes()
             ]);
-            setMenuItems(itemsRes.data);
+
+            const allItems = itemsRes.data || [];
+            const allRecipes = recipesRes.data || [];
+            const itemsWithRecipes = new Set(allRecipes.map(r => String(r.itemId)));
+            const currentEditId = id ? String(id) : null;
+
+            const availableItems = allItems.filter(item =>
+                !itemsWithRecipes.has(String(item.id)) || (currentEditId && String(item.id) === currentEditId)
+            );
+
+            setMenuItems(availableItems);
             setRawMaterials(materialsRes.data);
         } catch (error) {
             console.error("Failed to load data", error);

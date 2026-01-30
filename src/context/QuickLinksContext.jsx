@@ -3,7 +3,7 @@ import {
     LayoutDashboard, Layers, UtensilsCrossed, FileText, Archive, Truck, Bell, Settings,
     Calculator, Users, Box, Landmark, Share2, BarChart3, MessageSquare, Zap, UserCircle,
     CreditCard, FileSpreadsheet, Ticket, ShieldCheck,
-    Gift, Percent, Wallet, ShoppingCart, RotateCcw, BarChart2, ArrowRightLeft
+    Gift, Percent, Wallet, ShoppingCart, RotateCcw, BarChart2, ArrowRightLeft, Store
 } from 'lucide-react';
 
 const QuickLinksContext = createContext();
@@ -94,6 +94,12 @@ export const initialMenuGroups = [
                     { id: 'users_list', path: '/users', label: 'Staff Management' },
                     { id: 'roles_config', path: '/roles', label: 'System Roles' },
                 ]
+            },
+            {
+                id: 'franchise_mgmt',
+                path: '/franchise',
+                label: 'Franchise Management',
+                icon: Store
             },
             {
                 id: 'user_logs',

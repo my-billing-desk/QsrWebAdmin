@@ -62,7 +62,7 @@
     }
 
     .table-th {
-        @apply p-1.5;
+        @apply p-3;
     }
 
     .table-row {
@@ -70,6 +70,6 @@
     }
 
     .table-td {
-        @apply p-1.5 text-sm text-gray-700;
+        @apply p-3 text-sm text-gray-700;
     }
 }

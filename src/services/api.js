@@ -272,4 +272,10 @@ export const feedbackService = {
 
 
 
+export const tenantService = {
+    getSubTenants: () => api.get('/tenants/sub-tenants'),
+    createSubTenant: (data) => api.post('/tenants/sub-tenants', data),
+    updateSubTenant: (id, data) => api.put(`/tenants/sub-tenants/${id}`, data),
+};
+
 export default api;
