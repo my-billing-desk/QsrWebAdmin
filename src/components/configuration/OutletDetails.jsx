@@ -87,6 +87,28 @@ export function OutletDetails() {
                             />
                         </div>
                     </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">FSSAI License Number</label>
+                            <input
+                                type="text"
+                                value={outlet.fssaiLicNo || ''}
+                                onChange={e => setOutlet({ ...outlet, fssaiLicNo: e.target.value })}
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                placeholder="Enter FSSAI License No."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">GST Number</label>
+                            <input
+                                type="text"
+                                value={outlet.gstNumber || ''}
+                                onChange={e => setOutlet({ ...outlet, gstNumber: e.target.value })}
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                placeholder="Enter GST Number"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 {/* Operations */}
