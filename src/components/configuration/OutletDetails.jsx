@@ -20,8 +20,8 @@ export function OutletDetails() {
     const loadData = async () => {
         try {
             const res = await outletService.getConfig();
-            if (res.data) {
-                setOutlet(res.data);
+            if (res.data && res.data.success) {
+                setOutlet(res.data.data || {});
             }
         } catch (error) {
             console.error("Failed to load outlet config", error);
