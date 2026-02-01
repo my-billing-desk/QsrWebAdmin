@@ -13,6 +13,8 @@ export function PrintSettings() {
         footerText: 'Thank you for visiting!',
         showTaxDetails: true,
         showCashierName: true,
+        showFssai: true,
+        showGst: true,
         autoPrint: true,
         numberOfCopies: 1,
         fontSize: 'normal' // small, normal, large
@@ -181,69 +183,80 @@ export function PrintSettings() {
                                 <input type="checkbox" name="showTaxDetails" checked={config.showTaxDetails} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">Show Tax Breakdown</span>
                             </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="showCashierName" checked={config.showCashierName} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">Show Cashier Name</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Live Preview (Mock) */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col items-center">
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2 w-full">
-                        <Layout className="w-5 h-5 text-gray-500" />
-                        Live Preview (Mock)
-                    </h2>
-
-                    <div className={`bg-white border border-gray-200 shadow-lg p-4 text-gray-800 font-mono text-xs leading-relaxed overflow-hidden transition-all duration-300 ${config.paperSize === '3inch' ? 'w-64' : config.paperSize === '2inch' ? 'w-48' : 'w-full max-w-sm'}`}>
-                        {config.showLogo && (
-                            <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-gray-400">Logo</div>
-                        )}
-
-                        {config.showHeader && config.headerText && (
-                            <div className="text-center mb-4 whitespace-pre-wrap">{config.headerText}</div>
-                        )}
-
-                        {!config.showHeader && (
-                            <div className="text-center mb-4 font-bold">RESTAURANT NAME<br />123 Street Name, City</div>
-                        )}
-
-                        <div className="border-b border-dashed border-gray-400 mb-2"></div>
-                        <div className="flex justify-between"><span>Date: 01/02/2026</span><span>Time: 10:30 AM</span></div>
-                        <div className="flex justify-between mb-2"><span>Bill No: 1001</span><span>Table: 5</span></div>
-                        {config.showCashierName && <div className="mb-2">Cashier: John Doe</div>}
-
-                        <div className="border-b border-dashed border-gray-400 mb-2"></div>
-
-                        <div className="flex justify-between font-bold mb-1">
-                            <span>Item</span>
-                            <span>Amt</span>
-                        </div>
-                        <div className="flex justify-between"><span>1 x Burger</span><span>120.00</span></div>
-                        <div className="flex justify-between"><span>2 x Fries</span><span>160.00</span></div>
-                        <div className="flex justify-between"><span>1 x Coke</span><span>40.00</span></div>
-
-                        <div className="border-b border-dashed border-gray-400 my-2"></div>
-
-                        <div className="flex justify-between"><span>Subtotal</span><span>320.00</span></div>
-                        {config.showTaxDetails && (
-                            <>
-                                <div className="flex justify-between text-[10px] text-gray-500"><span>CGST (2.5%)</span><span>8.00</span></div>
-                                <div className="flex justify-between text-[10px] text-gray-500"><span>SGST (2.5%)</span><span>8.00</span></div>
-                            </>
-                        )}
-                        <div className="flex justify-between font-bold text-sm mt-2"><span>Total</span><span>336.00</span></div>
-
-                        <div className="border-b border-dashed border-gray-400 my-2"></div>
-
-                        {config.showFooter && config.footerText && (
-                            <div className="text-center mt-4 whitespace-pre-wrap">{config.footerText}</div>
-                        )}
+                            <span className="text-sm text-gray-700 dark:text-gray-300">Show Cashier Name</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="showFssai" checked={config.showFssai} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">Show FSSAI No.</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="showGst" checked={config.showGst} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">Show GST No.</span>
+                        </label>
                     </div>
                 </div>
             </div>
+
+            {/* Live Preview (Mock) */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col items-center">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2 w-full">
+                    <Layout className="w-5 h-5 text-gray-500" />
+                    Live Preview (Mock)
+                </h2>
+
+                <div className={`bg-white border border-gray-200 shadow-lg p-4 text-gray-800 font-mono text-xs leading-relaxed overflow-hidden transition-all duration-300 ${config.paperSize === '3inch' ? 'w-64' : config.paperSize === '2inch' ? 'w-48' : 'w-full max-w-sm'}`}>
+                    {config.showLogo && (
+                        <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-gray-400">Logo</div>
+                    )}
+
+                    {config.showHeader && config.headerText && (
+                        <div className="text-center mb-4 whitespace-pre-wrap">{config.headerText}</div>
+                    )}
+
+                    {!config.showHeader && (
+                        <div className="text-center mb-4 font-bold">RESTAURANT NAME<br />123 Street Name, City</div>
+                    )}
+
+                    <div className="text-center mb-2 text-[10px] text-gray-500">
+                        {config.showGst && <div>GSTIN: 29AAAAA0000A1Z5</div>}
+                        {config.showFssai && <div>FSSAI: 11219332000216</div>}
+                    </div>
+
+                    {config.showLogo && <div className="border-b border-dashed border-gray-400 mb-2"></div>}
+                    <div className="flex justify-between"><span>Date: 01/02/2026</span><span>Time: 10:30 AM</span></div>
+                    <div className="flex justify-between mb-2"><span>Bill No: 1001</span><span>Table: 5</span></div>
+                    {config.showCashierName && <div className="mb-2">Cashier: John Doe</div>}
+
+                    <div className="border-b border-dashed border-gray-400 mb-2"></div>
+
+                    <div className="flex justify-between font-bold mb-1">
+                        <span>Item</span>
+                        <span>Amt</span>
+                    </div>
+                    <div className="flex justify-between"><span>1 x Burger</span><span>120.00</span></div>
+                    <div className="flex justify-between"><span>2 x Fries</span><span>160.00</span></div>
+                    <div className="flex justify-between"><span>1 x Coke</span><span>40.00</span></div>
+
+                    <div className="border-b border-dashed border-gray-400 my-2"></div>
+
+                    <div className="flex justify-between"><span>Subtotal</span><span>320.00</span></div>
+                    {config.showTaxDetails && (
+                        <>
+                            <div className="flex justify-between text-[10px] text-gray-500"><span>CGST (2.5%)</span><span>8.00</span></div>
+                            <div className="flex justify-between text-[10px] text-gray-500"><span>SGST (2.5%)</span><span>8.00</span></div>
+                        </>
+                    )}
+                    <div className="flex justify-between font-bold text-sm mt-2"><span>Total</span><span>336.00</span></div>
+
+                    <div className="border-b border-dashed border-gray-400 my-2"></div>
+
+                    {config.showFooter && config.footerText && (
+                        <div className="text-center mt-4 whitespace-pre-wrap">{config.footerText}</div>
+                    )}
+                </div>
+            </div>
         </div>
+        </div >
     );
 }
 
