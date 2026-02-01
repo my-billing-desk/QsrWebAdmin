@@ -331,7 +331,7 @@ export function PrintSettings() {
                             <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
                                 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                             </div>
-                        ) : activeConfig.template === 'minimal' ? (
+                        ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
                             <div className="border-t border-gray-800 my-2"></div>
                         ) : activeTab === 'bill' && (
                             <>
@@ -375,7 +375,7 @@ export function PrintSettings() {
                             <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
                                 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                             </div>
-                        ) : activeConfig.template === 'minimal' ? (
+                        ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
                             null // No additional separator for minimal here
                         ) : (
                             <div className="border-b border-dashed border-gray-400 mb-2"></div>
@@ -459,11 +459,11 @@ export function PrintSettings() {
 
 
 
-                        {activeConfig.template === 'classic' ? (
+                        {activeConfig.template === 'classic' && activeTab === 'bill' ? (
                             <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
                                 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                             </div>
-                        ) : activeConfig.template === 'minimal' ? (
+                        ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
                             <div className="border-b border-gray-800 my-4"></div>
                         ) : (
                             <div className="border-b border-dashed border-gray-400 my-2"></div>
