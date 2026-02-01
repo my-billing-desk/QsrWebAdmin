@@ -60,6 +60,7 @@ import { DeliveryDistance } from './components/configuration/DeliveryDistance';
 import { AreaDeliveryCharges } from './components/configuration/AreaDeliveryCharges';
 import { FloorPlan } from './components/configuration/FloorPlan';
 import { EmailTemplateSettings } from './components/configuration/EmailTemplateSettings';
+import { PrintSettings } from './components/configuration/PrintSettings';
 import { DayEndSummary } from './components/reports/DayEndSummary';
 import { BusinessReport } from './components/reports/BusinessReport';
 import { OutletConfiguration } from './components/configuration/OutletConfiguration';
@@ -189,6 +190,7 @@ function AppRoutes() {
         <Route path="/config/area-delivery" element={<AreaDeliveryCharges />} />
         <Route path="/config/marketplace" element={<MarketplaceSetting />} />
         <Route path="/config/floor-plan" element={<FloorPlan />} />
+        <Route path="/config/print" element={<PrintSettings />} />
         <Route path="/config/email-template" element={<EmailTemplateSettings />} />
         <Route path="/config/subscription" element={<SubscriptionPlans />} />
         <Route path="/logs/timeline" element={<ActivityTimeline />} />

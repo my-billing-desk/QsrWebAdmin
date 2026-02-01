@@ -175,7 +175,8 @@ export function OutletConfiguration() {
                 <ConfigCard icon={Monitor} title="Set Your Print Logo" desc="Logo to print at your desktop point of sale." />
                 <ConfigCard icon={Layout} title="Calculations" desc="Configure how invoice gets calculate." />
                 <ConfigCard icon={Settings} title="Connected Services" desc="Configure how different services gets connects." to="/config/marketplace" />
-                <ConfigCard icon={Printer} title="Print" desc="Configure the print settings of the Bill and KOT." to="/config/email-template" />
+                <ConfigCard icon={Printer} title="Print" desc="Configure printer settings, receipt layout, and POS printing templates." to="/config/print" />
+                <ConfigCard icon={MessageSquare} title="Email Template" desc="Configure email templates for bills, reports, and notifications." to="/config/email-template" />
                 <ConfigCard icon={Users} title="Customer" desc="Configure the billing screen and it's component." />
             </Section>
 
