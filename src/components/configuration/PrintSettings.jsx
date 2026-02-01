@@ -17,7 +17,8 @@ export function PrintSettings() {
         showGst: true,
         autoPrint: true,
         numberOfCopies: 1,
-        fontSize: 'normal' // small, normal, large
+        fontSize: 'normal', // small, normal, large
+        template: 'standard' // standard, classic
     });
 
     const handleChange = (e) => {
@@ -67,6 +68,18 @@ export function PrintSettings() {
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Receipt Template</label>
+                                <select
+                                    name="template"
+                                    value={config.template}
+                                    onChange={handleChange}
+                                    className="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="standard">Standard (Modern)</option>
+                                    <option value="classic">Classic (Thermal)</option>
+                                </select>
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Paper Size</label>
                                 <select
@@ -206,7 +219,7 @@ export function PrintSettings() {
                         Live Preview (Mock)
                     </h2>
 
-                    <div className={`bg-white border border-gray-200 shadow-lg p-4 text-gray-800 font-mono text-xs leading-relaxed overflow-hidden transition-all duration-300 ${config.paperSize === '3inch' ? 'w-64' : config.paperSize === '2inch' ? 'w-48' : 'w-full max-w-sm'}`}>
+                    <div className={`bg-white border border-gray-200 shadow-lg p-4 text-gray-800 ${config.template === 'classic' ? 'font-mono' : 'font-sans'} text-xs leading-relaxed overflow-hidden transition-all duration-300 ${config.paperSize === '3inch' ? 'w-64' : config.paperSize === '2inch' ? 'w-48' : 'w-full max-w-sm'}`}>
                         {config.showLogo && (
                             <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-gray-400">Logo</div>
                         )}
