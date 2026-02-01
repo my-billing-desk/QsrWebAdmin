@@ -327,7 +327,7 @@ export function PrintSettings() {
                         )}
 
                         {/* Separator Style Selection */}
-                        {activeConfig.template === 'classic' ? (
+                        {activeConfig.template === 'classic' && activeTab === 'bill' ? (
                             <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
                                 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                             </div>
@@ -345,8 +345,8 @@ export function PrintSettings() {
 
                         {/* Info Section */}
                         {activeConfig.template !== 'minimal' && (
-                            <div className={`flex justify-between ${activeConfig.template === 'classic' ? 'mb-1 items-end' : ''}`}>
-                                {activeConfig.template === 'classic' ? (
+                            <div className={`flex justify-between ${activeConfig.template === 'classic' && activeTab === 'bill' ? 'mb-1 items-end' : ''}`}>
+                                {activeConfig.template === 'classic' && activeTab === 'bill' ? (
                                     <>
                                         <div className="text-gray-600">Cashier:</div>
                                         <div className="font-medium text-right">#3</div>
@@ -358,8 +358,8 @@ export function PrintSettings() {
                         )}
 
                         {activeConfig.template !== 'minimal' && (
-                            <div className={`flex justify-between ${activeConfig.template === 'classic' ? 'mb-1 items-end' : 'mb-2'}`}>
-                                {activeConfig.template === 'classic' ? (
+                            <div className={`flex justify-between ${activeConfig.template === 'classic' && activeTab === 'bill' ? 'mb-1 items-end' : 'mb-2'}`}>
+                                {activeConfig.template === 'classic' && activeTab === 'bill' ? (
                                     <>
                                         <div className="text-gray-600">Manager:</div>
                                         <div className="font-medium text-right">Eric Steer</div>
@@ -371,7 +371,7 @@ export function PrintSettings() {
                         )}
                         {activeConfig.showCashierName && activeConfig.template === 'standard' && <div className="mb-2">Cashier: John Doe</div>}
 
-                        {activeConfig.template === 'classic' ? (
+                        {activeConfig.template === 'classic' && activeTab === 'bill' ? (
                             <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
                                 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                             </div>
