@@ -38,7 +38,7 @@ export function PrintSettings() {
             autoPrint: true,
             numberOfCopies: 1,
             fontSize: 'normal',
-            template: 'classic'
+            template: 'standard'
         }
     });
 
@@ -277,17 +277,12 @@ export function PrintSettings() {
                             >
                                 Template 1
                             </button>
-                            <button
-                                onClick={() => handleChange({ target: { name: 'template', value: 'classic' } })}
-                                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeConfig.template === 'classic' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:text-gray-700'}`}
-                            >
-                                Template 2
-                            </button>
+
                             <button
                                 onClick={() => handleChange({ target: { name: 'template', value: 'minimal' } })}
                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeConfig.template === 'minimal' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:text-gray-700'}`}
                             >
-                                Template 3
+                                Template 2
                             </button>
                         </div>
                     </div>
@@ -308,240 +303,202 @@ export function PrintSettings() {
                             <div className="mb-4 prose prose-sm max-w-none text-center" dangerouslySetInnerHTML={{ __html: activeConfig.headerText }} />
                         ) : !activeConfig.showHeader && activeTab === 'bill' && (
                             <div className="text-center mb-4">
-                                <div className={`font-bold ${activeConfig.template === 'classic' ? 'uppercase text-xl tracking-tighter' : activeConfig.template === 'minimal' ? 'text-lg' : 'uppercase text-sm'} mb-1`}>
-                                    {activeConfig.template === 'minimal' ? 'Pint Shop' : 'SUPERMARKET'}
-                                </div>
-                                {activeConfig.template === 'minimal' ? (
-                                    <>
-                                        <div className="text-xs">Your Server was Kevin</div>
-                                        <div className="text-lg font-bold mt-1">Table 90</div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="font-normal text-xs text-gray-600">Lorem ipsum 258</div>
-                                        <div className="font-normal text-xs text-gray-600">City Index - 02025</div>
-                                        <div className="font-bold text-xs text-gray-800 mt-1">Tel.: +456-468-987-02</div>
-                                    </>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Separator Style Selection */}
-                        {activeConfig.template === 'classic' && activeTab === 'bill' ? (
-                            <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
-                                ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-                            </div>
-                        ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
-                            <div className="border-t border-gray-800 my-2"></div>
-                        ) : activeTab === 'bill' && (
-                            <>
-                                <div className="text-center mb-2 text-[10px] text-gray-500">
-                                    {activeConfig.showGst && <div>GSTIN: 29AAAAA0000A1Z5</div>}
-                                    {activeConfig.showFssai && <div>FSSAI: 11219332000216</div>}
-                                </div>
-                                {activeConfig.showLogo && <div className="border-b border-dashed border-gray-400 mb-2"></div>}
+                                <div className="font-normal text-xs text-gray-600">Lorem ipsum 258</div>
+                                <div className="font-normal text-xs text-gray-600">City Index - 02025</div>
+                                <div className="font-bold text-xs text-gray-800 mt-1">Tel.: +456-468-987-02</div>
                             </>
                         )}
-
-                        {/* Info Section */}
-                        {activeConfig.template !== 'minimal' && (
-                            <div className={`flex justify-between ${activeConfig.template === 'classic' && activeTab === 'bill' ? 'mb-1 items-end' : ''}`}>
-                                {activeConfig.template === 'classic' && activeTab === 'bill' ? (
-                                    <>
-                                        <div className="text-gray-600">Cashier:</div>
-                                        <div className="font-medium text-right">#3</div>
-                                    </>
-                                ) : (
-                                    <><span>Date: 01/02/2026</span><span>Time: 10:30 AM</span></>
-                                )}
-                            </div>
+                    </div>
                         )}
 
-                        {activeConfig.template !== 'minimal' && (
-                            <div className={`flex justify-between ${activeConfig.template === 'classic' && activeTab === 'bill' ? 'mb-1 items-end' : 'mb-2'}`}>
-                                {activeConfig.template === 'classic' && activeTab === 'bill' ? (
-                                    <>
-                                        <div className="text-gray-600">Manager:</div>
-                                        <div className="font-medium text-right">Eric Steer</div>
-                                    </>
-                                ) : (
-                                    <><span>{activeTab === 'bill' ? 'Bill No' : 'KOT No'}: 1001</span><span>Table: 5</span></>
-                                )}
+                    {/* Separator Style Selection */}
+                    {activeConfig.template === 'minimal' && activeTab === 'bill' ? (
+                        <div className="border-t border-gray-800 my-2"></div>
+                    ) : activeTab === 'bill' && (
+                        <>
+                            <div className="text-center mb-2 text-[10px] text-gray-500">
+                                {activeConfig.showGst && <div>GSTIN: 29AAAAA0000A1Z5</div>}
+                                {activeConfig.showFssai && <div>FSSAI: 11219332000216</div>}
                             </div>
-                        )}
-                        {activeConfig.showCashierName && activeConfig.template === 'standard' && <div className="mb-2">Cashier: John Doe</div>}
+                            {activeConfig.showLogo && <div className="border-b border-dashed border-gray-400 mb-2"></div>}
+                        </>
+                    )}
 
-                        {activeConfig.template === 'classic' && activeTab === 'bill' ? (
-                            <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
-                                ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+                    {/* Info Section */}
+                    {activeConfig.template !== 'minimal' && (
+                        <div className="flex justify-between">
+                            <span>Date: 01/02/2026</span><span>Time: 10:30 AM</span>
+                        </div>
+                    )}
+
+                    {activeConfig.template !== 'minimal' && (
+                        <div className="flex justify-between mb-2">
+                            <span>{activeTab === 'bill' ? 'Bill No' : 'KOT No'}: 1001</span><span>Table: 5</span>
+                        </div>
+                    )}
+                    {activeConfig.showCashierName && activeConfig.template === 'standard' && <div className="mb-2">Cashier: John Doe</div>}
+
+                    {activeConfig.template === 'classic' && activeTab === 'bill' ? (
+                        <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
+                            ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+                        </div>
+                    ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
+                        null // No additional separator for minimal here
+                    ) : (
+                        <div className="border-b border-dashed border-gray-400 mb-2"></div>
+                    )}
+
+                    {/* Table Header */}
+                    {activeConfig.template !== 'minimal' && (
+                        <div className="flex justify-between font-bold mb-2">
+                            <span className="w-1/2 text-left">Name</span>
+                            <span className="w-1/4 text-center">{activeTab === 'bill' ? 'Qty' : 'Qty'}</span>
+                            {activeTab === 'bill' && <span className="w-1/4 text-right">Price</span>}
+                        </div>
+                    )}
+
+                    {/* Items */}
+                    {activeTab === 'bill' ? (
+                        activeConfig.template === 'minimal' ? (
+                            <div className="space-y-3 mt-4">
+                                <div>
+                                    <div className="font-bold mb-1">Mains</div>
+                                    <div className="flex justify-between"><span>1 x Burger</span><span>£12.50</span></div>
+                                    <div className="flex justify-between"><span>1 x Grilled Aubergine</span><span>£11.00</span></div>
+                                    <div className="flex justify-between"><span>1 x Lamb Kebab</span><span>£12.00</span></div>
+                                </div>
+                                <div>
+                                    <div className="font-bold mb-1">Sides</div>
+                                    <div className="flex justify-between"><span>1 x Chips</span><span>£3.50</span></div>
+                                </div>
+                                <div>
+                                    <div className="font-bold mb-1">Keg Pint</div>
+                                    <div className="flex justify-between"><span>1 x Keg Taster</span><span>£0.00</span></div>
+                                    <div className="flex justify-between"><span>1 x Pint Cardinaldred</span><span>£6.30</span></div>
+                                </div>
+                                <div>
+                                    <div className="font-bold mb-1">Gin & Spirits</div>
+                                    <div className="flex justify-between"><span>1 x Brockmans Gin</span><span>£5.70</span></div>
+                                    <div className="pl-4 text-xs italic">Extras</div>
+                                    <div className="flex justify-between pl-4 text-xs"><span>1 x Mixer</span><span>£1.30</span></div>
+                                </div>
+                                <div>
+                                    <div className="font-bold mb-1">Soft Drinks</div>
+                                    <div className="flex justify-between"><span>1 x House Lemonade</span><span>£3.00</span></div>
+                                </div>
                             </div>
-                        ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
-                            null // No additional separator for minimal here
                         ) : (
-                            <div className="border-b border-dashed border-gray-400 mb-2"></div>
-                        )}
-
-                        {/* Table Header */}
-                        {activeConfig.template !== 'minimal' && (
-                            <div className="flex justify-between font-bold mb-2">
-                                <span className="w-1/2 text-left">Name</span>
-                                <span className="w-1/4 text-center">{activeTab === 'bill' ? 'Qty' : 'Qty'}</span>
-                                {activeTab === 'bill' && <span className="w-1/4 text-right">Price</span>}
+                            <>
+                                <div className="flex justify-between items-start mb-1">
+                                    <span className="w-1/2 text-left leading-tight">Lorem ipsum</span>
+                                    <span className="w-1/4 text-center">1</span>
+                                    <span className="w-1/4 text-right">$9.20</span>
+                                </div>
+                                <div className="flex justify-between items-start mb-1">
+                                    <span className="w-1/2 text-left leading-tight">Lorem ipsum dolor sit</span>
+                                    <span className="w-1/4 text-center">1</span>
+                                    <span className="w-1/4 text-right">$19.20</span>
+                                </div>
+                                <div className="flex justify-between items-start mb-1">
+                                    <span className="w-1/2 text-left leading-tight">Lorem ipsum</span>
+                                    <span className="w-1/4 text-center">1</span>
+                                    <span className="w-1/4 text-right">$15.00</span>
+                                </div>
+                            </>
+                        )
+                    ) : (
+                        // KOT View
+                        <>
+                            <div className="mb-2">
+                                <div className="flex justify-between font-medium"><span>Burger</span><span>1</span></div>
+                                <div className="text-[10px] italic text-gray-600 pl-2">Note: Less spicy</div>
                             </div>
-                        )}
+                            <div className="mb-2">
+                                <div className="flex justify-between font-medium"><span>Fries</span><span>2</span></div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between font-medium"><span>Coke</span><span>1</span></div>
+                                <div className="text-[10px] italic text-gray-600 pl-2">Note: No Ice</div>
+                            </div>
+                        </>
+                    )}
 
-                        {/* Items */}
-                        {activeTab === 'bill' ? (
-                            activeConfig.template === 'minimal' ? (
-                                <div className="space-y-3 mt-4">
-                                    <div>
-                                        <div className="font-bold mb-1">Mains</div>
-                                        <div className="flex justify-between"><span>1 x Burger</span><span>£12.50</span></div>
-                                        <div className="flex justify-between"><span>1 x Grilled Aubergine</span><span>£11.00</span></div>
-                                        <div className="flex justify-between"><span>1 x Lamb Kebab</span><span>£12.00</span></div>
-                                    </div>
-                                    <div>
-                                        <div className="font-bold mb-1">Sides</div>
-                                        <div className="flex justify-between"><span>1 x Chips</span><span>£3.50</span></div>
-                                    </div>
-                                    <div>
-                                        <div className="font-bold mb-1">Keg Pint</div>
-                                        <div className="flex justify-between"><span>1 x Keg Taster</span><span>£0.00</span></div>
-                                        <div className="flex justify-between"><span>1 x Pint Cardinaldred</span><span>£6.30</span></div>
-                                    </div>
-                                    <div>
-                                        <div className="font-bold mb-1">Gin & Spirits</div>
-                                        <div className="flex justify-between"><span>1 x Brockmans Gin</span><span>£5.70</span></div>
-                                        <div className="pl-4 text-xs italic">Extras</div>
-                                        <div className="flex justify-between pl-4 text-xs"><span>1 x Mixer</span><span>£1.30</span></div>
-                                    </div>
-                                    <div>
-                                        <div className="font-bold mb-1">Soft Drinks</div>
-                                        <div className="flex justify-between"><span>1 x House Lemonade</span><span>£3.00</span></div>
-                                    </div>
+
+
+
+                    {activeConfig.template === 'classic' && activeTab === 'bill' ? (
+                        <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
+                            ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+                        </div>
+                    ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
+                        <div className="border-b border-gray-800 my-4"></div>
+                    ) : (
+                        <div className="border-b border-dashed border-gray-400 my-2"></div>
+                    )}
+
+                    {/* Totals */}
+                    {activeTab === 'bill' && (
+                        <>
+                            {activeConfig.template === 'minimal' ? (
+                                <div className="flex flex-col items-end gap-1 mb-4">
+                                    <div className="flex justify-between w-full text-right gap-8"><span>Food Total</span><span>£39.00</span></div>
+                                    <div className="flex justify-between w-full text-right gap-8"><span>Drink Total</span><span>£16.30</span></div>
+                                    <div className="text-center w-full my-2 text-xs">Service Charge Not Added</div>
+                                    <div className="flex justify-between w-full text-lg font-bold mt-2"><span>Total</span><span>£55.30</span></div>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex justify-between items-start mb-1">
-                                        <span className="w-1/2 text-left leading-tight">Lorem ipsum</span>
-                                        <span className="w-1/4 text-center">1</span>
-                                        <span className="w-1/4 text-right">$9.20</span>
+                                    <div className="flex justify-between items-center">
+                                        <span>Sub Total</span>
+                                        <span>$107.60</span>
                                     </div>
-                                    <div className="flex justify-between items-start mb-1">
-                                        <span className="w-1/2 text-left leading-tight">Lorem ipsum dolor sit</span>
-                                        <span className="w-1/4 text-center">1</span>
-                                        <span className="w-1/4 text-right">$19.20</span>
-                                    </div>
-                                    <div className="flex justify-between items-start mb-1">
-                                        <span className="w-1/2 text-left leading-tight">Lorem ipsum</span>
-                                        <span className="w-1/4 text-center">1</span>
-                                        <span className="w-1/4 text-right">$15.00</span>
-                                    </div>
-                                </>
-                            )
-                        ) : (
-                            // KOT View
-                            <>
-                                <div className="mb-2">
-                                    <div className="flex justify-between font-medium"><span>Burger</span><span>1</span></div>
-                                    <div className="text-[10px] italic text-gray-600 pl-2">Note: Less spicy</div>
-                                </div>
-                                <div className="mb-2">
-                                    <div className="flex justify-between font-medium"><span>Fries</span><span>2</span></div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between font-medium"><span>Coke</span><span>1</span></div>
-                                    <div className="text-[10px] italic text-gray-600 pl-2">Note: No Ice</div>
-                                </div>
-                            </>
-                        )}
-
-
-
-
-                        {activeConfig.template === 'classic' && activeTab === 'bill' ? (
-                            <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-2 tracking-widest">
-                                ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-                            </div>
-                        ) : activeConfig.template === 'minimal' && activeTab === 'bill' ? (
-                            <div className="border-b border-gray-800 my-4"></div>
-                        ) : (
-                            <div className="border-b border-dashed border-gray-400 my-2"></div>
-                        )}
-
-                        {/* Totals */}
-                        {activeTab === 'bill' && (
-                            <>
-                                {activeConfig.template === 'minimal' ? (
-                                    <div className="flex flex-col items-end gap-1 mb-4">
-                                        <div className="flex justify-between w-full text-right gap-8"><span>Food Total</span><span>£39.00</span></div>
-                                        <div className="flex justify-between w-full text-right gap-8"><span>Drink Total</span><span>£16.30</span></div>
-                                        <div className="text-center w-full my-2 text-xs">Service Charge Not Added</div>
-                                        <div className="flex justify-between w-full text-lg font-bold mt-2"><span>Total</span><span>£55.30</span></div>
-                                    </div>
-                                ) : (
                                     <>
-                                        <div className={`flex justify-between items-center ${activeConfig.template === 'classic' ? 'mb-2' : ''}`}>
-                                            <span className={`${activeConfig.template === 'classic' ? 'text-lg font-bold' : ''}`}>Sub Total</span>
-                                            <span className={`${activeConfig.template === 'classic' ? 'text-lg font-bold' : ''}`}>$107.60</span>
-                                        </div>
-                                        {activeConfig.template !== 'classic' && (
+                                        {activeConfig.showTaxDetails && (
                                             <>
-                                                {activeConfig.showTaxDetails && (
-                                                    <>
-                                                        <div className="flex justify-between text-[10px] text-gray-500"><span>CGST (2.5%)</span><span>8.00</span></div>
-                                                        <div className="flex justify-between text-[10px] text-gray-500"><span>SGST (2.5%)</span><span>8.00</span></div>
-                                                    </>
-                                                )}
-                                                <div className="flex justify-between font-bold text-sm mt-2"><span>Total</span><span>336.00</span></div>
-                                                <div className="border-b border-dashed border-gray-400 my-2"></div>
+                                                <div className="flex justify-between text-[10px] text-gray-500"><span>CGST (2.5%)</span><span>8.00</span></div>
+                                                <div className="flex justify-between text-[10px] text-gray-500"><span>SGST (2.5%)</span><span>8.00</span></div>
                                             </>
                                         )}
+                                        <div className="flex justify-between font-bold text-sm mt-2"><span>Total</span><span>336.00</span></div>
+                                        <div className="border-b border-dashed border-gray-400 my-2"></div>
                                     </>
-                                )}
+                                </>
+                            )}
 
-                                {activeConfig.template === 'classic' && (
-                                    <>
-                                        <div className="flex justify-between text-xs mb-1"><span>CASH</span><span>$200.00</span></div>
-                                        <div className="flex justify-between text-xs mb-1"><span>CHANGE</span><span>$92.40</span></div>
-                                        <div className="overflow-hidden whitespace-nowrap text-gray-400 text-[8px] my-4 text-center tracking-widest">
-                                            .....................................................
-                                        </div>
-                                    </>
-                                )}
-                            </>
-                        )}
 
-                        {/* Barcode for Classic */}
-                        {activeConfig.template === 'classic' && (
-                            <div className="flex justify-center my-4">
-                                <div className="h-12 w-48 bg-gray-800 flex items-end justify-center text-white text-[8px] tracking-[4px]">
-                                    || | ||| || ||| ||
-                                </div>
+                        </>
+                    )}
+
+                    {/* Barcode for Classic */}
+                    {activeConfig.template === 'classic' && (
+                        <div className="flex justify-center my-4">
+                            <div className="h-12 w-48 bg-gray-800 flex items-end justify-center text-white text-[8px] tracking-[4px]">
+                                || | ||| || ||| ||
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Footer for Minimal (Pint Shop Style) */}
-                        {activeConfig.template === 'minimal' && activeTab === 'bill' && (
-                            <div className="text-center space-y-1 mb-4">
-                                <div className="border-t border-gray-800 w-full mb-2"></div>
-                                <div className="flex justify-between text-[10px] text-gray-600">
-                                    <span>02/07/2018 13:41:09</span>
-                                    <span>Bill No. 553305</span>
-                                </div>
-                                <div className="text-[10px] text-gray-600">Covers 3</div>
-                                <div className="text-[10px] text-gray-600">VAT No. 166356195</div>
-                                <div className="text-[10px] text-gray-600 mt-2">www.pintshop.co.uk</div>
+                    {/* Footer for Minimal (Pint Shop Style) */}
+                    {activeConfig.template === 'minimal' && activeTab === 'bill' && (
+                        <div className="text-center space-y-1 mb-4">
+                            <div className="border-t border-gray-800 w-full mb-2"></div>
+                            <div className="flex justify-between text-[10px] text-gray-600">
+                                <span>02/07/2018 13:41:09</span>
+                                <span>Bill No. 553305</span>
                             </div>
-                        )}
+                            <div className="text-[10px] text-gray-600">Covers 3</div>
+                            <div className="text-[10px] text-gray-600">VAT No. 166356195</div>
+                            <div className="text-[10px] text-gray-600 mt-2">www.pintshop.co.uk</div>
+                        </div>
+                    )}
 
-                        {activeConfig.showFooter && activeConfig.footerText && (
-                            <div className="mt-4 prose prose-sm max-w-none text-center" dangerouslySetInnerHTML={{ __html: activeConfig.footerText }} />
-                        )}
-                    </div>
+                    {activeConfig.showFooter && activeConfig.footerText && (
+                        <div className="mt-4 prose prose-sm max-w-none text-center" dangerouslySetInnerHTML={{ __html: activeConfig.footerText }} />
+                    )}
                 </div>
             </div>
         </div>
+        </div >
     );
 }
 
