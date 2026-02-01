@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ChevronRight, Printer, Save, FileText, Settings, Layout } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 export function PrintSettings() {
     const [config, setConfig] = useState({
@@ -10,7 +12,7 @@ export function PrintSettings() {
         showHeader: true,
         showFooter: true,
         headerText: '',
-        footerText: 'Thank you for visiting!',
+        footerText: '<p>Thank you for visiting!</p>',
         showTaxDetails: true,
         showCashierName: true,
         showFssai: true,
@@ -29,10 +31,26 @@ export function PrintSettings() {
         }));
     };
 
+    const handleQuillChange = (name, value) => {
+        setConfig(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     const handleSave = () => {
         // Here you would typically save to the backend
         console.log('Saving print config:', config);
         toast.success("Print settings saved successfully");
+    };
+
+    const modules = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{ 'align': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['clean']
+        ],
     };
 
     return (
@@ -151,47 +169,47 @@ export function PrintSettings() {
                             Content Configuration
                         </h2>
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div>
-                                <div className="flex justify-between items-center mb-1">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Header Text</label>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Header Text (Rich Text)</label>
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input type="checkbox" name="showHeader" checked={config.showHeader} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
                                         <span className="text-xs text-gray-500">Enable</span>
                                     </label>
                                 </div>
-                                <textarea
-                                    name="headerText"
-                                    value={config.headerText}
-                                    onChange={handleChange}
-                                    rows="3"
-                                    placeholder="Enter text to appear at the top of the receipt"
-                                    className="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                                    disabled={!config.showHeader}
-                                ></textarea>
+                                <div className={`${!config.showHeader ? 'opacity-50 pointer-events-none' : ''}`}>
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={config.headerText}
+                                        onChange={(value) => handleQuillChange('headerText', value)}
+                                        modules={modules}
+                                        className="bg-white dark:bg-gray-700 rounded-lg"
+                                    />
+                                </div>
                             </div>
 
                             <div>
-                                <div className="flex justify-between items-center mb-1">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Footer Text</label>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Footer Text (Rich Text)</label>
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input type="checkbox" name="showFooter" checked={config.showFooter} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
                                         <span className="text-xs text-gray-500">Enable</span>
                                     </label>
                                 </div>
-                                <textarea
-                                    name="footerText"
-                                    value={config.footerText}
-                                    onChange={handleChange}
-                                    rows="3"
-                                    placeholder="Enter text to appear at the bottom of the receipt"
-                                    className="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                                    disabled={!config.showFooter}
-                                ></textarea>
+                                <div className={`${!config.showFooter ? 'opacity-50 pointer-events-none' : ''}`}>
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={config.footerText}
+                                        onChange={(value) => handleQuillChange('footerText', value)}
+                                        modules={modules}
+                                        className="bg-white dark:bg-gray-700 rounded-lg"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="mt-6 flex flex-wrap gap-6">
+                        <div className="mt-8 flex flex-wrap gap-6">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" name="showTaxDetails" checked={config.showTaxDetails} onChange={handleChange} className="w-4 h-4 text-blue-600 rounded" />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">Show Tax Breakdown</span>
@@ -224,11 +242,9 @@ export function PrintSettings() {
                             <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-gray-400">Logo</div>
                         )}
 
-                        {config.showHeader && config.headerText && (
-                            <div className="text-center mb-4 whitespace-pre-wrap">{config.headerText}</div>
-                        )}
-
-                        {!config.showHeader && (
+                        {config.showHeader && config.headerText ? (
+                            <div className="mb-4 prose prose-sm max-w-none text-center" dangerouslySetInnerHTML={{ __html: config.headerText }} />
+                        ) : !config.showHeader && (
                             <div className="text-center mb-4">
                                 <div className="font-bold uppercase text-sm mb-1">Restaurant Name</div>
                                 <div className="font-normal text-xs text-gray-600">Sura and Sanklecha Ventures</div>
@@ -270,12 +286,12 @@ export function PrintSettings() {
                         <div className="border-b border-dashed border-gray-400 my-2"></div>
 
                         {config.showFooter && config.footerText && (
-                            <div className="text-center mt-4 whitespace-pre-wrap">{config.footerText}</div>
+                            <div className="mt-4 prose prose-sm max-w-none text-center" dangerouslySetInnerHTML={{ __html: config.footerText }} />
                         )}
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
 
