@@ -342,9 +342,17 @@ export function PrintSettings() {
                         ) : (
                             // KOT View
                             <>
-                                <div className="flex justify-between"><span>Burger</span><span>1</span></div>
-                                <div className="flex justify-between"><span>Fries</span><span>2</span></div>
-                                <div className="mt-2 text-[10px] italic">Note: Less spicy for Burger</div>
+                                <div className="mb-2">
+                                    <div className="flex justify-between font-medium"><span>Burger</span><span>1</span></div>
+                                    <div className="text-[10px] italic text-gray-600 pl-2">Note: Less spicy</div>
+                                </div>
+                                <div className="mb-2">
+                                    <div className="flex justify-between font-medium"><span>Fries</span><span>2</span></div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between font-medium"><span>Coke</span><span>1</span></div>
+                                    <div className="text-[10px] italic text-gray-600 pl-2">Note: No Ice</div>
+                                </div>
                             </>
                         )}
 
