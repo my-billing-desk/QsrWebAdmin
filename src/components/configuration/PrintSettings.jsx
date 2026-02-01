@@ -216,7 +216,11 @@ export function PrintSettings() {
                         )}
 
                         {!config.showHeader && (
-                            <div className="text-center mb-4 font-bold">RESTAURANT NAME<br />123 Street Name, City</div>
+                            <div className="text-center mb-4">
+                                <div className="font-bold uppercase text-sm mb-1">Restaurant Name</div>
+                                <div className="font-normal text-xs text-gray-600">Sura and Sanklecha Ventures</div>
+                                <div className="font-normal text-xs text-gray-600">#30, 80 Feet Rd, Indiranagar, Bengaluru</div>
+                            </div>
                         )}
 
                         <div className="text-center mb-2 text-[10px] text-gray-500">
